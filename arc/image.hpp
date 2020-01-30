@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 using namespace std;
+#include "sampler.hpp"
 #include "photon.hpp"
 #include "camera.hpp"
 
@@ -27,7 +28,8 @@ public:
     Ray sample(int idx) const
     {
         int x = idx % width, y = idx / width;
-        double dx = (x + RD.rand()) / width - 0.5, dy = (y + RD.rand()) / height - 0.5;
+        pair<double,double> v = RD.pixel(x, y, width, height);
+        double dx = v.first, dy = v.second;
         $ << dx << " " << dy << endl;
         return camera->apply(dx, dy);
     }

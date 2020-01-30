@@ -5,26 +5,52 @@
 #include "geo.hpp"
 using namespace std;
 
-class Sampler
+template<int base>
+class HaltonSequence
 {
-    unsigned seed, MAX;
+    long long key; double now;
 
 public:
-    Sampler ()
+    HaltonSequence ()
     {
-        seed = 1;
-        MAX = (1 << 28);
+        key = 0;
+        now = 0;
     }
+    double operator () ()
+    {
+        double q = 1. / base;
+        key += 1;
+        for (int i = key; i % base == 0; now -= (base - 1) * q, i /= base, q /= base);
+        now += q;
+        return now;
+    }
+};
+
+class Sampler
+{
+    mt19937 R;
+    HaltonSequence<7> X;
+    HaltonSequence<11> Y;
+
+public:
+    Sampler () {}
+
+    double sample() { return 1. * R() / (1ll << 32); }
     double rand(double l = 0, double r = 1)
     {
-        seed = (0x5DEECE66DUL * seed + 0xB16) & 0xFFFFFFFFFFFFUL;
-        double v = (seed >> 4) * (r - l) / MAX + l;
-        // double v = 1. * ::rand() / RAND_MAX * (r - l)  + l;
-        return v;
+        return sample() * (r - l) + l;
+    }
+
+    pair<double,double> pixel(double x, double y, double width, double height)
+    {
+        pair<double,double> v = make_pair(X(), Y());
+        double dx = (x + v.first) / width - 0.5, dy = (y + v.second) / height - 0.5;
+        return make_pair(dx, dy);
     }
     Vec3 semisphere()
     {
-        double z = rand(), phi = rand(-pi, pi);
+        pair<double,double> v = make_pair(rand(), rand());
+        double z = v.first, phi = v.second * (2 * pi) - pi;
         return Vec3(sin(phi) * sqrt(1 - z * z), cos(phi) * sqrt(1 - z * z), z);
     }
     Vec3 semisphere(Vec3 z)
