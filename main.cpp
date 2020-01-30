@@ -7,7 +7,7 @@ int main()
 {
     ios::sync_with_stdio(0);
 
-    shared_ptr<Sence> sence = load_sence1();
+    shared_ptr<Sence> sence = load_sence2();
 
     shared_ptr<Camera> camera = make_shared<PerspectiveCamera>(
         Vec3(0, 0, -35),

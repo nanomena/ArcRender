@@ -58,6 +58,7 @@ struct Ray
 
     Ray move(double length) const { return Ray(o + d.scale(length), d); }
     Ray reflect(Ray n) const { return Ray(n.o, d - d.project(n.d) * 2); }
+    Ray operator - () const { return Ray(o, -d); }
 
     friend ostream& operator << (ostream &s, Ray t)
     {

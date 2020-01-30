@@ -20,7 +20,7 @@ class Render
 
 public:
     Render (shared_ptr<Image> _image, shared_ptr<Sence> _sence,
-        int _trace_mxcnt = 4, double _trace_eps = 1e-3)
+        int _trace_mxcnt = 6, double _trace_eps = 1e-3)
     {
         image = _image;
         sence = _sence;

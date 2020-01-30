@@ -44,7 +44,9 @@ public:
     Photon forward_diffuse(const Photon &photon, const Ray &normal) const
     {
         $ << "diffuse!" << endl;
-        return Photon(photon.stat, RD.diffuse(normal).move(EPS), photon.color * color);
+        Ray _normal = normal;
+        if (photon.ray.d * normal.d > 0) _normal.d = -normal.d;
+        return Photon(photon.stat, RD.diffuse(_normal).move(EPS), photon.color * color);
     }
     Photon forward_specular(const Photon &photon, const Ray &normal) const
     {
@@ -58,16 +60,82 @@ public:
     }
     Photon forward(const Photon &photon, const Ray &normal) const
     {
-        Ray _normal = normal;
-        if (photon.ray.d * normal.d > 0) _normal.d = -normal.d;
-
         double p = RD.rand(0, 1);
         if ((p -= diffuse) < 0)
-            return forward_diffuse(photon, _normal);
+            return forward_diffuse(photon, normal);
         else if ((p -= specular) < 0)
-            return forward_specular(photon, _normal);
+            return forward_specular(photon, normal);
         else
-            return forward_absorb(photon, _normal);
+            return forward_absorb(photon, normal);
+    }
+};
+
+class InsulatedHitEvent
+{
+    Ray i, n;
+    double cosi, cost, eta;
+
+public:
+    double fresnel()
+    {
+        double rs = (eta * cosi - cost) / (eta * cost + cosi);
+        double rp = (eta * cost - cosi) / (eta * cosi + cost);
+        return (rs * rs + rp * rp) * 0.5;
+    }
+
+    InsulatedHitEvent(Ray _i, Ray _n, double _eta)
+    {
+        i = _i, n = _n; eta = _eta;
+    }
+    double refl()
+    {
+        cosi = -i.d * n.d;
+        if (sqrt(1 - cosi * cosi) * eta > 1) return 1;
+        else
+        {
+            cost = sqrt(1 - (1 - cosi * cosi) * eta * eta);
+            return fresnel();
+        }
+    }
+    Ray reflect()
+    {
+        return Ray(n.o, i.d + n.d * (cosi * 2));
+    }
+    Ray refract()
+    {
+        return Ray(n.o, i.d * eta + n.d * (cosi * eta - cost));
+    }
+};
+
+class SmoothInsulatedSurface : public Surface
+{
+    Color color; double eta;
+
+public:
+    SmoothInsulatedSurface (Color _color, double _eta)
+    {
+        color = _color;
+        eta = _eta;
+    }
+
+    Photon forward(const Photon &photon, const Ray &normal) const
+    {
+        // $ << photon.ray.d.norm2() << " " << normal.d.norm2() << endl;
+        double cosi = photon.ray.d * normal.d;
+        InsulatedHitEvent hit_event(photon.ray, (cosi > 0 ? -normal : normal), (cosi > 0 ? eta : 1 / eta));
+
+        double p = RD.rand(0, 1);
+        if ((p -= hit_event.refl()) < 0)
+        {
+            $ << "reflect!" << endl;
+            return Photon(photon.stat, hit_event.reflect().move(EPS), photon.color);
+        }
+        else
+        {
+            $ << "refract!" << endl;
+            double dis = (cosi > 0 ? 0 : (photon.ray.d - normal.d).norm());
+            return Photon(photon.stat, hit_event.refract().move(EPS), photon.color * (color ^ dis));
+        }
     }
 };
 

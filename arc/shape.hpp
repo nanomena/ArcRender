@@ -13,6 +13,7 @@ public:
     Shape () {}
     Vec3 virtual inter(const Ray &ray) const { throw "NotImplementedError"; }
     Ray virtual normal(const Ray &ray, const Vec3 &inter) const { throw "NotImplementedError"; }
+        // norm should be unitary
 };
 
 class Sphere : public Shape
@@ -39,7 +40,7 @@ public:
     }
     Ray normal(const Ray &ray, const Vec3 &inter) const
     {
-        return Ray(inter, o - inter);
+        return Ray(inter, (inter - o).scale(1));
     }
 };
 
@@ -68,7 +69,7 @@ public:
         for (int i = 0; i < n; ++ i)
             vertexs.push_back(va_arg(p, Vec3));
 
-        norm = (vertexs[1] - vertexs[0]) ^ (vertexs[2] - vertexs[0]);
+        norm = ((vertexs[1] - vertexs[0]) ^ (vertexs[2] - vertexs[0])).scale(1);
         T = axis(vertexs[1] - vertexs[0], vertexs[2] - vertexs[0], norm);
 
         T_vertexs.resize(n);
