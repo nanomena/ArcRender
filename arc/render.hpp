@@ -20,7 +20,7 @@ class Render
 
 public:
     Render (shared_ptr<Image> _image, shared_ptr<Sence> _sence,
-        int _trace_mxcnt = 6, double _trace_eps = 1e-3)
+        int _trace_mxcnt = 6, double _trace_eps = 1e-30)
     {
         image = _image;
         sence = _sence;
@@ -31,14 +31,18 @@ public:
 
     void step(int idx) const
     {
-        Photon photon(1, image->sample(idx));
-        $ << idx << " : tracing " << photon.ray << endl;
-        for (int cnt = 0; (cnt < trace_limit) && !(photon.stat & 2); ++ cnt)
-            photon = sence->forward(photon);
-        $ << int(photon.stat) << " " << photon.color << endl;
-        if (!(photon.stat & 2))
-            photon = Photon(3, Ray(), Color(0));
-        image->draw(idx, photon.color);
+        double weight = 1;
+        Photon photon(image->sample(idx));
+        photon.visit(0);
+        $ << "step : " << idx << endl;
+        for (int cnt = 0; (cnt < trace_limit) && !photon.is_visit(1) && weight > EPS; ++ cnt)
+        {
+            $ << "tracing " << photon.ray << endl;
+            weight *= sence->forward(photon);
+        }
+        $ << "finish tracing : " << int(photon.stat) << " " << photon.spectrum << endl;
+        if (!photon.is_visit(1)) photon.trans(Spectrum(0));
+        image->draw(idx, photon.spectrum, weight);
     }
     void epoch() const
     {

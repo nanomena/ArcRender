@@ -56,9 +56,7 @@ struct Ray
     Ray () {}
     Ray (Vec3 _o, Vec3 _d) { o = _o, d = _d; }
 
-    Ray move(double length) const { return Ray(o + d.scale(length), d); }
-    Ray reflect(Ray n) const { return Ray(n.o, d - d.project(n.d) * 2); }
-    Ray operator - () const { return Ray(o, -d); }
+    void move(double length) { o = o + d.scale(length); }
 
     friend ostream& operator << (ostream &s, Ray t)
     {

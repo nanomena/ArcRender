@@ -12,7 +12,7 @@ class Image
 {
     int width, height, length;
     shared_ptr<Camera> camera;
-    vector<Color> color;
+    vector<Spectrum> spectrum;
     vector<double> weight;
 
 public:
@@ -21,7 +21,7 @@ public:
         width = _width, height = _height;
         camera = _camera;
         length = width * height;
-        color.resize(length);
+        spectrum.resize(length);
         weight.resize(length);
     }
     int epoch() { return length; } const
@@ -33,9 +33,9 @@ public:
         $ << dx << " " << dy << endl;
         return camera->apply(dx, dy);
     }
-    void draw(int idx, Color c, double w = 1)
+    void draw(int idx, Spectrum c, double w = 1)
     {
-        color[idx] = color[idx] + c * w;
+        spectrum[idx] = spectrum[idx] + c * w;
         weight[idx] += w;
     }
     void save(const char* path, double white = 1, double gamma = 2.2) const
@@ -46,7 +46,7 @@ public:
         out << 255 << endl;
         for (int i = 0; i < length; ++ i)
         {
-            auto _c = (color[i] / weight[i]).rgb888(white, gamma);
+            auto _c = (spectrum[i] / weight[i]).rgb888(white, gamma);
             out << char(_c / 65536) << char(_c / 256 % 256) << char(_c % 256);
         }
         out.close();
