@@ -44,9 +44,9 @@ public:
     }
 };
 
-int is_right(Vec3 p1, Vec3 p2, Vec3 q)
+int is_right(const Vec3 &p1, const Vec3 &p2, const Vec3 &q)
 {
-    if (p1.d[0] > p2.d[0]) swap(p1, p2);
+    if (p1.d[0] > p2.d[0]) return is_right(p2, p1, q);
     if (q.d[0] < p1.d[0]) return 0;
     if (p2.d[0] <= q.d[0]) return 0;
     return (q.d[1] - p1.d[1]) * (p2.d[0] - p1.d[0])

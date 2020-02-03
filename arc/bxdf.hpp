@@ -1,6 +1,9 @@
 #ifndef BXDF
 #define BXDF
 #include "sampler.hpp"
+#include "material.hpp"
+#include "photon.hpp"
+#include <memory>
 
 class BxDF
 {
@@ -47,13 +50,20 @@ public:
 
     double G(const Vec3 &in, const Vec3 &out) const
     {
-        // return 1;
+        Vec3 normal = (-in + out).scale(1);
 
-        double k = (rough + 1) * (rough + 1) / 8;
+        double k = alpha / 4;
         double g_in = -in.d[2] / (-in.d[2] * (1 - k) + k);
         double g_out = out.d[2] / (out.d[2] * (1 - k) + k);
-        double g = g_in * g_out / (-in.d[2] * out.d[2]);
-        return g / 4;
+        double g = g_in * g_out;
+        return g;
+
+        // double c_i = (-in * normal), t_i2 = (1 - c_i * c_i) / (c_i * c_i);
+        // double g_i = max(0., 2 * (-in * normal) / (-in.d[2]) / (1 + sqrt(1 + alpha2 * t_i2)));
+        // double c_o = (out * normal), t_o2 = (1 - c_o * c_o) / (c_o * c_o);
+        // double g_o = max(0., 2 * (out * normal) / (out.d[2]) / (1 + sqrt(1 + alpha2 * t_o2)));
+        // double g = g_i * g_o * (-in.d[2]) * (out.d[2]);
+        // return g;
     }
 
     Spectrum FD(const Vec3 &in, const Vec3 &out, const Vec3 &normal) const
@@ -86,9 +96,9 @@ public:
                 return 0;
             }
 
-            spectrum = F(in, normal) / prob;
+            spectrum = F(in, normal) * G(in, out) / prob;
 
-            return G(in, out);
+            return 1;
         }
         else
         {
@@ -124,8 +134,8 @@ public:
 
     double F(double cosi, double cost) const
     {
-        double rs = (IOR * cosi - cost) / (IOR * cost + cosi);
-        double rp = (IOR * cost - cosi) / (IOR * cosi + cost);
+        double rs = (IOR * cosi - cost) / (IOR * cosi + cost);
+        double rp = (IOR * cost - cosi) / (IOR * cost + cosi);
         return (rs * rs + rp * rp) * 0.5;
     }
 
@@ -138,28 +148,11 @@ public:
     double G(const Vec3 &in, const Vec3 &out) const
     {
         return 1;
-
-        double k = (rough + 1) * (rough + 1) / 8;
-        double g_in = -in.d[2] / (-in.d[2] * (1 - k) + k);
-        double g_out = out.d[2] / (out.d[2] * (1 - k) + k);
-        double g = g_in * g_out / (-in.d[2] * out.d[2]);
-        return g / 4;
     }
 
-    double GT(const Vec3 &in, const Vec3 &out, const Vec3 &normal) const
+    double GT(const Vec3 &in, const Vec3 &out) const
     {
         return 1;
-
-        double k = (rough + 1) * (rough + 1) / 8;
-        double g_in = -in.d[2] / (-in.d[2] * (1 - k) + k);
-        double g_out = -out.d[2] / (-out.d[2] * (1 - k) + k);
-        double g = g_in * g_out / (-in.d[2] * -out.d[2]);
-        return g;
-
-        double c_in = (in * normal) * (IOR < 1 ? -1 : 1);
-        double c_out = (out * normal) * (IOR < 1 ? 1 : -1);
-        // cerr << c_in << " " << c_out << endl;
-        return g * abs(c_in) * abs(c_out) / ((c_in + c_out / IOR) * (c_in + c_out / IOR));
     }
 
     double through(const Vec3 &in, Vec3 &out, Spectrum &spectrum, int &type) const
@@ -204,15 +197,13 @@ public:
                 return 0;
             }
 
-            spectrum = Spectrum(1);
-            double weight = G(in, out);
-            // cerr << "L " << weight << endl;
-            return weight;
+            spectrum = Spectrum(1) * G(in, out);
+            return 1;
         }
         else
         {
             type = 0;
-            
+
             $ << "refract !" << endl;
             out = (in * IOR + normal * (cosi * IOR - cost)).scale(1);
             if (out.d[2] > 0)
@@ -221,10 +212,8 @@ public:
                 return 0;
             }
 
-            spectrum = Spectrum(1);
-            double weight = GT(in, out, normal);
-            // cerr << "R " << weight << endl;
-            return weight;
+            spectrum = Spectrum(1) * GT(in, out);
+            return 1;
         }
     }
 };

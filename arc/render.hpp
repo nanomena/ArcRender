@@ -36,7 +36,7 @@ public:
         Photon photon(image->sample(idx));
         $ << "step : " << idx << endl;
         int diffuse_cnt = 0, matched = 0;
-        for (int cnt = 0; (cnt < trace_limit) && weight > trace_eps; ++ cnt)
+        for (int trace_cnt = 0; (trace_cnt < trace_limit) && weight > trace_eps; ++ trace_cnt)
         {
             $ << "tracing " << photon.ray << endl;
             int type;
