@@ -31,8 +31,8 @@ public:
         $ << "hit " << name << " normal " << normal << endl;
 
         Vec3 x, y, z = normal.d;
-        if ((photon.d ^ normal.d).norm2() > EPS)
-            x = (photon.d - z * (photon.d * z)).scale(1);
+        if ((photon.ray.d ^ normal.d).norm2() > EPS)
+            x = (photon.ray.d - z * (photon.ray.d * z)).scale(1);
         else if (z.d[0] * z.d[0] + z.d[1] * z.d[1] > EPS)
             x = Vec3(z.d[1], -z.d[0], 0).scale(1);
         else

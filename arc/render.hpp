@@ -20,7 +20,7 @@ class Render
 
 public:
     Render (shared_ptr<Image> _image, shared_ptr<Sence> _sence,
-        int _trace_mxcnt = 6, double _trace_eps = 1e-30)
+        int _trace_mxcnt = 8, double _trace_eps = 1e-30)
     {
         image = _image;
         sence = _sence;
@@ -35,12 +35,12 @@ public:
         Photon photon(image->sample(idx));
         photon.visit(0);
         $ << "step : " << idx << endl;
-        for (int cnt = 0; (cnt < trace_limit) && !photon.is_visit(1) && weight > EPS; ++ cnt)
+        for (int cnt = 0; (cnt < trace_limit) && !photon.is_visit(1) && weight > trace_eps; ++ cnt)
         {
             $ << "tracing " << photon.ray << endl;
             weight *= sence->forward(photon);
         }
-        $ << "finish tracing : " << int(photon.stat) << " " << photon.spectrum << endl;
+        $ << "finish tracing : " << int(photon.stat) << " " << weight << " " << photon.spectrum << endl;
         if (!photon.is_visit(1)) photon.trans(Spectrum(0));
         image->draw(idx, photon.spectrum, weight);
     }

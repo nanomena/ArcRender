@@ -30,6 +30,11 @@ public:
                 next = object;
             }
         }
+        // $ << photon.ray << endl;
+        // if (photon.inside->name != "air")
+            // cerr << (hitpoint - photon.ray.o).norm() << endl;
+        // 
+        photon.trans(photon.inside->through((hitpoint - photon.ray.o).norm()));
         double weight = next->forward(hitpoint, photon);
         photon.move(EPS);
         return weight;

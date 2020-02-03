@@ -30,7 +30,7 @@ public:
         int x = idx % width, y = idx / width;
         pair<double,double> v = RD.pixel(x, y, width, height);
         double dx = v.first, dy = v.second;
-        $ << dx << " " << dy << endl;
+        $ << "image sample " << dx << " " << dy << endl;
         return camera->apply(dx, dy);
     }
     void draw(int idx, Spectrum c, double w = 1)

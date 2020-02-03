@@ -31,23 +31,77 @@ public:
     }
 };
 
-class BRDFSurface : public Surface, public BRDF
+class MetalSurface : public Surface
 {
+    shared_ptr<BxDF> subsurface;
 
 public:
-    BRDFSurface (Spectrum _albedo, double _rough, double _metal)
-        : BRDF(_albedo, _rough, _metal) {}
+    MetalSurface (Spectrum _albedo, double _rough, double _metal)
+    {
+        subsurface = make_shared<Metal>(_albedo, _rough, _metal);
+    }
 
     double forward(Photon &photon) const
     {
         Vec3 out;
         Spectrum spectrum;
-        double weight = through(photon.ray.d, out, spectrum);
+        double weight = subsurface->through(photon.ray.d, out, spectrum);
         photon.apply(Ray(Vec3(), out));
         photon.trans(spectrum);
+        $ << "WEIGHT  " << weight << endl;
         return weight;
     }
 };
+
+
+class TransSurface : public Surface
+{
+    shared_ptr<Material> inside, outside;
+    shared_ptr<BxDF> into, outo;
+
+public:
+    TransSurface (shared_ptr<Material> _inside, double _rough, shared_ptr<Material> _outside = air)
+    {
+        inside = _inside;
+        outside = _outside;
+        into = make_shared<Trans>(outside->IOR / inside->IOR, _rough);
+        outo = make_shared<Trans>(inside->IOR / outside->IOR, _rough);
+    }
+
+    double forward(Photon &photon) const
+    {
+        Vec3 in = photon.ray.d, out;
+        Spectrum spectrum;
+        double weight;
+        if (photon.ray.d.d[2] < 0)
+        {
+            weight = into->through(photon.ray.d, out, spectrum);
+            photon.apply(Ray(Vec3(), out));
+            if (out.d[2] < 0)
+            {
+                // $ << "in" << endl;
+                photon.into(inside);
+            }
+            photon.trans(spectrum);
+        }
+        else
+        {
+            photon.ray.d.d[2] *= -1;
+            weight = outo->through(photon.ray.d, out, spectrum);
+            out.d[2] *= -1;
+            photon.apply(Ray(Vec3(), out));
+            if (out.d[2] > 0)
+            {
+                // $ << "out" << endl;
+                photon.into(outside);
+            }
+            photon.trans(spectrum);
+        }
+        $ << "WEIGHT  " << weight << endl;
+        return weight;
+    }
+};
+
 
 
 

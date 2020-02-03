@@ -20,7 +20,7 @@ public:
     {
         double q = 1. / base;
         key += 1;
-        for (int i = key; i % base == 0; now -= (base - 1) * q, i /= base, q /= base);
+        for (long long i = key; i % base == 0; now -= (base - 1) * q, i /= base, q /= base);
         now += q;
         return now;
     }

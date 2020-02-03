@@ -108,7 +108,7 @@ class Disc : public Shape
 public:
     Disc (Vec3 _o, Vec3 _norm, double _r)
     {
-        o = _o; norm = _norm; r = _r;
+        o = _o; norm = _norm.scale(1); r = _r;
 
         Vec3 x, y, z = norm;
 
