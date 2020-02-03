@@ -13,18 +13,19 @@ using namespace std;
 
 class Render
 {
-    int trace_limit, length;
+    int trace_limit, diffuse_limit, length;
     double trace_eps;
     shared_ptr<Image> image;
     shared_ptr<Sence> sence;
 
 public:
     Render (shared_ptr<Image> _image, shared_ptr<Sence> _sence,
-        int _trace_mxcnt = 8, double _trace_eps = 1e-30)
+        int _trace_mxcnt = 8, int _diffuse_mxcnt = 3, double _trace_eps = 1e-30)
     {
         image = _image;
         sence = _sence;
         trace_limit = _trace_mxcnt;
+        diffuse_limit = _diffuse_mxcnt;
         trace_eps = _trace_eps;
         length = image->epoch();
     }
@@ -33,15 +34,18 @@ public:
     {
         double weight = 1;
         Photon photon(image->sample(idx));
-        photon.visit(0);
         $ << "step : " << idx << endl;
-        for (int cnt = 0; (cnt < trace_limit) && !photon.is_visit(1) && weight > trace_eps; ++ cnt)
+        int diffuse_cnt = 0, matched = 0;
+        for (int cnt = 0; (cnt < trace_limit) && weight > trace_eps; ++ cnt)
         {
             $ << "tracing " << photon.ray << endl;
-            weight *= sence->forward(photon);
+            int type;
+            weight *= sence->forward(photon, type);
+            if (type == -1) {matched = 1; break;}
+            if (type == 1) if (diffuse_cnt < diffuse_limit) diffuse_cnt ++; else break;
         }
-        $ << "finish tracing : " << int(photon.stat) << " " << weight << " " << photon.spectrum << endl;
-        if (!photon.is_visit(1)) photon.trans(Spectrum(0));
+        $ << "finish tracing : " << matched << " " << weight << " " << photon.spectrum << endl;
+        if (!matched) photon.trans(Spectrum(0));
         image->draw(idx, photon.spectrum, weight);
     }
     void epoch() const

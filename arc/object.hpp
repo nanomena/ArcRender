@@ -25,7 +25,7 @@ public:
     {
         return shape->inter(ray);
     }
-    double forward(const Vec3 &inter, Photon &photon) const
+    double forward(const Vec3 &inter, Photon &photon, int &type) const
     {
         Ray normal = shape->normal(photon.ray, inter);
         $ << "hit " << name << " normal " << normal << endl;
@@ -45,7 +45,7 @@ public:
 
         // change into BRDF coordinate
 
-        double weight = surface->forward(photon);
+        double weight = surface->forward(photon, type);
 
         photon.apply(Ray(normal.o, T * photon.ray.d));
 

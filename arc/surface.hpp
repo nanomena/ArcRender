@@ -9,7 +9,7 @@ class Surface
 
 public:
     Surface () {}
-    double virtual forward(Photon &photon) const { throw "NotImplementedError"; }
+    double virtual forward(Photon &photon, int &type) const { throw "NotImplementedError"; }
 };
 
 class LightSource : public Surface
@@ -22,11 +22,12 @@ public:
         spectrum = light;
     }
 
-    double forward(Photon &photon) const
+    double forward(Photon &photon, int &type) const
     {
+        type = -1;
+
         $ << "shine!" << endl;
         photon.trans(spectrum);
-        photon.visit(1);
         return 1;
     }
 };
@@ -41,11 +42,11 @@ public:
         subsurface = make_shared<Metal>(_albedo, _rough, _metal);
     }
 
-    double forward(Photon &photon) const
+    double forward(Photon &photon, int &type) const
     {
         Vec3 out;
         Spectrum spectrum;
-        double weight = subsurface->through(photon.ray.d, out, spectrum);
+        double weight = subsurface->through(photon.ray.d, out, spectrum, type);
         photon.apply(Ray(Vec3(), out));
         photon.trans(spectrum);
         $ << "WEIGHT  " << weight << endl;
@@ -68,14 +69,14 @@ public:
         outo = make_shared<Trans>(inside->IOR / outside->IOR, _rough);
     }
 
-    double forward(Photon &photon) const
+    double forward(Photon &photon, int &type) const
     {
         Vec3 in = photon.ray.d, out;
         Spectrum spectrum;
         double weight;
         if (photon.ray.d.d[2] < 0)
         {
-            weight = into->through(photon.ray.d, out, spectrum);
+            weight = into->through(photon.ray.d, out, spectrum, type);
             photon.apply(Ray(Vec3(), out));
             if (out.d[2] < 0)
             {
@@ -87,7 +88,7 @@ public:
         else
         {
             photon.ray.d.d[2] *= -1;
-            weight = outo->through(photon.ray.d, out, spectrum);
+            weight = outo->through(photon.ray.d, out, spectrum, type);
             out.d[2] *= -1;
             photon.apply(Ray(Vec3(), out));
             if (out.d[2] > 0)

@@ -9,7 +9,7 @@ shared_ptr<Material> glass = make_shared<Material>(
     1.5, Spectrum(0.99, 0.99, 0.99), "glass"
 );
 shared_ptr<Material> emerald = make_shared<Material>(
-    1.6, Spectrum(0.95, 0.99, 0.95), "emerald"
+    1.6, Spectrum(0.97, 0.995, 0.97), "emerald"
 );
 shared_ptr<Material> water = make_shared<Material>(
     1.3333, Spectrum(0.99, 0.99, 0.99), "water"
@@ -81,14 +81,14 @@ shared_ptr<Sence> load_sence1()
     sence->add_object(make_shared<Object>(light, light4, "light"));
 
     shared_ptr<Shape> ball1 = make_shared<Sphere>(
-        Vec3(7, 9, 13), 6
+        Vec3(7, 8, 13), 7
     );
     sence->add_object(make_shared<Object>(ball1, gold_surface59, "ball1"));
 
     shared_ptr<Shape> ball2 = make_shared<Sphere>(
-        Vec3(-5, 9, 5), 6
+        Vec3(-6, 8, 3), 7
     );
-    sence->add_object(make_shared<Object>(ball2, make_shared<TransSurface>(emerald, 0.2), "ball2"));
+    sence->add_object(make_shared<Object>(ball2, make_shared<TransSurface>(emerald, 0.1), "ball2"));
 
     shared_ptr<Shape> front = make_shared<Flat>(4,
         Vec3(-15, -15, 20),
@@ -100,40 +100,32 @@ shared_ptr<Sence> load_sence1()
 
     shared_ptr<Shape> left = make_shared<Flat>(4,
         Vec3(-15, -15, 20),
-        Vec3(-15, -15, -40),
-        Vec3(-15, 15, -40),
+        Vec3(-15, -15, -10),
+        Vec3(-15, 15, -10),
         Vec3(-15, 15, 20)
     );
     sence->add_object(make_shared<Object>(left, blue_diffuse_surface, "left"));
 
     shared_ptr<Shape> right = make_shared<Flat>(4,
-        Vec3(15, -15, -40),
+        Vec3(15, -15, -10),
         Vec3(15, -15, 20),
         Vec3(15, 15, 20),
-        Vec3(15, 15, -40)
+        Vec3(15, 15, -10)
     );
     sence->add_object(make_shared<Object>(right, red_diffuse_surface, "right"));
 
-    shared_ptr<Shape> back = make_shared<Flat>(4,
-        Vec3(-15, 15, -40),
-        Vec3(-15, -15, -40),
-        Vec3(15, -15, -40),
-        Vec3(15, 15, -40)
-    );
-    sence->add_object(make_shared<Object>(back, diffuse_surface, "back"));
-
     shared_ptr<Shape> down = make_shared<Flat>(4,
-        Vec3(-15, -15, -40),
+        Vec3(-15, -15, -10),
         Vec3(-15, -15, 20),
         Vec3(15, -15, 20),
-        Vec3(15, -15, -40)
+        Vec3(15, -15, -10)
     );
     sence->add_object(make_shared<Object>(down, diffuse_surface, "down"));
 
     shared_ptr<Shape> up = make_shared<Flat>(4,
         Vec3(-15, 15, 20),
-        Vec3(-15, 15, -40),
-        Vec3(15, 15, -40),
+        Vec3(-15, 15, -10),
+        Vec3(15, 15, -10),
         Vec3(15, 15, 20)
     );
     sence->add_object(make_shared<Object>(up, diffuse_surface, "up"));

@@ -17,7 +17,7 @@ public:
     {
         objects.push_back(object);
     }
-    double forward(Photon &photon) const
+    double forward(Photon &photon, int &type) const
     {
         shared_ptr<Object> next = objects[0];
         Vec3 hitpoint(INF, INF, INF);
@@ -35,7 +35,7 @@ public:
             // cerr << (hitpoint - photon.ray.o).norm() << endl;
         // 
         photon.trans(photon.inside->through((hitpoint - photon.ray.o).norm()));
-        double weight = next->forward(hitpoint, photon);
+        double weight = next->forward(hitpoint, photon, type);
         photon.move(EPS);
         return weight;
     }

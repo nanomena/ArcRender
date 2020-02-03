@@ -8,7 +8,7 @@ class BxDF
 public:
     BxDF () {}
 
-    double virtual through(const Vec3 &in, Vec3 &out, Spectrum &spectrum) const
+    double virtual through(const Vec3 &in, Vec3 &out, Spectrum &spectrum, int &type) const
         { throw "NotImplementedError"; }
 };
 
@@ -66,10 +66,12 @@ public:
         return diffuse * f_in * f_out;
     }
 
-    double through(const Vec3 &in, Vec3 &out, Spectrum &spectrum) const
+    double through(const Vec3 &in, Vec3 &out, Spectrum &spectrum, int &type) const
     {
         if (RD.rand() < prob)
         {
+            type = 0;
+
             double p = RD.rand();
             double costheta = sqrt((1 - p) / (p * (alpha2 - 1) + 1));
             double sintheta = sqrt(1 - costheta * costheta);
@@ -90,6 +92,8 @@ public:
         }
         else
         {
+            type = 1;
+
             out = RD.semisphere();
             Vec3 normal = (out - in).scale(1);
             spectrum = FD(in, normal, out) / (1 - prob);
@@ -158,7 +162,7 @@ public:
         return g * abs(c_in) * abs(c_out) / ((c_in + c_out / IOR) * (c_in + c_out / IOR));
     }
 
-    double through(const Vec3 &in, Vec3 &out, Spectrum &spectrum) const
+    double through(const Vec3 &in, Vec3 &out, Spectrum &spectrum, int &type) const
     {
         $ << "Trans " << in << endl;
         double p = RD.rand();
@@ -190,6 +194,8 @@ public:
 
         if (RD.rand() < reflect)
         {
+            type = 0;
+
             $ << "reflect !" << endl;
             out = in + normal * cosi * 2;
             if (out.d[2] < 0)
@@ -205,6 +211,8 @@ public:
         }
         else
         {
+            type = 0;
+            
             $ << "refract !" << endl;
             out = (in * IOR + normal * (cosi * IOR - cost)).scale(1);
             if (out.d[2] > 0)
