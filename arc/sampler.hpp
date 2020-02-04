@@ -43,13 +43,17 @@ public:
 
     pair<double,double> pixel(double x, double y, double width, double height)
     {
-        pair<double,double> v = make_pair(X(), Y());
+        // omp_set_lock(&lock);
+        // pair<double,double> v = make_pair(X(), Y());
+        // omp_unset_lock(&lock);
+
+        pair<double,double> v = make_pair(sample(), sample());
         double dx = (x + v.first) / width - 0.5, dy = (y + v.second) / height - 0.5;
         return make_pair(dx, dy);
     }
     Vec3 semisphere()
     {
-        pair<double,double> v = make_pair(rand(), rand());
+        pair<double,double> v = make_pair(sample(), sample());
         double z = v.first, phi = v.second * (2 * pi) - pi;
         return Vec3(sin(phi) * sqrt(1 - z * z), cos(phi) * sqrt(1 - z * z), z);
     }

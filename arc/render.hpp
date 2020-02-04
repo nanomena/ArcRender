@@ -48,9 +48,12 @@ public:
         if (!matched) photon.trans(Spectrum(0));
         image->draw(idx, photon.spectrum, weight);
     }
-    void epoch() const
+    void epoch(int cluster = 1) const
     {
-        for (int i = 0; i < length; ++ i) step(i);
+        #pragma omp parallel for
+        for (int i = 0; i < length; ++ i)
+            for (int j = 0; j < cluster; ++ j)
+                step(i);
     }
 };
 
