@@ -193,4 +193,35 @@ Mat3 axis(const Vec3 &x, const Vec3 &y, const Vec3 &z)
     return axis_I(x, y, z).I();
 }
 
+struct Cuboid
+{
+    Vec3 n, x;
+
+    Cuboid () { n = Vec3(INF, INF, INF); x = Vec3(-INF, -INF, -INF); }
+    Cuboid (Vec3 p) { n = x = p; }
+    Cuboid (Vec3 _n, Vec3 _x) { n = _n; x = _x; }
+
+    Cuboid operator + (const Cuboid &t) const
+    {
+        return Cuboid(
+            Vec3(min(n.d[0], t.n.d[0]), min(n.d[1], t.n.d[1]), min(n.d[2], t.n.d[2])),
+            Vec3(max(x.d[0], t.x.d[0]), max(x.d[1], t.x.d[1]), max(x.d[2], t.x.d[2]))
+        );
+    }
+
+    void inter(const Ray &ray, int &hit, Vec3 &hitpoint) const
+    {
+        double l = 0, r = INF;
+        for (int i = 0; i < 3; ++ i)
+        {
+            double p = (n.d[i] - ray.o.d[i]) / ray.d.d[i];
+            double q = (x.d[i] - ray.o.d[i]) / ray.d.d[i];
+            if (p < q) l = max(l, p), r = min(r, q);
+            else l = max(l, q), r = max(r, p);
+        }
+        if (l > r) { hit = 0; return; }
+        hit = 1; hitpoint = ray.o + ray.d * l;
+    }
+};
+
 #endif

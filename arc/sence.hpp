@@ -2,38 +2,36 @@
 #define SENCE
 #include <memory>
 #include "object.hpp"
+#include "graph.hpp"
 
 class Sence
 {
+    shared_ptr<Object> skybox;
     vector<shared_ptr<Object>> objects;
+    KaDanTree graph;
 
 public:
-    Sence (shared_ptr<Object> skybox)
+    Sence (shared_ptr<Object> _skybox)
     {
-        objects.push_back(skybox);
+        skybox = _skybox;
     }
 
     void add_object(shared_ptr<Object> object)
     {
         objects.push_back(object);
     }
+    void build_graph()
+    {
+        graph.load(&(objects.front()), objects.size());
+    }
+
     double forward(Photon &photon, int &type) const
     {
-        shared_ptr<Object> next = objects[0];
-        Vec3 hitpoint(INF, INF, INF);
-        for (shared_ptr<Object> object : objects)
-        {
-            Vec3 p = object->inter(photon.ray);
-            if ((p - photon.ray.o).norm2() < (hitpoint - photon.ray.o).norm2())
-            {
-                hitpoint = p;
-                next = object;
-            }
-        }
-        // $ << photon.ray << endl;
-        // if (photon.inside->name != "air")
-            // cerr << (hitpoint - photon.ray.o).norm() << endl;
-        // 
+        shared_ptr<Object> next = skybox;
+        int hit; Vec3 hitpoint;
+        skybox->inter(photon.ray, hit, hitpoint);
+        graph.query(photon.ray, next, hitpoint);
+
         photon.trans(photon.inside->through((hitpoint - photon.ray.o).norm()));
         double weight = next->forward(hitpoint, photon, type);
         photon.move(EPS);

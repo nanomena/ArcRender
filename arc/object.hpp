@@ -21,9 +21,13 @@ public:
         name = _name;
     }
 
-    Vec3 inter(const Ray &ray) const
+    Cuboid outline() const
     {
-        return shape->inter(ray);
+        return shape->outline();
+    }
+    void inter(const Ray &ray, int &hit, Vec3 &hitpoint) const
+    {
+        shape->inter(ray, hit, hitpoint);
     }
     double forward(const Vec3 &inter, Photon &photon, int &type) const
     {

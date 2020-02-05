@@ -148,15 +148,15 @@ shared_ptr<Sence> load_surface_test()
     // );
 
     shared_ptr<Shape> back = make_shared<Flat>(4,
-        Vec3(-33, -33, 25),
-        Vec3(-33, 33, 25),
-        Vec3(33, 33, 25),
-        Vec3(33, -33, 25)
+        Vec3(-40, -40, 25),
+        Vec3(-40, 40, 25),
+        Vec3(40, 40, 25),
+        Vec3(40, -40, 25)
     );
-    // sence->add_object(make_shared<Object>(back, diffuse_surface, "back"));
+    sence->add_object(make_shared<Object>(back, diffuse_surface, "back"));
 
     shared_ptr<Surface> test_surface = make_shared<TransSurface>(
-        blue_glass, 1
+        emerald, 1
     );
 
     shared_ptr<Shape> ball1 = make_shared<Sphere>(

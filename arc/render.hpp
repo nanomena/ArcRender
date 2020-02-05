@@ -28,6 +28,8 @@ public:
         diffuse_limit = _diffuse_mxcnt;
         trace_eps = _trace_eps;
         length = image->epoch();
+
+        sence->build_graph();
     }
 
     void step(int idx) const
