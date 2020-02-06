@@ -45,7 +45,7 @@ struct KaDanTreeNode
         if (!hit) return;
         if ((candipoint - ray.o).norm2() >= (hitpoint - ray.o).norm2()) return;
 
-        // KaDanVisit ++;
+        KaDanVisit ++;
 
         cen->inter(ray, hit, candipoint);
         if (hit) if ((candipoint - ray.o).norm2() < (hitpoint - ray.o).norm2())
@@ -93,9 +93,9 @@ public:
     }
     void query(const Ray &ray, shared_ptr<Object> &next, Vec3 &hitpoint) const
     {
-        // KaDanVisit = 0;
+        KaDanVisit = 0;
         root->query(ray, next, hitpoint);
-        // $ << "visit " << KaDanVisit << endl;
+        $ << "visit " << KaDanVisit << endl;
     }
 };
 

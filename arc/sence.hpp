@@ -34,7 +34,6 @@ public:
 
         photon.trans(photon.inside->through((hitpoint - photon.ray.o).norm()));
         double weight = next->forward(hitpoint, photon, type);
-        photon.move(EPS);
         return weight;
     }
 };

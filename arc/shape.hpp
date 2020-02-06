@@ -31,7 +31,7 @@ public:
         box = Cuboid(o - Vec3(r, r, r), o + Vec3(r, r, r));
     }
 
-    bool contain(const Vec3 &t) const { return (o - t).norm2() <= r * r; }
+    bool contain(const Vec3 &t) const { return (o - t).norm2() <= r * r + r * EPS; }
     void inter(const Ray &ray, int &hit, Vec3 &hitpoint) const
     {
         Vec3 x = (o - ray.o).project(ray.d), y = (o - ray.o) - x;
@@ -156,6 +156,60 @@ public:
     Ray normal(const Ray &ray, const Vec3 &inter) const
     {
         return Ray(inter, norm);
+    }
+};
+
+class TriObj : public Shape
+{
+    Vec3 V0, Vn0, V1, Vn1, V2, Vn2;
+
+public:
+    void init_box()
+    {
+        box = box + Cuboid(V0) + Cuboid(V1) + Cuboid(V2);
+    }
+    TriObj (Vec3 _V0, Vec3 _Vn0, Vec3 _V1, Vec3 _Vn1, Vec3 _V2, Vec3 _Vn2)
+    {
+        V0 = _V0; Vn0 = _Vn0;
+        V1 = _V1; Vn1 = _Vn1;
+        V2 = _V2; Vn2 = _Vn2;
+        init_box();
+    }
+    TriObj (Vec3 _V0, Vec3 _V1, Vec3 _V2)
+    {
+        V0 = _V0;
+        V1 = _V1;
+        V2 = _V2;
+        Vn0 = Vn1 = Vn2 = (V1 - V0) ^ (V2 - V0);
+        init_box();
+    }
+
+    void inter(const Ray &ray, int &hit, Vec3 &hitpoint) const
+    {
+        Vec3 E1 = V1 - V0, E2 = V2 - V0, T = ray.o - V0;
+        Vec3 P = ray.d ^ E2;
+        double det = P * E1;
+        if (det < 0) det = -det, T = -T;
+        if (det < EPS) { hit = 0; return; }
+        double u = P * T;
+        if (u < 0 || u > det) { hit = 0; return; }
+        Vec3 Q = T ^ E1;
+        double t = Q * E2;
+        if (t < 0) { hit = 0; return; }
+
+        double v = Q * ray.d;
+        if (v < 0 || u + v > det) { hit = 0; return; }
+        hit = 1; hitpoint = ray.o + ray.d * (t / det);
+    }
+    Ray normal(const Ray &ray, const Vec3 &inter) const
+    {
+        Vec3 E1 = V1 - V0, E2 = V2 - V0, T = ray.o - V0;
+        Vec3 P = ray.d ^ E2;
+        Vec3 Q = T ^ E1;
+        double det = P * E1;
+        double u = P * T / det;
+        double v = Q * ray.d / det;
+        return Ray(inter, (Vn0 * (1 - u - v) + Vn1 * u + Vn2 * v).scale(1));
     }
 };
 

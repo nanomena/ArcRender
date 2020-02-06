@@ -7,6 +7,7 @@
 #include "image.hpp"
 #include "photon.hpp"
 #include "camera.hpp"
+#include "objsence.hpp"
 #include <thread>
 using namespace std;
 

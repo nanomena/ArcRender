@@ -25,7 +25,7 @@ public:
     }
     Ray apply(double dx, double dy)
     {
-        return Ray(o, (x * dx + y * dy + z).scale(1));
+        return Ray(o, (x * dx - y * dy + z).scale(1));
     }
 };
 

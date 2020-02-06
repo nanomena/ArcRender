@@ -73,20 +73,20 @@ shared_ptr<Sence> sence = make_shared<Sence>(
 shared_ptr<Sence> load_sence1()
 {
     shared_ptr<Shape> light = make_shared<Flat>(4,
-        Vec3(-6, -14.9, 0),
-        Vec3(-6, -14.9, 14),
-        Vec3(6, -14.9, 14),
-        Vec3(6, -14.9, 0)
+        Vec3(-6, 14.9, 0),
+        Vec3(-6, 14.9, 14),
+        Vec3(6, 14.9, 14),
+        Vec3(6, 14.9, 0)
     );
     sence->add_object(make_shared<Object>(light, light4, "light"));
 
     shared_ptr<Shape> ball1 = make_shared<Sphere>(
-        Vec3(7, 8, 13), 7
+        Vec3(7, -8, 13), 7
     );
     sence->add_object(make_shared<Object>(ball1, gold_surface59, "ball1"));
 
     shared_ptr<Shape> ball2 = make_shared<Sphere>(
-        Vec3(-6, 8, 3), 7
+        Vec3(-6, -8, 3), 7
     );
     sence->add_object(make_shared<Object>(ball2, make_shared<TransSurface>(emerald, 0.1), "ball2"));
 
@@ -99,28 +99,20 @@ shared_ptr<Sence> load_sence1()
     sence->add_object(make_shared<Object>(front, iron_surface59, "front"));
 
     shared_ptr<Shape> left = make_shared<Flat>(4,
-        Vec3(-15, -15, 20),
-        Vec3(-15, -15, -10),
         Vec3(-15, 15, -10),
-        Vec3(-15, 15, 20)
+        Vec3(-15, 15, 20),
+        Vec3(-15, -15, 20),
+        Vec3(-15, -15, -10)
     );
     sence->add_object(make_shared<Object>(left, blue_diffuse_surface, "left"));
 
     shared_ptr<Shape> right = make_shared<Flat>(4,
-        Vec3(15, -15, -10),
-        Vec3(15, -15, 20),
         Vec3(15, 15, 20),
-        Vec3(15, 15, -10)
+        Vec3(15, 15, -10),
+        Vec3(15, -15, -10),
+        Vec3(15, -15, 20)
     );
     sence->add_object(make_shared<Object>(right, red_diffuse_surface, "right"));
-
-    shared_ptr<Shape> down = make_shared<Flat>(4,
-        Vec3(-15, -15, -10),
-        Vec3(-15, -15, 20),
-        Vec3(15, -15, 20),
-        Vec3(15, -15, -10)
-    );
-    sence->add_object(make_shared<Object>(down, diffuse_surface, "down"));
 
     shared_ptr<Shape> up = make_shared<Flat>(4,
         Vec3(-15, 15, 20),
@@ -129,6 +121,14 @@ shared_ptr<Sence> load_sence1()
         Vec3(15, 15, 20)
     );
     sence->add_object(make_shared<Object>(up, diffuse_surface, "up"));
+
+    shared_ptr<Shape> down = make_shared<Flat>(4,
+        Vec3(-15, -15, -10),
+        Vec3(-15, -15, 20),
+        Vec3(15, -15, 20),
+        Vec3(15, -15, -10)
+    );
+    sence->add_object(make_shared<Object>(down, diffuse_surface, "down"));
 
     return sence;
 }
@@ -148,10 +148,10 @@ shared_ptr<Sence> load_surface_test()
     // );
 
     shared_ptr<Shape> back = make_shared<Flat>(4,
-        Vec3(-40, -40, 25),
         Vec3(-40, 40, 25),
-        Vec3(40, 40, 25),
-        Vec3(40, -40, 25)
+        Vec3(-40, -40, 25),
+        Vec3(40, -40, 25),
+        Vec3(40, 40, 25)
     );
     sence->add_object(make_shared<Object>(back, diffuse_surface, "back"));
 
@@ -163,6 +163,30 @@ shared_ptr<Sence> load_surface_test()
         Vec3(0, 0, 0), 20
     );
     sence->add_object(make_shared<Object>(ball1, test_surface, "ball1"));
+
+    return sence;
+}
+
+shared_ptr<Sence> load_teapot()
+{
+    double d[3][3] = {
+        {1, 0, 0},
+        {0, 1, 0},
+        {0, 0, 1}
+    };
+    Mat3 T(d);
+    ObjSence x;
+    x.import("objects/teapot.obj", sence, T);
+
+    cerr << "finish importing!" << endl;
+
+    shared_ptr<Shape> light = make_shared<Flat>(4,
+        Vec3(-100, 200, -100),
+        Vec3(-100, 200, 100),
+        Vec3(100, 200, 100),
+        Vec3(100, 200, -100)
+    );
+    sence->add_object(make_shared<Object>(light, light2, "light"));
 
     return sence;
 }

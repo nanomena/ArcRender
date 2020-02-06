@@ -3,6 +3,7 @@
 #include "photon.hpp"
 #include "sampler.hpp"
 #include "bxdf.hpp"
+#include <cassert>
 
 class Surface
 {
@@ -32,6 +33,29 @@ public:
     }
 };
 
+class OneFaceLightSource : public Surface
+{
+    Spectrum spectrum;
+
+public:
+    OneFaceLightSource (Spectrum light)
+    {
+        spectrum = light;
+    }
+
+    double forward(Photon &photon, int &type) const
+    {
+        type = -1;
+
+        $ << "shine!" << endl;
+        if (photon.ray.d.d[2] > 0)
+            photon.trans(Spectrum(0));
+        else
+            photon.trans(spectrum);
+        return 1;
+    }
+};
+
 class MetalSurface : public Surface
 {
     shared_ptr<BxDF> subsurface;
@@ -44,6 +68,7 @@ public:
 
     double forward(Photon &photon, int &type) const
     {
+        if (photon.ray.d.d[2] > 0) return 0;
         Vec3 out;
         Spectrum spectrum;
         double weight = subsurface->through(photon.ray.d, out, spectrum, type);

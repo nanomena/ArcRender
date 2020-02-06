@@ -157,7 +157,6 @@ public:
 
     double through(const Vec3 &in, Vec3 &out, Spectrum &spectrum, int &type) const
     {
-        $ << "Trans " << in << endl;
         double p = RD.rand();
         double costheta = sqrt((1 - p) / (p * (alpha2 - 1) + 1));
         double sintheta = sqrt(1 - costheta * costheta);

@@ -46,6 +46,8 @@ public:
         out << 255 << endl;
         for (int i = 0; i < length; ++ i)
         {
+            if (spectrum[i].r < 0)
+                cerr << i << " " << spectrum[i].r << " " << spectrum[i].g << " " << spectrum[i].b << endl;
             auto _c = (spectrum[i] / weight[i]).rgb888(white, gamma);
             out << char(_c / 65536) << char(_c / 256 % 256) << char(_c % 256);
         }

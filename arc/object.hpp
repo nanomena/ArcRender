@@ -28,6 +28,7 @@ public:
     void inter(const Ray &ray, int &hit, Vec3 &hitpoint) const
     {
         shape->inter(ray, hit, hitpoint);
+        if ((hitpoint - ray.o).norm2() < EPS) hit = 0;
     }
     double forward(const Vec3 &inter, Photon &photon, int &type) const
     {
