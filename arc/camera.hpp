@@ -1,9 +1,7 @@
 #ifndef CAMERA
 #define CAMERA
-#include <vector>
-#include <memory>
-using namespace std;
-#include "geo.hpp"
+#include "arc.hpp"
+#include "geometry.hpp"
 
 class Camera
 {

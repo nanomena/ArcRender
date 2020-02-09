@@ -1,9 +1,7 @@
 #ifndef SAMPLER
 #define SAMPLER
-#include <random>
-#include <cmath>
-#include "geo.hpp"
-using namespace std;
+#include "arc.hpp"
+#include "geometry.hpp"
 
 template<int base>
 class HaltonSequence

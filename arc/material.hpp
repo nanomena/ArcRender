@@ -1,5 +1,6 @@
 #ifndef MATERIAL
 #define MATERIAL
+#include "arc.hpp"
 #include "spectrum.hpp"
 
 struct Material

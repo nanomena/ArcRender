@@ -1,9 +1,6 @@
 #ifndef IMAGE
 #define IMAGE
-#include <string>
-#include <fstream>
-#include <iostream>
-using namespace std;
+#include "arc.hpp"
 #include "sampler.hpp"
 #include "photon.hpp"
 #include "camera.hpp"

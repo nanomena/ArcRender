@@ -1,10 +1,7 @@
 #ifndef SHAPE
 #define SHAPE
-#include <cmath>
-#include <vector>
-#include <stdarg.h>
-using namespace std;
-#include "geo.hpp"
+#include "arc.hpp"
+#include "geometry.hpp"
 
 class Shape
 {

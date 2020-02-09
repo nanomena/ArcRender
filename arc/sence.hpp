@@ -1,6 +1,6 @@
 #ifndef SENCE
 #define SENCE
-#include <memory>
+#include "arc.hpp"
 #include "object.hpp"
 #include "graph.hpp"
 

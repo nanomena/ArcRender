@@ -1,15 +1,11 @@
 #ifndef RENDER
 #define RENDER
-#define DEBUG 0
-// #define double long double
-#define $ if (DEBUG) cerr
+#include "arc.hpp"
 #include "sence.hpp"
 #include "image.hpp"
 #include "photon.hpp"
 #include "camera.hpp"
 #include "objsence.hpp"
-#include <thread>
-using namespace std;
 
 
 class Render

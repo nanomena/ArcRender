@@ -1,10 +1,7 @@
 #ifndef SPECTRUM
 #define SPECTRUM
-#include <cmath>
-#include <iostream>
-#include <algorithm>
-using namespace std;
-#include "geo.hpp"
+#include "arc.hpp"
+#include "geometry.hpp"
 
 struct Spectrum
 {

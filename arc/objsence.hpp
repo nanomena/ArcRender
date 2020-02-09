@@ -1,10 +1,7 @@
 #ifndef OBJLOADER
 #define OBJLOADER
-#include <string>
-#include <fstream>
-#include <iostream>
-using namespace std;
-#include "geo.hpp"
+#include "arc.hpp"
+#include "geometry.hpp"
 #include "object.hpp"
 #include "sence.hpp"
 

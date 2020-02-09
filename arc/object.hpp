@@ -1,11 +1,9 @@
 #ifndef OBJECT
 #define OBJECT
-#include "geo.hpp"
+#include "arc.hpp"
+#include "geometry.hpp"
 #include "shape.hpp"
 #include "surface.hpp"
-#include <memory>
-#include <string>
-using namespace std;
 
 class Object
 {

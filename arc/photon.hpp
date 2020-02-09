@@ -1,6 +1,7 @@
 #ifndef PHOTON
 #define PHOTON
-#include "geo.hpp"
+#include "arc.hpp"
+#include "geometry.hpp"
 #include "spectrum.hpp"
 #include "material.hpp"
 

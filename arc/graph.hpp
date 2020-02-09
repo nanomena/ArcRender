@@ -1,8 +1,7 @@
 #ifndef GRAPH
 #define GRAPH
-#include <functional>
-using namespace std;
-#include "geo.hpp"
+#include "arc.hpp"
+#include "geometry.hpp"
 #include "shape.hpp"
 
 int KaDanVisit;

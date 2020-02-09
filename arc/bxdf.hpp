@@ -1,9 +1,9 @@
 #ifndef BXDF
 #define BXDF
+#include "arc.hpp"
 #include "sampler.hpp"
 #include "material.hpp"
 #include "photon.hpp"
-#include <memory>
 
 class BxDF
 {

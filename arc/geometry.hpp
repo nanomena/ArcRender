@@ -1,8 +1,6 @@
 #ifndef GEO
 #define GEO
-#include <cmath>
-#include <iostream>
-using namespace std;
+#include "arc.hpp"
 
 const double INF = 1e50;
 const double EPS = 1e-9;
