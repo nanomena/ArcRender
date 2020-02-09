@@ -11,7 +11,7 @@ using namespace std;
 
 int main()
 {
-    int epoch = 50, cluster = 1;
+    int epoch = 4000, cluster = 1;
     cerr << "target : " << epoch << endl;
     ios::sync_with_stdio(0);
 
@@ -22,7 +22,7 @@ int main()
     //     Vec3(0, 1, 0),
     //     1
     // );
-    // shared_ptr<Image> image = make_shared<Image>(200, 200, camera);
+    // shared_ptr<Image> image = make_shared<Image>(400, 400, camera);
 
     // shared_ptr<Sence> sence = load_sence1();
     // shared_ptr<Camera> camera = make_shared<PerspectiveCamera>(

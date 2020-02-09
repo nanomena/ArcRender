@@ -50,8 +50,6 @@ public:
 
     double G(const Vec3 &in, const Vec3 &out) const
     {
-        Vec3 normal = (-in + out).scale(1);
-
         double k = alpha / 4;
         double g_in = -in.d[2] / (-in.d[2] * (1 - k) + k);
         double g_out = out.d[2] / (out.d[2] * (1 - k) + k);
@@ -147,12 +145,23 @@ public:
 
     double G(const Vec3 &in, const Vec3 &out) const
     {
-        return 1;
+        double k = alpha / 4;
+        double g_in = -in.d[2] / (-in.d[2] * (1 - k) + k);
+        double g_out = out.d[2] / (out.d[2] * (1 - k) + k);
+        double g = g_in * g_out;
+        return g;
     }
 
-    double GT(const Vec3 &in, const Vec3 &out) const
+    double GT(const Vec3 &in, const Vec3 &out, const Vec3 &normal) const
     {
-        return 1;
+        double k = alpha / 4;
+        double g_in = -in.d[2] / (-in.d[2] * (1 - k) + k);
+        double g_out = -out.d[2] / (-out.d[2] * (1 - k) + k);
+        double g = g_in * g_out;
+
+        double i_in = -in * normal;
+        double i_out = -out * normal;
+        return g * i_in * i_out / pow((i_in + i_out / IOR) / 2, 2);
     }
 
     double through(const Vec3 &in, Vec3 &out, Spectrum &spectrum, int &type) const
@@ -211,7 +220,7 @@ public:
                 return 0;
             }
 
-            spectrum = Spectrum(1) * GT(in, out);
+            spectrum = Spectrum(1) * GT(in, out, normal);
             return 1;
         }
     }

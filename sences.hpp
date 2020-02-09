@@ -1,4 +1,7 @@
 
+shared_ptr<Material> light_air = make_shared<Material>(
+    0.8, Spectrum(1, 1, 1), "light_air"
+);
 shared_ptr<Material> heavy_air = make_shared<Material>(
     1.0005, Spectrum(1, 1, 1), "heavy_air"
 );
@@ -148,15 +151,15 @@ shared_ptr<Sence> load_surface_test()
     // );
 
     shared_ptr<Shape> back = make_shared<Flat>(4,
-        Vec3(-40, 40, 25),
         Vec3(-40, -40, 25),
-        Vec3(40, -40, 25),
-        Vec3(40, 40, 25)
+        Vec3(-40, 40, 25),
+        Vec3(40, 40, 25),
+        Vec3(40, -40, 25)
     );
     sence->add_object(make_shared<Object>(back, diffuse_surface, "back"));
 
     shared_ptr<Surface> test_surface = make_shared<TransSurface>(
-        emerald, 1
+        emerald, 0.3
     );
 
     shared_ptr<Shape> ball1 = make_shared<Sphere>(

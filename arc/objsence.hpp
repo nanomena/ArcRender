@@ -88,7 +88,7 @@ public:
                     // $ << V[v[0]] << " " << V[v[i]] << " " << V[v[i + 1]] << endl;
 
                     sence->add_object(make_shared<Object>(
-                        now, diffuse_surface, string(path) + to_string(num)
+                        now, make_shared<TransSurface>(emerald, 0.1), string(path) + to_string(num)
                     ));
                 }
                 num ++;
