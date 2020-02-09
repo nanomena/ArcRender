@@ -1,6 +1,7 @@
-#ifndef OBJLOADER
-#define OBJLOADER
-#include "arc.hpp"
+#ifndef objsence_hpp
+#define objsence_hpp
+
+#include "utils.hpp"
 #include "geometry.hpp"
 #include "object.hpp"
 #include "sence.hpp"
@@ -94,7 +95,6 @@ public:
         V.clear(); Vn.clear(); Vt.clear();
     }
 };
-
 
 
 #endif

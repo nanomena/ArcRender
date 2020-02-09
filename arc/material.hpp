@@ -1,6 +1,7 @@
-#ifndef MATERIAL
-#define MATERIAL
-#include "arc.hpp"
+#ifndef material_hpp
+#define material_hpp
+
+#include "utils.hpp"
 #include "spectrum.hpp"
 
 struct Material
@@ -9,19 +10,25 @@ struct Material
     double IOR;
     string name;
 
-    Material (double _IOR, Spectrum _trans, string _name)
-    {
-        IOR = _IOR;
-        trans = _trans;
-        name = _name;
-    }
-
-    Spectrum through(double dis)
-    {
-        return trans ^ dis;
-    }
+    Material (double _IOR, Spectrum _trans, string _name);
+    Spectrum through(double dis);
 };
 
-shared_ptr<Material> air = make_shared<Material>(1, Spectrum(1), "air");
+static shared_ptr<Material> air = make_shared<Material>(1, Spectrum(1), "air");
+
+#ifdef library
+
+Material::Material (double _IOR, Spectrum _trans, std::string _name)
+{
+    IOR = _IOR;
+    trans = _trans;
+    name = _name;
+}
+
+Spectrum Material::through(double dis)
+{
+    return trans ^ dis;
+}
 
 #endif
+#endif /* material_hpp */

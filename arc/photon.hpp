@@ -1,6 +1,7 @@
-#ifndef PHOTON
-#define PHOTON
-#include "arc.hpp"
+#ifndef photon_hpp
+#define photon_hpp
+
+#include "utils.hpp"
 #include "geometry.hpp"
 #include "spectrum.hpp"
 #include "material.hpp"
@@ -9,18 +10,28 @@ struct Photon
 {
     Ray ray; Spectrum spectrum;
     shared_ptr<Material> inside;
-    Photon (Ray _ray, Spectrum _spectrum = Spectrum(1), shared_ptr<Material> material = air)
-    {
-        ray = _ray;
-        spectrum = _spectrum;
-        inside = material;
-    }
+    Photon (Ray _ray, Spectrum _spectrum = Spectrum(1), shared_ptr<Material> material = air);
 
-    void move(double length) { ray.move(length); }
-    void into(shared_ptr<Material> material) { inside = material; }
-    void trans(Spectrum _spectrum) { spectrum = spectrum * _spectrum; }
-    void apply(Ray _ray) { ray = _ray; }
+    void move(double length);
+    void into(shared_ptr<Material> material);
+    void trans(Spectrum _spectrum);
+    void apply(Ray _ray);
 };
+
+#ifdef library
+
+Photon::Photon (Ray _ray, Spectrum _spectrum, shared_ptr<Material> material)
+{
+    ray = _ray;
+    spectrum = _spectrum;
+    inside = material;
+}
+
+void Photon::move(double length) { ray.move(length); }
+void Photon::into(shared_ptr<Material> material) { inside = material; }
+void Photon::trans(Spectrum _spectrum) { spectrum = spectrum * _spectrum; }
+void Photon::apply(Ray _ray) { ray = _ray; }
 
 
 #endif
+#endif /* photon_hpp */

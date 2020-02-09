@@ -25,7 +25,7 @@ int main()
         Vec3(0, 1, 0),
         1
     );
-    shared_ptr<Image> image = make_shared<Image>(800, 800, camera);
+    shared_ptr<oBuffer> image = make_shared<oBuffer>(800, 800, camera);
 
     // shared_ptr<Sence> sence = load_teapot();
     // shared_ptr<Camera> camera = make_shared<PerspectiveCamera>(

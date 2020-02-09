@@ -170,6 +170,7 @@ shared_ptr<Sence> load_surface_test()
     return sence;
 }
 
+#include "arc/objsence.hpp"
 shared_ptr<Sence> load_teapot()
 {
     double d[3][3] = {

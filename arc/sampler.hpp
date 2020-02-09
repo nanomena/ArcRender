@@ -1,6 +1,7 @@
-#ifndef SAMPLER
-#define SAMPLER
-#include "arc.hpp"
+#ifndef sampler_hpp
+#define sampler_hpp
+
+#include "utils.hpp"
 #include "geometry.hpp"
 
 template<int base>
@@ -27,34 +28,40 @@ public:
 class Sampler
 {
     mt19937 R;
-    HaltonSequence<7> X;
-    HaltonSequence<11> Y;
 
 public:
-    Sampler () {}
+    double sample();
+    double rand(double l = 0, double r = 1);
 
-    double sample() { return 1. * R() / (1ll << 32); }
-    double rand(double l = 0, double r = 1)
-    {
-        return sample() * (r - l) + l;
-    }
+    Vec2 pixel(Vec2 t, double width, double height);
+    Vec3 semisphere();
+};
 
-    pair<double,double> pixel(double x, double y, double width, double height)
-    {
-        // omp_set_lock(&lock);
-        // pair<double,double> v = make_pair(X(), Y());
-        // omp_unset_lock(&lock);
+static Sampler RD;
 
-        pair<double,double> v = make_pair(sample(), sample());
-        double dx = (x + v.first) / width - 0.5, dy = (y + v.second) / height - 0.5;
-        return make_pair(dx, dy);
-    }
-    Vec3 semisphere()
-    {
-        pair<double,double> v = make_pair(sample(), sample());
-        double z = v.first, phi = v.second * (2 * pi) - pi;
-        return Vec3(sin(phi) * sqrt(1 - z * z), cos(phi) * sqrt(1 - z * z), z);
-    }
-} RD;
+#ifdef library
+
+double Sampler::sample()
+{
+    return 1. * R() / (1ll << 32);
+}
+double Sampler::rand(double l, double r)
+{
+    return sample() * (r - l) + l;
+}
+
+Vec2 Sampler::pixel(Vec2 t, double width, double height)
+{
+    double _x = sample(), _y = sample();
+    double dx = (t.d[0] + _x) / width - 0.5, dy = (t.d[1] + _y) / height - 0.5;
+    return Vec2(dx, dy);
+}
+Vec3 Sampler::semisphere()
+{
+    auto v = make_pair(sample(), sample());
+    double z = v.first, phi = v.second * (2 * pi) - pi;
+    return Vec3(sin(phi) * sqrt(1 - z * z), cos(phi) * sqrt(1 - z * z), z);
+}
 
 #endif
+#endif /* sampler_hpp */
