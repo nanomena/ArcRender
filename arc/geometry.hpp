@@ -100,7 +100,7 @@ struct Cuboid
 };
 
 
-#ifdef library
+#ifndef library
 
 const double INF = 1e50;
 const double EPS = 1e-9;

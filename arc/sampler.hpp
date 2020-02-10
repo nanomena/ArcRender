@@ -39,7 +39,7 @@ public:
 
 static Sampler RD;
 
-#ifdef library
+#ifndef library
 
 double Sampler::sample()
 {

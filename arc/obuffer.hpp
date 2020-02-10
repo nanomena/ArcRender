@@ -23,7 +23,7 @@ public:
     void save(const char* path, double white = 1, double gamma = 2.2) const;
 };
 
-#ifdef library
+#ifndef library
 
 oBuffer::oBuffer (int _width, int _height, shared_ptr<Camera> _camera)
 {

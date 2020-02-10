@@ -2,28 +2,30 @@
 #define object_hpp
 
 #include "utils.hpp"
-#include "surface.hpp"
+#include "bxdf.hpp"
 #include "shape.hpp"
 
 class Object
 {
     shared_ptr<Shape> shape;
+    shared_ptr<BxDF> bxdf;
     shared_ptr<Surface> surface;
 
 public:
     string name;
-    Object (shared_ptr<Shape> _shape, shared_ptr<Surface> _surface, string _name);
+    Object (shared_ptr<BxDF> _bxdf, shared_ptr<Shape> _shape, shared_ptr<Surface> _surface, string _name);
 
     Cuboid outline() const;
     void inter(const Ray &ray, int &hit, Vec3 &hitpoint) const;
     double forward(const Vec3 &inter, Photon &photon, int &type) const;
 };
 
-#ifdef library
+#ifndef library
 
 
-Object::Object (shared_ptr<Shape> _shape, shared_ptr<Surface> _surface, std::string _name)
+Object::Object (shared_ptr<BxDF> _bxdf, shared_ptr<Shape> _shape, shared_ptr<Surface> _surface, string _name)
 {
+    bxdf = _bxdf;
     shape = _shape;
     surface = _surface;
     name = _name;
@@ -43,7 +45,11 @@ double Object::forward(const Vec3 &inter, Photon &photon, int &type) const
     $ << name << endl;
     Ray normal = shape->normal(photon.ray, inter);
 
-    Vec3 x, y, z = normal.d;
+    $ << "inter : " << inter << endl;
+
+    sInfo S = surface->info(photon.ray, normal);
+
+    Vec3 x, y, z = (photon.ray.d * normal.d < 0 ? normal.d : -normal.d);
     if ((photon.ray.d ^ normal.d).norm2() > EPS)
         x = (photon.ray.d - z * (photon.ray.d * z)).scale(1);
     else if (z.d[0] * z.d[0] + z.d[1] * z.d[1] > EPS)
@@ -53,14 +59,16 @@ double Object::forward(const Vec3 &inter, Photon &photon, int &type) const
     y = (x ^ z).scale(1);
     Mat3 T = axis_I(x, y, z);
 
-    Vec3 d(x * photon.ray.d, y * photon.ray.d, z * photon.ray.d);
+    Vec3 o(x * inter, y * inter, z * inter),
+        d(x * photon.ray.d, y * photon.ray.d, z * photon.ray.d);
+
     photon.apply(Ray(Vec3(), d));
 
     // change into BRDF coordinate
 
-    double weight = surface->forward(photon, type);
+    double weight = bxdf->forward(S, photon, type);
 
-    photon.apply(Ray(normal.o, T * photon.ray.d));
+    photon.apply(Ray(T * (o + photon.ray.o), T * photon.ray.d));
     return weight;
 }
 

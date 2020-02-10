@@ -73,7 +73,7 @@ public:
 };
 
 
-#ifdef library
+#ifndef library
 
 void Shape::inter(const Ray &ray, int &hit, Vec3 &hitpoint) const
 {

@@ -4,6 +4,7 @@
 #include "utils.hpp"
 #include "object.hpp"
 #include "graph.hpp"
+#include "material.hpp"
 
 class Sence
 {
@@ -12,18 +13,21 @@ class Sence
     KaDanTree graph;
 
 public:
-    Sence (shared_ptr<Object> _skybox);
+    shared_ptr<Material> env;
+    Sence (shared_ptr<Material> _env, shared_ptr<Object> _skybox);
 
     void add_object(shared_ptr<Object> object);
     void build_graph();
 
+    shared_ptr<Material> outside();
     double forward(Photon &photon, int &type) const;
 };
 
-#ifdef library
+#ifndef library
 
-Sence::Sence (shared_ptr<Object> _skybox)
+Sence::Sence (shared_ptr<Material> _env, shared_ptr<Object> _skybox)
 {
+    env = _env;
     skybox = _skybox;
 }
 

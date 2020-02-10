@@ -10,7 +10,7 @@ struct Photon
 {
     Ray ray; Spectrum spectrum;
     shared_ptr<Material> inside;
-    Photon (Ray _ray, Spectrum _spectrum = Spectrum(1), shared_ptr<Material> material = air);
+    Photon (Ray _ray, Spectrum _spectrum, shared_ptr<Material> material);
 
     void move(double length);
     void into(shared_ptr<Material> material);
@@ -18,7 +18,7 @@ struct Photon
     void apply(Ray _ray);
 };
 
-#ifdef library
+#ifndef library
 
 Photon::Photon (Ray _ray, Spectrum _spectrum, shared_ptr<Material> material)
 {

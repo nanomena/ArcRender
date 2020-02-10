@@ -32,7 +32,7 @@ public:
     void query(const Ray &ray, shared_ptr<Object> &next, Vec3 &hitpoint) const;
 };
 
-#ifdef library
+#ifndef library
 
 void KaDanTreeNode::load(shared_ptr<Object> objects[], int size, \
         function<KaDanTreeNode*()> acquire, int d)
@@ -71,7 +71,7 @@ void KaDanTreeNode::query(const Ray &ray, shared_ptr<Object> &next, Vec3 &hitpoi
     KaDanVisit ++;
 
     cen->inter(ray, hit, candipoint);
-    $ << "ray " << ray << " " << cen->outline() << " " << hit << endl;
+    // $ << "ray " << ray << " " << cen->outline() << " " << hit << endl;
     if (hit) if ((candipoint - ray.o).norm2() < (hitpoint - ray.o).norm2())
     {
         hitpoint = candipoint;

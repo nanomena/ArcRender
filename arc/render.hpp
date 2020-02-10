@@ -21,7 +21,7 @@ public:
     void epoch(int cluster = 1) const;
 };
 
-#ifdef library
+#ifndef library
 
 Render::Render (shared_ptr<oBuffer> _image, shared_ptr<Sence> _sence,
     int _trace_mxcnt, int _diffuse_mxcnt, double _trace_eps)
@@ -38,23 +38,24 @@ Render::Render (shared_ptr<oBuffer> _image, shared_ptr<Sence> _sence,
 
 void Render::step(int idx) const
 {
+    $ << "STEP :: " << idx << endl;
     double weight = 1;
-    Photon photon(image->sample(idx));
+    Photon photon(image->sample(idx), Spectrum(1), sence->env);
     int diffuse_cnt = 0, matched = 0;
     for (int trace_cnt = 0; (trace_cnt < trace_limit) && weight > trace_eps; ++ trace_cnt)
     {
         int type;
         $ << "tracing " << photon.ray << endl;
         weight *= sence->forward(photon, type);
-        if (type == -1) {matched = 1; break;}
-        if (type == 1)
+        if (type == 0) {matched = 1; break;}
+        if (abs(type) == 1)
         {
             if (diffuse_cnt < diffuse_limit)
                 diffuse_cnt ++;
             else break;
         }
     }
-    // $ << photon.spectrum << " " << weight << endl;
+    $ << photon.spectrum << " " << weight << endl;
     if (!matched) photon.trans(Spectrum(0));
     image->draw(idx, photon.spectrum, weight);
 }

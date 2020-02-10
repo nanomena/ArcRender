@@ -8,9 +8,13 @@
 #pragma GCC optimize("inline","fast-math","unroll-loops","no-stack-protector")
 
 
-#define DEBUG 0
-// #define double long double
+#ifdef ebug
+    #define DEBUG 1
+#else
+    #define DEBUG 0
+#endif
 #define $ if (DEBUG) cerr
+// #define double long double
 
 #include <random>
 #include <memory>

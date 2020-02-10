@@ -2,136 +2,68 @@
 #define surface_hpp
 
 #include "utils.hpp"
-#include "photon.hpp"
-#include "bxdf.hpp"
+#include "material.hpp"
+#include "spectrum.hpp"
+
+struct sInfo
+{
+    double absorb, ior, rough, metal, diffuse;
+    Spectrum emission, base, specular;
+    shared_ptr<Material> inside, outside;
+
+    sInfo ();
+    sInfo (shared_ptr<Material> inside, shared_ptr<Material> outside, double rough);
+};
 
 class Surface
 {
 
 public:
-    double virtual forward(Photon &photon, int &type) const;
+    sInfo virtual info(const Ray &ray, const Ray &normal) const;
 };
 
-class LightSource : public Surface
+class Uniform : public Surface
 {
-    Spectrum spectrum;
+    sInfo into, outo;
 
 public:
-    LightSource (Spectrum light);
-
-    double forward(Photon &photon, int &type) const;
+    Uniform (shared_ptr<Material> _inside, shared_ptr<Material> _outside, double _rough = 0);
+    sInfo info(const Ray &ray, const Ray &normal) const override;
 };
 
-class OneFaceLightSource : public Surface
+#ifndef library
+
+sInfo::sInfo () {}
+sInfo::sInfo (shared_ptr<Material> _inside, shared_ptr<Material> _outside, double _rough)
 {
-    Spectrum spectrum;
+    inside = _inside;
+    outside = _outside;
+    ior = outside->ior / inside->ior;
+    rough = _rough;
+    metal = inside->metal;
+    absorb = inside->absorb;
+    diffuse = inside->diffuse;
+    base = inside->base;
+    specular = inside->specular;
+    emission = inside->emission;
+}
 
-public:
-    OneFaceLightSource (Spectrum light);
-
-    double forward(Photon &photon, int &type) const;
-};
-
-class MetalSurface : public Surface
-{
-    shared_ptr<BxDF> subsurface;
-
-public:
-    MetalSurface (Spectrum _albedo, double _rough, double _metal);
-
-    double forward(Photon &photon, int &type) const;
-};
-
-
-class TransSurface : public Surface
-{
-    shared_ptr<Material> inside, outside;
-    shared_ptr<BxDF> into, outo;
-
-public:
-    TransSurface (shared_ptr<Material> _inside, double _rough, shared_ptr<Material> _outside = air);
-
-    double forward(Photon &photon, int &type) const;
-};
-
-#ifdef library
-
-double Surface::forward(Photon &photon, int &type) const
+sInfo Surface::info(const Ray &ray, const Ray &normal) const
 {
     throw "NotImplementedError";
 }
 
-
-LightSource::LightSource (Spectrum light)
+Uniform::Uniform (shared_ptr<Material> _inside, shared_ptr<Material> _outside, double _rough)
 {
-    spectrum = light;
-}
-double LightSource::forward(Photon &photon, int &type) const
-{
-    type = -1;
-    photon.trans(spectrum);
-    return 1;
+    into = sInfo(_inside, _outside, _rough);
+    outo = sInfo(_outside, _inside, _rough);
 }
 
-OneFaceLightSource::OneFaceLightSource (Spectrum light)
+sInfo Uniform::info(const Ray &ray, const Ray &normal) const
 {
-    spectrum = light;
-}
-
-double OneFaceLightSource::forward(Photon &photon, int &type) const
-{
-    type = -1;
-    if (photon.ray.d.d[2] > 0)
-        photon.trans(Spectrum(0));
-    else
-        photon.trans(spectrum);
-    return 1;
-}
-
-MetalSurface::MetalSurface (Spectrum _albedo, double _rough, double _metal)
-{
-    subsurface = make_shared<Metal>(_albedo, _rough, _metal);
-}
-double MetalSurface::forward(Photon &photon, int &type) const
-{
-    if (photon.ray.d.d[2] > 0) return 0;
-    Vec3 out;
-    Spectrum spectrum;
-    double weight = subsurface->through(photon.ray.d, out, spectrum, type);
-    photon.apply(Ray(Vec3(), out));
-    photon.trans(spectrum);
-    return weight;
-}
-
-TransSurface::TransSurface (shared_ptr<Material> _inside, double _rough, shared_ptr<Material> _outside)
-{
-    inside = _inside;
-    outside = _outside;
-    into = make_shared<Trans>(outside->IOR / inside->IOR, _rough);
-    outo = make_shared<Trans>(inside->IOR / outside->IOR, _rough);
-}
-double TransSurface::forward(Photon &photon, int &type) const
-{
-    Vec3 in = photon.ray.d, out;
-    Spectrum spectrum;
-    double weight;
-    if (photon.ray.d.d[2] < 0)
-    {
-        weight = into->through(in, out, spectrum, type);
-        if (out.d[2] < 0) photon.into(inside);
-        photon.apply(Ray(Vec3(), out));
-        photon.trans(spectrum);
-    }
-    else
-    {
-        in.d[2] *= -1;
-        weight = outo->through(in, out, spectrum, type);
-        out.d[2] *= -1;
-        if (out.d[2] > 0) photon.into(outside);
-        photon.apply(Ray(Vec3(), out));
-        photon.trans(spectrum);
-    }
-    return weight;
+    // $ << into.absorb << " " << outo.absorb << " " << ray.d * normal.d << endl;
+    if (ray.d * normal.d < 0) return into;
+    else return outo;
 }
 
 #endif

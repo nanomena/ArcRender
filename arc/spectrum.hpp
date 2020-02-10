@@ -15,7 +15,7 @@ struct Spectrum
     Spectrum operator / (double v) const;
     Spectrum operator ^ (double v) const;
     int rgb888(double white, double gamma = 2.2) const;
-    double norm();
+    double norm() const;
 
     friend ostream& operator << (ostream &s, Spectrum t);
 };
@@ -23,7 +23,7 @@ struct Spectrum
 Spectrum rgb888(double l = 0, double gamma = 2.2);
 Spectrum rgb888(double r, double g, double b, double gamma = 2.2);
 
-#ifdef library
+#ifndef library
 
 
 Spectrum::Spectrum (double l)
@@ -65,7 +65,10 @@ int Spectrum::rgb888(double white, double gamma) const
     return (_r * 256 + _g) * 256 + _b;
 }
 
-double Spectrum::norm() { return sqrt(r * r + g * g + b * b); }
+double Spectrum::norm() const
+{
+    return sqrt(r * r + g * g + b * b);
+}
 
 ostream& operator << (ostream &s, Spectrum t)
 {

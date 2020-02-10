@@ -6,26 +6,37 @@
 
 struct Material
 {
-    Spectrum trans;
-    double IOR;
+    double absorb, ior, metal, diffuse;
+    Spectrum emission, base, specular, trans;
     string name;
 
-    Material (double _IOR, Spectrum _trans, string _name);
-    Spectrum through(double dis);
+    Material (double _absorb, Spectrum _emission, \
+        double _ior, double _metal, double _diffuse, \
+        Spectrum _base, Spectrum _specular, Spectrum _trans, \
+        string _name);
+
+    Spectrum through(double dis) const;
 };
 
-static shared_ptr<Material> air = make_shared<Material>(1, Spectrum(1), "air");
+#ifndef library
 
-#ifdef library
-
-Material::Material (double _IOR, Spectrum _trans, std::string _name)
+Material::Material (double _absorb, Spectrum _emission, \
+    double _ior, double _metal, double _diffuse, \
+    Spectrum _base, Spectrum _specular, Spectrum _trans, \
+    string _name)
 {
-    IOR = _IOR;
+    ior = _ior;
+    metal = _metal;
+    absorb = _absorb;
+    diffuse = _diffuse;
+    base = _base;
+    specular = _specular;
+    emission = _emission;
     trans = _trans;
     name = _name;
 }
 
-Spectrum Material::through(double dis)
+Spectrum Material::through(double dis) const
 {
     return trans ^ dis;
 }
