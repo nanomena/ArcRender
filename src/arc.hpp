@@ -1,5 +1,5 @@
-#ifndef arc_hpp
-#define arc_hpp
+#ifndef arc_all_hpp
+#define arc_all_hpp
 
 #include "bxdf.hpp"
 #include "camera.hpp"
@@ -16,4 +16,4 @@
 #include "spectrum.hpp"
 #include "surface.hpp"
 
-#endif
+#endif /* arc_all_hpp */

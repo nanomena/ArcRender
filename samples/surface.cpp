@@ -1,5 +1,5 @@
 #include "arc.hpp"
-#include <vector>
+#include <bits/stdc++.h>
 using namespace std;
 
 int main()
@@ -59,13 +59,20 @@ int main()
     // sence->add_object(back);
 
 
+    double ior, diffuse, rough;
+    cout << "ior?" << endl; cin >> ior;
+    cout << "diffuse?" << endl; cin >> diffuse;
+    cout << "rough?" << endl; cin >> rough;
+    char output[100]; sprintf(output, "%03.0lf|%02.0lf|%02.0lf.ppm", ior * 10, diffuse * 10, rough * 10);
+
     shared_ptr<Material> Mtest = make_shared<Material>(
-        0, Spectrum(0), 1.6, 0.5, rgb888(252, 250, 245), rgb888(252, 250, 245), Spectrum(0.97, 0.995, 0.97), "test"
+        0, Spectrum(0), ior, diffuse,
+        rgb888(252, 250, 245), rgb888(252, 250, 245), Spectrum(0.97, 0.995, 0.97), "test"
     );
     shared_ptr<Object> ball = make_shared<Object>(
         bxdf,
         make_shared<Sphere>(Vec3(0, 0, 0), 20),
-        make_shared<Uniform>(Mtest, Mair, 1),
+        make_shared<Uniform>(Mtest, Mair, rough),
         "ball"
     );
     sence->add_object(ball);
@@ -92,7 +99,7 @@ int main()
         render->epoch(cluster);
         cerr << "epoch " << i << endl;
         if (i % 5 == 0)
-            image->save("test.ppm", 1);
+            image->save(output, 1);
     }
-    image->save("test.ppm", 1);
+    image->save(output, 1);
 }
