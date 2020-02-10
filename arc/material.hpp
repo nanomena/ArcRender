@@ -6,12 +6,12 @@
 
 struct Material
 {
-    double absorb, ior, metal, diffuse;
+    double absorb, ior, diffuse;
     Spectrum emission, base, specular, trans;
     string name;
 
     Material (double _absorb, Spectrum _emission, \
-        double _ior, double _metal, double _diffuse, \
+        double _ior, double _diffuse, \
         Spectrum _base, Spectrum _specular, Spectrum _trans, \
         string _name);
 
@@ -21,12 +21,11 @@ struct Material
 #ifndef library
 
 Material::Material (double _absorb, Spectrum _emission, \
-    double _ior, double _metal, double _diffuse, \
+    double _ior, double _diffuse, \
     Spectrum _base, Spectrum _specular, Spectrum _trans, \
     string _name)
 {
     ior = _ior;
-    metal = _metal;
     absorb = _absorb;
     diffuse = _diffuse;
     base = _base;

@@ -50,7 +50,7 @@ double BSDF::Fd(const sInfo &S, const Vec3 &in, const Vec3 &out, const Vec3 &nor
     double f_l = (1 - 0.5 * f_in) * (1 - 0.5 * f_out);
     double f_r = r_r * (f_in + f_out + f_in * f_out * (r_r - 1));
 
-    double f = f_l + f_r / S.diffuse;
+    double f = f_l + f_r; // It's wrong ~, but it does work well.
     return f;
 }
 
@@ -100,48 +100,34 @@ double BSDF::through(const sInfo &S, const Vec3 &in, Vec3 &out, Spectrum &spectr
         type = 0;
         return 1;
     }
-    if (RD.rand() < S.metal)
-    {
-        Vec3 normal = sampleD(S);
-        double cos_i = -in * normal, cos_t;
 
-        if (cos_i < 0)
+    Vec3 normal = sampleD(S);
+    double cos_i = -in * normal, cos_t;
+
+    if (cos_i < 0)
+    {
+        spectrum = Spectrum(0);
+        return 0;
+    }
+    double reflect;
+    if (sqrt(1 - cos_i * cos_i) * S.ior > 1) reflect = 1;
+    else
+    {
+        cos_t = sqrt(1 - (1 - cos_i * cos_i) * S.ior * S.ior);
+        reflect = F(S, cos_i, cos_t);
+    }
+    if (RD.rand() < reflect)
+    {
+        out = in + normal * cos_i * 2;
+        if (out.d[2] < 0)
         {
             spectrum = Spectrum(0);
             return 0;
         }
-        double reflect;
-        if (sqrt(1 - cos_i * cos_i) * S.ior > 1) reflect = 1;
         else
-        {
-            cos_t = sqrt(1 - (1 - cos_i * cos_i) * S.ior * S.ior);
-            reflect = F(S, cos_i, cos_t);
-        }
-
-        if (RD.rand() < reflect)
         {
             type = 2;
-            out = in + normal * cos_i * 2;
-            // cerr << in << " " << out << endl;
-            if (out.d[2] < 0)
-            {
-                spectrum = Spectrum(0);
-                return 0;
-            }
             spectrum = S.specular * Gl(S, in, out, normal);
-            return 1;
-        }
-        else
-        {
-            type = -2;
-            out = (in * S.ior + normal * (cos_i * S.ior - cos_t)).scale(1);
-            if (out.d[2] > 0)
-            {
-                spectrum = Spectrum(0);
-                return 0;
-            }
-            spectrum = (Spectrum(1) - reflect) * (1 - S.diffuse) * Gt(S, in, out, normal);
-            // cerr << spectrum << endl;
             return 1;
         }
     }
@@ -157,11 +143,21 @@ double BSDF::through(const sInfo &S, const Vec3 &in, Vec3 &out, Spectrum &spectr
         }
         else
         {
-            type = -1;
-            out = RD.semisphere();
-            out.d[2] *= -1;
-            spectrum = S.base;
-            return 1;
+            out = (in * S.ior + normal * (cos_i * S.ior - cos_t)).scale(1);
+            if (out.d[2] > 0 || RD.rand() > Gt(S, in, out, normal))
+            {
+                type = -1;
+                out = RD.semisphere();
+                out.d[2] *= -1;
+                spectrum = S.base;
+                return 1;
+            }
+            else
+            {
+                type = -2;
+                spectrum = S.base;
+                return 1;
+            }
         }
     }
 }

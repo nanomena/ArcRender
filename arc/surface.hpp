@@ -7,7 +7,7 @@
 
 struct sInfo
 {
-    double absorb, ior, rough, metal, diffuse;
+    double absorb, ior, rough, diffuse;
     Spectrum emission, base, specular;
     shared_ptr<Material> inside, outside;
 
@@ -40,7 +40,6 @@ sInfo::sInfo (shared_ptr<Material> _inside, shared_ptr<Material> _outside, doubl
     outside = _outside;
     ior = outside->ior / inside->ior;
     rough = _rough;
-    metal = inside->metal;
     absorb = inside->absorb;
     diffuse = inside->diffuse;
     base = inside->base;
