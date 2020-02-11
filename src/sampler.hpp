@@ -39,7 +39,7 @@ public:
 
 static Sampler RD;
 
-#ifndef library
+#ifdef ARC_IMPLEMENTATION
 
 double Sampler::sample()
 {

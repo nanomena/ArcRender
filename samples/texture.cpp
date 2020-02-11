@@ -24,12 +24,12 @@ int main()
         1, Spectrum(4), 1, 0, Spectrum(0), Spectrum(0), Spectrum(0), "light2"
     );
 
-    shared_ptr<Material> Mlight3 = make_shared<Material>(
-        1, Spectrum(9), 1, 0, Spectrum(0), Spectrum(0), Spectrum(0), "light3"
+    shared_ptr<Material> Mlight6 = make_shared<Material>(
+        1, Spectrum(36), 1, 0, Spectrum(0), Spectrum(0), Spectrum(0), "light6"
     );
 
     shared_ptr<Material> Mdiffuse = make_shared<Material>(
-        0, Spectrum(0), 30, 1, rgb888(230), rgb888(230), Spectrum(1), "diffuse"
+        0, Spectrum(0), 1.5, 1, rgb888(255), rgb888(255), Spectrum(1), "diffuse"
     );
 
     shared_ptr<Object> skybox = make_shared<Object>(
@@ -43,42 +43,38 @@ int main()
         Mair, skybox
     );
 
+    shared_ptr<Mapping> texture = make_shared<Mapping>("tmp/xxx.png");
+
+    Trans3 Tback(
+        Vec3(-30, -30, 25), Vec3(-30, 30, 25), Vec3(30, 30, 25),
+        Vec3(0, 0, 0), Vec3(0, 1, 0), Vec3(1, 1, 0)
+    );
+
+    auto Surface = make_shared<Textured>(
+        Mdiffuse, Mair, texture, Tback, 0.5
+    );
+
     shared_ptr<Object> back = make_shared<Object>(
         bxdf,
         make_shared<Flat>(4,
-            Vec3(-60, -60, 25),
-            Vec3(-60, 60, 25),
-            Vec3(60, 60, 25),
-            Vec3(60, -60, 25)
+            Vec3(-30, -30, 25),
+            Vec3(-30, 30, 25),
+            Vec3(30, 30, 25),
+            Vec3(30, -30, 25)
         ),
-        make_shared<Uniform>(Mdiffuse, Mair, 1),
+        Surface,
         "back"
     );
-    // sence->add_object(back);
+    sence->add_object(back);
 
 
-    double ior, diffuse, rough;
-    cout << "ior?" << endl; cin >> ior;
-    cout << "diffuse?" << endl; cin >> diffuse;
-    cout << "rough?" << endl; cin >> rough;
-    char output[100]; sprintf(output, "%03.0lf|%02.0lf|%02.0lf.ppm", ior * 10, diffuse * 10, rough * 10);
 
-    shared_ptr<Material> Mtest = make_shared<Material>(
-        0, Spectrum(0), ior, diffuse,
-        rgb888(252, 250, 245), rgb888(252, 250, 245), Spectrum(0.97, 0.995, 0.97), "test"
-    );
-    shared_ptr<Object> ball = make_shared<Object>(
-        bxdf,
-        make_shared<Sphere>(Vec3(0, 0, 0), 20),
-        make_shared<Uniform>(Mtest, Mair, rough),
-        "ball"
-    );
-    sence->add_object(ball);
+    char output[100]; sprintf(output, "texture.ppm");
 
     shared_ptr<Object> light = make_shared<Object>(
         bxdf,
         make_shared<Disc>(Vec3(-35.36, 0, -35.36), Vec3(0.707, 0, 0.707), 20),
-        make_shared<Uniform>(Mlight2, Mair),
+        make_shared<Uniform>(Mlight6, Mair),
         "light"
     );
     sence->add_object(light);
@@ -93,7 +89,7 @@ int main()
     shared_ptr<oBuffer> image = make_shared<oBuffer>(400, 400, camera);
     shared_ptr<Render> render = make_shared<Render>(image, sence);
 
-    int epoch = 1000, cluster = 1;
+    int epoch = 10000, cluster = 1;
     cerr << "target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++ i)
     {

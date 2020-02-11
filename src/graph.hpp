@@ -32,7 +32,7 @@ public:
     void query(const Ray &ray, shared_ptr<Object> &next, Vec3 &hitpoint) const;
 };
 
-#ifndef library
+#ifdef ARC_IMPLEMENTATION
 
 void KaDanTreeNode::load(shared_ptr<Object> objects[], int size, \
         function<KaDanTreeNode*()> acquire, int d)

@@ -21,7 +21,7 @@ public:
     void epoch(int cluster = 1) const;
 };
 
-#ifndef library
+#ifdef ARC_IMPLEMENTATION
 
 Render::Render (shared_ptr<oBuffer> _image, shared_ptr<Sence> _sence,
     int _trace_mxcnt, int _diffuse_mxcnt, double _trace_eps)

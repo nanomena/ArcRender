@@ -27,7 +27,7 @@ public:
     double forward(const sInfo &S, Photon &photon, int &type) const override;
 };
 
-#ifndef library
+#ifdef ARC_IMPLEMENTATION
 
 double BxDF::forward(const sInfo &S, Photon &photon, int &type) const
 {

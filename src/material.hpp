@@ -18,7 +18,11 @@ struct Material
     Spectrum through(double dis) const;
 };
 
-#ifndef library
+Material material_emi(Spectrum emission, string name);
+Material material_uni(double ior, double diffuse, Spectrum base, Spectrum specular, Spectrum trans, string name);
+// Material material_mtl(Spectrum Kd, Spectrum Ks, double Ni, Spectrum d, string name);
+
+#ifdef ARC_IMPLEMENTATION
 
 Material::Material (double _absorb, Spectrum _emission, \
     double _ior, double _diffuse, \
@@ -38,6 +42,14 @@ Material::Material (double _absorb, Spectrum _emission, \
 Spectrum Material::through(double dis) const
 {
     return trans ^ dis;
+}
+Material material_emi(Spectrum emission, string name)
+{
+    return Material(1, emission, 0, 0, Spectrum(0), Spectrum(0), Spectrum(0), name);
+}
+Material material_uni(double ior, double diffuse, Spectrum base, Spectrum specular, Spectrum trans, string name)
+{
+    return Material(0, Spectrum(0), ior, diffuse, base, specular, trans, name);
 }
 
 #endif

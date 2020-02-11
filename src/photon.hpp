@@ -18,7 +18,7 @@ struct Photon
     void apply(Ray _ray);
 };
 
-#ifndef library
+#ifdef ARC_IMPLEMENTATION
 
 Photon::Photon (Ray _ray, Spectrum _spectrum, shared_ptr<Material> material)
 {

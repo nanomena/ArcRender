@@ -73,7 +73,7 @@ public:
 };
 
 
-#ifndef library
+#ifdef ARC_IMPLEMENTATION
 
 void Shape::inter(const Ray &ray, int &hit, Vec3 &hitpoint) const
 {

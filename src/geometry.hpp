@@ -99,8 +99,19 @@ struct Cuboid
     friend ostream& operator << (ostream &s, Cuboid t);
 };
 
+struct Trans3
+{
+    Mat3 T; Vec3 O;
 
-#ifndef library
+    Trans3 ();
+    Trans3 (const Mat3 &_T, const Vec3 &_O);
+    Trans3 (const Vec3 &V0, const Vec3 &V1, const Vec3 &V2,
+        const Vec3 &Vt0, const Vec3 &Vt1, const Vec3 &Vt2);
+
+    Vec3 apply(const Vec3 &t) const;
+};
+
+#ifdef ARC_IMPLEMENTATION
 
 const double INF = 1e50;
 const double EPS = 1e-9;
@@ -392,6 +403,27 @@ ostream& operator << (ostream &s, Cuboid t)
 {
     s << "[" << t.n << "|" << t.x << "]";
     return s;
+}
+
+Trans3::Trans3 ()
+{
+
+}
+Trans3::Trans3 (const Mat3 &_T, const Vec3 &_O)
+{
+    T = _T; O = _O;
+}
+Trans3::Trans3 (const Vec3 &V0, const Vec3 &V1, const Vec3 &V2,
+    const Vec3 &Vt0, const Vec3 &Vt1, const Vec3 &Vt2)
+{
+    T = axis_I(Vt1 - Vt0, Vt2 - Vt0, (Vt1 - Vt0) ^ (Vt2 - Vt0)) *
+        axis(V1 - V0, V2 - V0, (V1 - V0) ^ (V2 - V0));
+    O = Vt0 - T * V0;
+}
+
+Vec3 Trans3::apply(const Vec3 &t) const
+{
+    return T * t + O;
 }
 
 #endif

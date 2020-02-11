@@ -23,7 +23,7 @@ public:
     double forward(Photon &photon, int &type) const;
 };
 
-#ifndef library
+#ifdef ARC_IMPLEMENTATION
 
 Sence::Sence (shared_ptr<Material> _env, shared_ptr<Object> _skybox)
 {

@@ -1,11 +1,11 @@
 #ifndef ARC
 #define ARC
 
-#pragma GCC optimize("Ofast")
+// #pragma GCC optimize("inline","Ofast")
 #pragma GCC target("sse3","sse2","sse")
 #pragma GCC target("avx","sse4","sse4.1","sse4.2","ssse3")
 #pragma GCC target("f16c")
-#pragma GCC optimize("inline","fast-math","unroll-loops","no-stack-protector")
+#pragma GCC optimize("fast-math","unroll-loops","no-stack-protector")
 
 
 #ifdef ebug
@@ -13,6 +13,11 @@
 #else
     #define DEBUG 0
 #endif
+
+#ifdef ARC_IMPLEMENTATION
+    #define STB_IMAGE_IMPLEMENTATION
+#endif
+
 #define $ if (DEBUG) cerr
 // #define double long double
 
@@ -26,6 +31,7 @@
 #include <fstream>
 #include <stdarg.h>
 #include <algorithm>
+#include "stb_image.h"
 using namespace std;
 
 

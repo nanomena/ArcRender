@@ -2,6 +2,7 @@
 #define spectrum_hpp
 
 #include "utils.hpp"
+#include "mapping.hpp"
 
 struct Spectrum
 {
@@ -22,8 +23,9 @@ struct Spectrum
 
 Spectrum rgb888(double l = 0, double gamma = 2.2);
 Spectrum rgb888(double r, double g, double b, double gamma = 2.2);
+Spectrum rgb(const Pixel &t, double gamma = 2.2);
 
-#ifndef library
+#ifdef ARC_IMPLEMENTATION
 
 
 Spectrum::Spectrum (double l)
@@ -83,6 +85,10 @@ Spectrum rgb888(double l, double gamma)
 Spectrum rgb888(double r, double g, double b, double gamma)
 {
     return Spectrum(pow(r / 255, gamma), pow(g / 255, gamma), pow(b / 255, gamma));
+}
+Spectrum rgb(const Pixel &t, double gamma)
+{
+    return Spectrum(pow(t.r, gamma), pow(t.g, gamma), pow(t.b, gamma));
 }
 
 #endif

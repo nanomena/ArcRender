@@ -20,7 +20,7 @@ public:
     Ray apply(const Vec2 &t) override;
 };
 
-#ifndef library
+#ifdef ARC_IMPLEMENTATION
 
 Ray Camera::apply(const Vec2 &t)
 {

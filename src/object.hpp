@@ -20,7 +20,7 @@ public:
     double forward(const Vec3 &inter, Photon &photon, int &type) const;
 };
 
-#ifndef library
+#ifdef ARC_IMPLEMENTATION
 
 
 Object::Object (shared_ptr<BxDF> _bxdf, shared_ptr<Shape> _shape, shared_ptr<Surface> _surface, string _name)
@@ -59,7 +59,7 @@ double Object::forward(const Vec3 &inter, Photon &photon, int &type) const
     y = (x ^ z).scale(1);
     Mat3 T = axis_I(x, y, z);
 
-    Vec3 o(x * inter, y * inter, z * inter),
+    Vec3 O(x * inter, y * inter, z * inter),
         d(x * photon.ray.d, y * photon.ray.d, z * photon.ray.d);
 
     photon.apply(Ray(Vec3(), d));
@@ -68,7 +68,7 @@ double Object::forward(const Vec3 &inter, Photon &photon, int &type) const
 
     double weight = bxdf->forward(S, photon, type);
 
-    photon.apply(Ray(T * (o + photon.ray.o), T * photon.ray.d));
+    photon.apply(Ray(T * (O + photon.ray.o), T * photon.ray.d));
     return weight;
 }
 

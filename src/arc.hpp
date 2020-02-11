@@ -5,6 +5,7 @@
 #include "camera.hpp"
 #include "geometry.hpp"
 #include "graph.hpp"
+#include "mapping.hpp"
 #include "material.hpp"
 #include "object.hpp"
 #include "obuffer.hpp"
