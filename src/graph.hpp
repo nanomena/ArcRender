@@ -112,6 +112,7 @@ KaDanTreeNode* KaDanTree::acquire() { return &tree[cnt ++]; }
 
 void KaDanTree::load(shared_ptr<Object> objects[], int size)
 {
+    cerr << "faces : " << size << endl;
     tree.resize(size);
     root = acquire();
     root->load(objects, size, bind(&KaDanTree::acquire, this), 0);

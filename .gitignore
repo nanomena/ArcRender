@@ -1,5 +1,5 @@
 bin/
 lib/
 build/
-result/
+objects/
 tmp/

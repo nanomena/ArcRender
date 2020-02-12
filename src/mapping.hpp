@@ -23,7 +23,7 @@ struct Mapping
     int width, height;
 
     Mapping ();
-    Mapping (const char *filename);
+    Mapping (string filename);
 
     Pixel getp(int x, int y) const;
     Pixel get(double x, double y) const;
@@ -55,14 +55,11 @@ ostream& operator << (ostream &s, Pixel t)
     return s;
 }
 
-Mapping::Mapping ()
-{
-
-}
-Mapping::Mapping (const char *filename)
+Mapping::Mapping () {}
+Mapping::Mapping (string filename)
 {
     int n;
-    unsigned char *data = stbi_load(filename, &width, &height, &n, 0);
+    unsigned char *data = stbi_load(filename.c_str(), &width, &height, &n, 0);
     image.resize(width * height);
     for (int i = 0; i < image.size(); ++ i)
     {
@@ -72,7 +69,7 @@ Mapping::Mapping (const char *filename)
             image[i] = Pixel(data[i * n + 0] / 255.);
             break;
         case 2:
-            image[i] = Pixel(data[i * n + 0] / 255., data[i * n + 1] / 255.);
+            image[i] = Pixel(data[i * n + 0] / 255., 1 - data[i * n + 1] / 255.);
             break;
         case 3:
             image[i] = Pixel(data[i * n + 0] / 255., data[i * n + 1] / 255.,
@@ -80,7 +77,7 @@ Mapping::Mapping (const char *filename)
             break;
         case 4:
             image[i] = Pixel(data[i * n + 0] / 255., data[i * n + 1] / 255.,
-                data[i * n + 2] / 255., data[i * n + 3] / 255.);
+                data[i * n + 2] / 255., 1 - data[i * n + 3] / 255.);
             break;
         }
     }

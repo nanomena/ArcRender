@@ -104,9 +104,8 @@ struct Trans3
     Mat3 T; Vec3 O;
 
     Trans3 ();
-    Trans3 (const Mat3 &_T, const Vec3 &_O);
-    Trans3 (const Vec3 &V0, const Vec3 &V1, const Vec3 &V2,
-        const Vec3 &Vt0, const Vec3 &Vt1, const Vec3 &Vt2);
+    Trans3 (Mat3 _T, Vec3 _O);
+    Trans3 (Vec3 V0, Vec3 V1, Vec3 V2, Vec3 Vt0, Vec3 Vt1, Vec3 Vt2);
 
     Vec3 apply(const Vec3 &t) const;
 };
@@ -409,12 +408,11 @@ Trans3::Trans3 ()
 {
 
 }
-Trans3::Trans3 (const Mat3 &_T, const Vec3 &_O)
+Trans3::Trans3 (Mat3 _T, Vec3 _O)
 {
     T = _T; O = _O;
 }
-Trans3::Trans3 (const Vec3 &V0, const Vec3 &V1, const Vec3 &V2,
-    const Vec3 &Vt0, const Vec3 &Vt1, const Vec3 &Vt2)
+Trans3::Trans3 (Vec3 V0, Vec3 V1, Vec3 V2, Vec3 Vt0, Vec3 Vt1, Vec3 Vt2)
 {
     T = axis_I(Vt1 - Vt0, Vt2 - Vt0, (Vt1 - Vt0) ^ (Vt2 - Vt0)) *
         axis(V1 - V0, V2 - V0, (V1 - V0) ^ (V2 - V0));

@@ -28,7 +28,10 @@ Photon::Photon (Ray _ray, Spectrum _spectrum, shared_ptr<Material> material)
 }
 
 void Photon::move(double length) { ray.move(length); }
-void Photon::into(shared_ptr<Material> material) { inside = material; }
+void Photon::into(shared_ptr<Material> material)
+{
+    if (material != nullptr) inside = material;
+}
 void Photon::trans(Spectrum _spectrum) { spectrum = spectrum * _spectrum; }
 void Photon::apply(Ray _ray) { ray = _ray; }
 

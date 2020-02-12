@@ -13,7 +13,8 @@ struct sInfo
     shared_ptr<Material> inside, outside;
 
     sInfo ();
-    sInfo (shared_ptr<Material> inside, shared_ptr<Material> outside, double rough);
+    sInfo (shared_ptr<Material> inside, shared_ptr<Material> outside, double _rough);
+    sInfo (shared_ptr<Material> material, double _rough);
 
     void apply(const Pixel &t);
 };
@@ -25,24 +26,31 @@ public:
     sInfo virtual info(const Ray &ray, Ray &normal) const;
 };
 
-class Uniform : public Surface
-{
-    sInfo into, outo;
-
-public:
-    Uniform (shared_ptr<Material> _inside, shared_ptr<Material> _outside, double _rough = 0);
-    sInfo info(const Ray &ray, Ray &normal) const override;
-};
-
-class Textured : public Surface
+class Solid : public Surface
 {
     sInfo into, outo;
     shared_ptr<Mapping> texture;
     Trans3 T;
 
 public:
-    Textured (shared_ptr<Material> _inside, shared_ptr<Material> _outside, shared_ptr<Mapping> _texture,
+    Solid (shared_ptr<Material> _inside, shared_ptr<Material> _outside, double _rough = 0);
+    Solid (shared_ptr<Material> _inside, shared_ptr<Material> _outside, shared_ptr<Mapping> _texture,
         const Trans3 &_T, double _rough = 0);
+
+    sInfo info(const Ray &ray, Ray &normal) const override;
+};
+
+class Thin : public Surface
+{
+    sInfo surface;
+    shared_ptr<Mapping> texture;
+    Trans3 T;
+
+public:
+    Thin (shared_ptr<Material> material, double _rough = 0);
+    Thin (shared_ptr<Material> material, shared_ptr<Mapping> _texture,
+        const Trans3 &_T, double rough = 0);
+
     sInfo info(const Ray &ray, Ray &normal) const override;
 };
 
@@ -62,11 +70,25 @@ sInfo::sInfo (shared_ptr<Material> _inside, shared_ptr<Material> _outside, doubl
     emission = inside->emission;
 }
 
+sInfo::sInfo (shared_ptr<Material> material, double _rough)
+{
+    inside = outside = nullptr;
+    ior = 1 / material->ior;
+    rough = _rough * (ior - 1);
+    absorb = material->absorb;
+    diffuse = material->diffuse;
+    base = material->base;
+    specular = material->specular;
+    emission = material->emission;
+}
+
+
 void sInfo::apply(const Pixel &t)
 {
     emission = emission * rgb(t);
     base = base * rgb(t);
     specular = specular * rgb(t);
+    diffuse *= (1 - t.a);
 }
 
 sInfo Surface::info(const Ray &ray, Ray &normal) const
@@ -74,20 +96,14 @@ sInfo Surface::info(const Ray &ray, Ray &normal) const
     throw "NotImplementedError";
 }
 
-Uniform::Uniform (shared_ptr<Material> _inside, shared_ptr<Material> _outside, double _rough)
+Solid::Solid (shared_ptr<Material> _inside, shared_ptr<Material> _outside, double _rough)
 {
     into = sInfo(_inside, _outside, _rough);
     outo = sInfo(_outside, _inside, _rough);
+    texture = nullptr;
 }
 
-sInfo Uniform::info(const Ray &ray, Ray &normal) const
-{
-    // $ << into.absorb << " " << outo.absorb << " " << ray.d * normal.d << endl;
-    if (ray.d * normal.d < 0) return into;
-    else return outo;
-}
-
-Textured::Textured (shared_ptr<Material> _inside, shared_ptr<Material> _outside, shared_ptr<Mapping> _texture,
+Solid::Solid (shared_ptr<Material> _inside, shared_ptr<Material> _outside, shared_ptr<Mapping> _texture,
     const Trans3 &_T, double _rough)
 {
     into = sInfo(_inside, _outside, _rough);
@@ -96,13 +112,41 @@ Textured::Textured (shared_ptr<Material> _inside, shared_ptr<Material> _outside,
     T = _T;
 }
 
-sInfo Textured::info(const Ray &ray, Ray &normal) const
+sInfo Solid::info(const Ray &ray, Ray &normal) const
 {
     sInfo result;
     if (ray.d * normal.d < 0) result = into;
     else result = outo;
-    Vec3 p = T.apply(normal.o);
-    result.apply(texture->get(p.d[0], p.d[1]));
+    if (texture != nullptr)
+    {
+        Vec3 p = T.apply(normal.o);
+        result.apply(texture->get(p.d[0], p.d[1]));
+    }
+    return result;
+}
+
+Thin::Thin (shared_ptr<Material> material, double rough)
+{
+    surface = sInfo(material, rough);
+    texture = nullptr;
+}
+
+Thin::Thin (shared_ptr<Material> material, shared_ptr<Mapping> _texture,
+    const Trans3 &_T, double rough)
+{
+    surface = sInfo(material, rough);
+    texture = _texture;
+    T = _T;
+}
+
+sInfo Thin::info(const Ray &ray, Ray &normal) const
+{
+    sInfo result = surface;
+    if (texture != nullptr)
+    {
+        Vec3 p = T.apply(normal.o);
+        result.apply(texture->get(p.d[0], p.d[1]));
+    }
     return result;
 }
 

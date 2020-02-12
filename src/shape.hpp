@@ -63,10 +63,11 @@ public:
 
 class TriObj : public Shape
 {
-    Vec3 V0, V1, V2, norm;
+    Vec3 V0, V1, V2, Vn0, Vn1, Vn2;
 
 public:
     TriObj (Vec3 _V0, Vec3 _V1, Vec3 _V2);
+    TriObj (Vec3 _V0, Vec3 _V1, Vec3 _V2, Vec3 _Vn0, Vec3 _Vn1, Vec3 _Vn2);
 
     void inter(const Ray &ray, int &hit, Vec3 &hitpoint) const override;
     Ray normal(const Ray &ray, const Vec3 &inter) const override;
@@ -218,7 +219,14 @@ TriObj::TriObj (Vec3 _V0, Vec3 _V1, Vec3 _V2)
     V0 = _V0;
     V1 = _V1;
     V2 = _V2;
-    norm = ((V1 - V0) ^ (V2 - V0)).scale(1);
+    Vn0 = Vn1 = Vn2 = ((V1 - V0) ^ (V2 - V0)).scale(1);
+    box = Cuboid(V0) + Cuboid(V1) + Cuboid(V2);
+}
+TriObj::TriObj (Vec3 _V0, Vec3 _V1, Vec3 _V2, Vec3 _Vn0, Vec3 _Vn1, Vec3 _Vn2)
+{
+    V0 = _V0; Vn0 = _Vn0;
+    V1 = _V1; Vn1 = _Vn1;
+    V2 = _V2; Vn2 = _Vn2;
     box = Cuboid(V0) + Cuboid(V1) + Cuboid(V2);
 }
 
@@ -241,6 +249,14 @@ void TriObj::inter(const Ray &ray, int &hit, Vec3 &hitpoint) const
 }
 Ray TriObj::normal(const Ray &ray, const Vec3 &inter) const
 {
+    Vec3 E1 = V1 - V0, E2 = V2 - V0, T = ray.o - V0;
+    Vec3 P = ray.d ^ E2;
+    double det = P * E1;
+    Vec3 Q = T ^ E1;
+    double t = Q * E2;
+    double u = P * T / det;
+    double v = Q * ray.d / det;
+    Vec3 norm = (Vn0 * (1 - u - v) + Vn1 * u + Vn2 * v).scale(1);
     return Ray(inter, norm);
 }
 

@@ -35,7 +35,7 @@ int main()
     shared_ptr<Object> skybox = make_shared<Object>(
         bxdf,
         make_shared<Sphere>(Vec3(0, 0, 0), INF / 10),
-        make_shared<Uniform>(Mair, Mlight0),
+        make_shared<Solid>(Mair, Mlight0),
         "skybox"
     );
 
@@ -50,7 +50,7 @@ int main()
         Vec3(0, 0, 0), Vec3(0, 1, 0), Vec3(1, 1, 0)
     );
 
-    auto Surface = make_shared<Textured>(
+    auto Surface = make_shared<Solid>(
         Mdiffuse, Mair, texture, Tback, 0.5
     );
 
@@ -74,7 +74,7 @@ int main()
     shared_ptr<Object> light = make_shared<Object>(
         bxdf,
         make_shared<Disc>(Vec3(-35.36, 0, -35.36), Vec3(0.707, 0, 0.707), 20),
-        make_shared<Uniform>(Mlight6, Mair),
+        make_shared<Solid>(Mlight6, Mair),
         "light"
     );
     sence->add_object(light);

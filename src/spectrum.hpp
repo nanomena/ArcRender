@@ -23,6 +23,7 @@ struct Spectrum
 
 Spectrum rgb888(double l = 0, double gamma = 2.2);
 Spectrum rgb888(double r, double g, double b, double gamma = 2.2);
+Spectrum rgb(double r, double g, double b, double gamma = 2.2);
 Spectrum rgb(const Pixel &t, double gamma = 2.2);
 
 #ifdef ARC_IMPLEMENTATION
@@ -85,6 +86,10 @@ Spectrum rgb888(double l, double gamma)
 Spectrum rgb888(double r, double g, double b, double gamma)
 {
     return Spectrum(pow(r / 255, gamma), pow(g / 255, gamma), pow(b / 255, gamma));
+}
+Spectrum rgb(double r, double g, double b, double gamma)
+{
+    return Spectrum(pow(r, gamma), pow(g, gamma), pow(b, gamma));
 }
 Spectrum rgb(const Pixel &t, double gamma)
 {

@@ -8,6 +8,7 @@
 #include "mapping.hpp"
 #include "material.hpp"
 #include "object.hpp"
+#include "objloader.hpp"
 #include "obuffer.hpp"
 #include "photon.hpp"
 #include "render.hpp"

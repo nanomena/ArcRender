@@ -14,10 +14,6 @@
     #define DEBUG 0
 #endif
 
-#ifdef ARC_IMPLEMENTATION
-    #define STB_IMAGE_IMPLEMENTATION
-#endif
-
 #define $ if (DEBUG) cerr
 // #define double long double
 
@@ -31,7 +27,9 @@
 #include <fstream>
 #include <stdarg.h>
 #include <algorithm>
+#include <map>
 #include "stb_image.h"
+#include "tiny_obj_loader.h"
 using namespace std;
 
 

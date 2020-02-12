@@ -155,7 +155,7 @@ double BSDF::through(const sInfo &S, const Vec3 &in, Vec3 &out, Spectrum &spectr
             else
             {
                 type = -2;
-                spectrum = S.base;
+                spectrum = Spectrum(1);
                 return 1;
             }
         }

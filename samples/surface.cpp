@@ -35,7 +35,7 @@ int main()
     shared_ptr<Object> skybox = make_shared<Object>(
         bxdf,
         make_shared<Sphere>(Vec3(0, 0, 0), INF / 10),
-        make_shared<Uniform>(Mair, Mlight0),
+        make_shared<Solid>(Mair, Mlight0),
         "skybox"
     );
 
@@ -51,7 +51,7 @@ int main()
             Vec3(60, 60, 25),
             Vec3(60, -60, 25)
         ),
-        make_shared<Uniform>(Mdiffuse, Mair, 1),
+        make_shared<Solid>(Mdiffuse, Mair, 1),
         "back"
     );
     // sence->add_object(back);
@@ -70,7 +70,7 @@ int main()
     shared_ptr<Object> ball = make_shared<Object>(
         bxdf,
         make_shared<Sphere>(Vec3(0, 0, 0), 20),
-        make_shared<Uniform>(Mtest, Mair, rough),
+        make_shared<Solid>(Mtest, Mair, rough),
         "ball"
     );
     sence->add_object(ball);
@@ -78,7 +78,7 @@ int main()
     shared_ptr<Object> light = make_shared<Object>(
         bxdf,
         make_shared<Disc>(Vec3(-35.36, 0, -35.36), Vec3(0.707, 0, 0.707), 20),
-        make_shared<Uniform>(Mlight2, Mair),
+        make_shared<Solid>(Mlight2, Mair),
         "light"
     );
     sence->add_object(light);
