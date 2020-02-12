@@ -9,15 +9,15 @@ int main()
     shared_ptr<BxDF> bxdf = make_shared<BSDF>();
 
     shared_ptr<Material> Mair = make_shared<Material>(
-        0, Spectrum(0), 1, 0, Spectrum(1), Spectrum(1), Spectrum(1), "air"
+        0, rgb(0), 1, 0, rgb(1), rgb(1), Spectrum(1), "air"
     );
 
     shared_ptr<Material> Msky = make_shared<Material>(
-        1, Spectrum(0.007, 0.008, 0.01), 1, 0, Spectrum(0), Spectrum(0), Spectrum(0), "sky"
+        1, rgb(0.14, 0.15, 0.16) / 5, 1, 0, rgb(0), rgb(0), Spectrum(0), "sky"
     );
 
     shared_ptr<Material> Mlight = make_shared<Material>(
-        1, Spectrum(0.03), 1, 0, Spectrum(0), Spectrum(0), Spectrum(0), "light"
+        1, rgb(0.27), 1, 0, rgb(0), rgb(0), Spectrum(0), "light"
     );
 
     shared_ptr<Object> skybox = make_shared<Object>(
@@ -39,35 +39,47 @@ int main()
     shared_ptr<Object> light = make_shared<Object>(
         bxdf,
         make_shared<Flat>(4,
-            Vec3(-100, 200, 100),
-            Vec3(-100, 200, -100),
-            Vec3(100, 200, -100),
-            Vec3(100, 200, 100)
+            Vec3(-300, 300, 300),
+            Vec3(-300, 300, -300),
+            Vec3(300, 300, -300),
+            Vec3(300, 300, 300)
         ),
         make_shared<Thin>(Mlight),
         "light"
     );
-    sence->add_object(light);
+    // sence->add_object(light);
+
+    // shared_ptr<Camera> camera = make_shared<PerspectiveCamera>(
+    //     Vec3(60, 60, 100),
+    //     Vec3(1.3333333333333333, 0, 0),
+    //     Vec3(0, 0.8660254037844386, 0.5),
+    //     1
+    // );
 
     shared_ptr<Camera> camera = make_shared<PerspectiveCamera>(
-        Vec3(0, 5, -20),
-        Vec3(1, 0, 0),
-        Vec3(0, 1, 0),
+        Vec3(105, 55, 20),
+        Vec3(0, 0, 1.3333333333333333),
+        Vec3(-0.5, 0.8660254037844386, 0),
         1
     );
 
-    shared_ptr<oBuffer> image = make_shared<oBuffer>(800, 800, camera);
+    shared_ptr<oBuffer> image = make_shared<oBuffer>(800, 600, camera);
     shared_ptr<Render> render = make_shared<Render>(image, sence);
 
-    char output[100]; sprintf(output, "HelloWorld.ppm");
+    char output[100];
     int epoch = 10000, cluster = 1;
     cerr << "target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++ i)
     {
         render->epoch(cluster);
         cerr << "epoch " << i << endl;
-        if (i % 3 == 0)
-            image->save(output, 0.12);
+        sprintf(output, "HelloWorld.ppm");
+        image->save(output, 1);
+        if (i % 10 == 0)
+        {
+            sprintf(output, "HelloWorld%d.ppm", i);
+            image->save(output, 1);
+        }
     }
-    image->save(output, 0.12);
+    image->save(output, 1);
 }
