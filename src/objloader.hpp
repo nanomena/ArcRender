@@ -76,8 +76,15 @@ void ObjLoader::load(string filename, shared_ptr<BxDF> bxdf)
                 diffuse = rgb(M.diffuse[0], M.diffuse[1], M.diffuse[2]),
                 specular = rgb(M.specular[0], M.specular[1], M.specular[2]);
 
+            double prob = emission.norm() / (emission.norm() + diffuse.norm());
+            if (prob > EPS)
+            {
+                emission = emission * (emission.norm() + diffuse.norm());
+                diffuse = diffuse * (emission.norm() + diffuse.norm());
+                specular = specular * (emission.norm() + diffuse.norm());
+            }
             shared_ptr<Material> material = make_shared<Material>(
-                emission.norm() / (emission.norm() + diffuse.norm()),
+                prob,
                 emission,
                 M.ior, M.dissolve,
                 diffuse,
