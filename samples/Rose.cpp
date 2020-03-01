@@ -40,10 +40,10 @@ int main()
     shared_ptr<Object> light = make_shared<Object>(
         bxdf,
         make_shared<Flat>(4,
-            Vec3(-200, 600,  200),
-            Vec3(-200, 600, -200),
-            Vec3(200, 600, -200),
-            Vec3(200, 600, 200)
+            Vec3(-200, 600,  -200),
+            Vec3(-200, 600, 200),
+            Vec3(200, 600, 200),
+            Vec3(200, 600, -200)
         ),
         make_shared<Thin>(Mlight),
         "light"
@@ -51,9 +51,9 @@ int main()
     sence->add_object(light);
 
     shared_ptr<Camera> camera = make_shared<PerspectiveCamera>(
-        Vec3(-0.75, -4, 15),
+        Vec3(-0.75, -4, -15),
         Vec3(1, 0, 0),
-        Vec3(0, 0.7071067811865476, -0.7071067811865476),
+        Vec3(0, 0.7071067811865476, 0.7071067811865476),
         1
     );
 

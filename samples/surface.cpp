@@ -46,10 +46,10 @@ int main()
     shared_ptr<Object> back = make_shared<Object>(
         bxdf,
         make_shared<Flat>(4,
-            Vec3(-60, -60, 25),
-            Vec3(-60, 60, 25),
-            Vec3(60, 60, 25),
-            Vec3(60, -60, 25)
+            Vec3(-60, -60, -25),
+            Vec3(-60, 60, -25),
+            Vec3(60, 60, -25),
+            Vec3(60, -60, -25)
         ),
         make_shared<Solid>(Mdiffuse, Mair, 1),
         "back"
@@ -77,14 +77,14 @@ int main()
 
     shared_ptr<Object> light = make_shared<Object>(
         bxdf,
-        make_shared<Disc>(Vec3(-35.36, 0, -35.36), Vec3(0.707, 0, 0.707), 20),
+        make_shared<Disc>(Vec3(-35.36, 0, 35.36), Vec3(0.707, 0, -0.707), 20),
         make_shared<Solid>(Mlight2, Mair),
         "light"
     );
     sence->add_object(light);
 
     shared_ptr<Camera> camera = make_shared<PerspectiveCamera>(
-        Vec3(0, 0, -50),
+        Vec3(0, 0, 50),
         Vec3(1, 0, 0),
         Vec3(0, 1, 0),
         1

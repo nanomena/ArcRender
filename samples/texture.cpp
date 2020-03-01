@@ -43,10 +43,10 @@ int main()
         Mair, skybox
     );
 
-    shared_ptr<Mapping> texture = make_shared<Mapping>("tmp/xxx.png");
+    shared_ptr<Mapping> texture = make_shared<Mapping>("samples/texture.png");
 
     Trans3 Tback(
-        Vec3(-30, -30, 25), Vec3(-30, 30, 25), Vec3(30, 30, 25),
+        Vec3(-30, -30, -25), Vec3(-30, 30, -25), Vec3(30, 30, -25),
         Vec3(0, 0, 0), Vec3(0, 1, 0), Vec3(1, 1, 0)
     );
 
@@ -57,10 +57,10 @@ int main()
     shared_ptr<Object> back = make_shared<Object>(
         bxdf,
         make_shared<Flat>(4,
-            Vec3(-30, -30, 25),
-            Vec3(-30, 30, 25),
-            Vec3(30, 30, 25),
-            Vec3(30, -30, 25)
+            Vec3(-30, -30, -25),
+            Vec3(-30, 30, -25),
+            Vec3(30, 30, -25),
+            Vec3(30, -30, -25)
         ),
         Surface,
         "back"
@@ -73,14 +73,14 @@ int main()
 
     shared_ptr<Object> light = make_shared<Object>(
         bxdf,
-        make_shared<Disc>(Vec3(-35.36, 0, -35.36), Vec3(0.707, 0, 0.707), 20),
+        make_shared<Disc>(Vec3(-35.36, 0, 35.36), Vec3(0.707, 0, -0.707), 20),
         make_shared<Solid>(Mlight6, Mair),
         "light"
     );
     sence->add_object(light);
 
     shared_ptr<Camera> camera = make_shared<PerspectiveCamera>(
-        Vec3(0, 0, -50),
+        Vec3(0, 0, 50),
         Vec3(1, 0, 0),
         Vec3(0, 1, 0),
         1

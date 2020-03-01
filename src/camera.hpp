@@ -33,7 +33,7 @@ PerspectiveCamera::PerspectiveCamera (Vec3 _o, Vec3 _x, Vec3 _y, double _z)
 }
 Ray PerspectiveCamera::apply(const Vec2 &t)
 {
-    return Ray(o, (x * t.d[0] - y * t.d[1] + z).scale(1));
+    return Ray(o, (x * t.d[0] - y * t.d[1] - z).scale(1));
 }
 
 #endif
