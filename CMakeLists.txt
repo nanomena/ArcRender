@@ -27,5 +27,8 @@ target_link_libraries(surface arc stb_image obj_loader OpenMP::OpenMP_CXX)
 add_executable(texture samples/texture.cpp)
 target_link_libraries(texture arc stb_image obj_loader OpenMP::OpenMP_CXX)
 
-add_executable(model samples/model.cpp)
-target_link_libraries(model arc stb_image obj_loader OpenMP::OpenMP_CXX)
+add_executable(HelloWorld samples/HelloWorld.cpp)
+target_link_libraries(HelloWorld arc stb_image obj_loader OpenMP::OpenMP_CXX)
+
+add_executable(Rose samples/Rose.cpp)
+target_link_libraries(Rose arc stb_image obj_loader OpenMP::OpenMP_CXX)
