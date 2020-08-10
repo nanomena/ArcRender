@@ -1,5 +1,1 @@
-bin/
-lib/
-build/
-objects/
-tmp/
+cmake-build-debug/

@@ -1,34 +1,20 @@
-cmake_minimum_required(VERSION 3.6)
-
-set(CMAKE_C_COMPILER "gcc-9")
-set(CMAKE_CXX_COMPILER "g++-9")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ../bin/)
-set(LIBRARY_OUTPUT_PATH ../lib)
-
+cmake_minimum_required(VERSION 3.16)
 project(ARCrender)
 
-find_package(OpenMP REQUIRED)
+set(CMAKE_CXX_STANDARD 17)
 
-include_directories(res/)
+find_package(OpenMP)
+IF (OPENMP_FOUND)
+    message("Found OpenMP!")
+    add_compile_options(-fopenmp)
+ENDIF ()
+add_compile_options(-Ofast)
 
-add_compile_options(-Ofast -fopenmp)
-add_compile_options(-g)
+add_library(stb_image STATIC 3rdparty/stb_image.cpp)
+add_library(obj_loader STATIC 3rdparty/tiny_obj_loader.cpp)
 
-add_library(stb_image STATIC res/stb_image.cpp)
-add_library(obj_loader STATIC res/tiny_obj_loader.cpp)
-add_library(arc STATIC src/arc.cpp)
-link_directories(lib/)
+include_directories(3rdparty/)
 
-include_directories(include/)
+add_library(arc STATIC include/arc.cpp)
 
-add_executable(surface samples/surface.cpp)
-target_link_libraries(surface arc stb_image obj_loader OpenMP::OpenMP_CXX)
-
-add_executable(texture samples/texture.cpp)
-target_link_libraries(texture arc stb_image obj_loader OpenMP::OpenMP_CXX)
-
-add_executable(HelloWorld samples/HelloWorld.cpp)
-target_link_libraries(HelloWorld arc stb_image obj_loader OpenMP::OpenMP_CXX)
-
-add_executable(Rose samples/Rose.cpp)
-target_link_libraries(Rose arc stb_image obj_loader OpenMP::OpenMP_CXX)
+add_subdirectory(samples)

@@ -43,7 +43,7 @@ int main()
         Mair, skybox
     );
 
-    shared_ptr<Mapping> texture = make_shared<Mapping>("samples/texture.png");
+    shared_ptr<Mapping> texture = make_shared<Mapping>("texture.png");
 
     Trans3 Tback(
         Vec3(-30, -30, -25), Vec3(-30, 30, -25), Vec3(30, 30, -25),
@@ -56,7 +56,8 @@ int main()
 
     shared_ptr<Object> back = make_shared<Object>(
         bxdf,
-        make_shared<Flat>(4,
+        make_shared<Flat>(
+            4,
             Vec3(-30, -30, -25),
             Vec3(-30, 30, -25),
             Vec3(30, 30, -25),
@@ -67,9 +68,8 @@ int main()
     );
     sence->add_object(back);
 
-
-
-    char output[100]; sprintf(output, "texture.ppm");
+    char output[100];
+    sprintf(output, "result.ppm");
 
     shared_ptr<Object> light = make_shared<Object>(
         bxdf,
@@ -91,7 +91,9 @@ int main()
 
     int epoch = 10000, cluster = 1;
     cerr << "target : " << epoch << endl;
-    for (int i = 1; i <= epoch; ++ i)
+    for (
+        int i = 1; i <= epoch; ++i
+        )
     {
         render->epoch(cluster);
         cerr << "epoch " << i << endl;

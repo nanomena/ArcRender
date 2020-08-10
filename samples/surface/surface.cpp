@@ -45,7 +45,8 @@ int main()
 
     shared_ptr<Object> back = make_shared<Object>(
         bxdf,
-        make_shared<Flat>(4,
+        make_shared<Flat>(
+            4,
             Vec3(-60, -60, -25),
             Vec3(-60, 60, -25),
             Vec3(60, 60, -25),
@@ -58,14 +59,22 @@ int main()
 
 
     double ior, diffuse, rough;
-    cout << "ior?" << endl; cin >> ior;
-    cout << "diffuse?" << endl; cin >> diffuse;
-    cout << "rough?" << endl; cin >> rough;
-    char output[100]; sprintf(output, "%03.0lf|%02.0lf|%02.0lf.ppm", ior * 10, diffuse * 10, rough * 10);
+    cout << "ior?" << endl;
+    cin >> ior;
+    cout << "diffuse?" << endl;
+    cin >> diffuse;
+    cout << "rough?" << endl;
+    cin >> rough;
+    char output[100];
+    sprintf(
+        output, "%03.0lf|%02.0lf|%02.0lf.ppm", ior * 10, diffuse * 10,
+        rough * 10
+    );
 
     shared_ptr<Material> Mtest = make_shared<Material>(
         0, Spectrum(0), ior, diffuse,
-        rgb888(252, 250, 245), rgb888(252, 250, 245), Spectrum(0.97, 0.995, 0.97), "test"
+        rgb888(252, 250, 245), rgb888(252, 250, 245),
+        Spectrum(0.97, 0.995, 0.97), "test"
     );
     shared_ptr<Object> ball = make_shared<Object>(
         bxdf,
@@ -95,7 +104,9 @@ int main()
 
     int epoch = 1000, cluster = 1;
     cerr << "target : " << epoch << endl;
-    for (int i = 1; i <= epoch; ++ i)
+    for (
+        int i = 1; i <= epoch; ++i
+        )
     {
         render->epoch(cluster);
         cerr << "epoch " << i << endl;
