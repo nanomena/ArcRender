@@ -89,11 +89,11 @@ int main()
     shared_ptr<Render> render = make_shared<Render>(image, sence);
 
     int epoch = 10000, cluster = 1;
-    cerr << "target : " << epoch << endl;
+    cerr << "[T + " << (clock() / (double)CLOCKS_PER_SEC) << "] | target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++i)
     {
         render->epoch(cluster);
-        cerr << "epoch " << i << endl;
+        cerr << "[T + " << (clock() / (double)CLOCKS_PER_SEC) << "] | epoch " << i << endl;
         if (i % 5 == 0)
             image->save(output, 1);
     }

@@ -71,11 +71,11 @@ int main()
 
     char output[100];
     int epoch = 5000, cluster = 1;
-    cerr << "target : " << epoch << endl;
+    cerr << "[T + " << (clock() / (double)CLOCKS_PER_SEC) << "] | target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++i)
     {
         render->epoch(cluster);
-        cerr << "epoch " << i << endl;
+        cerr << "[T + " << (clock() / (double)CLOCKS_PER_SEC) << "] | epoch " << i << endl;
         sprintf(output, "HelloWorld.png");
         image->save(output, 0.24);
         if (i % 1 == 0)
