@@ -63,7 +63,7 @@ void ObjLoader::load(const string &filename, const shared_ptr<BxDF> &bxdf)
                 tinyobj::real_t ty = attrib.texcoords[2 * idx.texcoord_index + 1];
 
                 V.emplace_back(vx, vy, vz);
-                // Vn.push_back(Vec3(nx, ny, nz));
+                // Vn.emplace_back(nx, ny, nz);
                 Vt.emplace_back(tx, ty, 0);
             }
 

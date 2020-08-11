@@ -8,8 +8,8 @@ int main()
 
     shared_ptr<BxDF> bxdf = make_shared<BSDF>();
 
-    shared_ptr<Material> Mair = make_shared<Material>(
-        0, Spectrum(0), 1, 0, Spectrum(1), Spectrum(1), Spectrum(1), "air"
+    shared_ptr<Material> Mvacant = make_shared<Material>(
+        0, Spectrum(0), 1, 0, Spectrum(1), Spectrum(1), Spectrum(1), "vacant"
     );
 
     shared_ptr<Material> Mlight0 = make_shared<Material>(
@@ -35,12 +35,12 @@ int main()
     shared_ptr<Object> skybox = make_shared<Object>(
         bxdf,
         make_shared<Sphere>(Vec3(0, 0, 0), INF / 10),
-        make_shared<Solid>(Mair, Mlight0),
+        make_shared<Solid>(Mvacant, Mlight0),
         "skybox"
     );
 
     shared_ptr<Sence> sence = make_shared<Sence>(
-        Mair, skybox
+        Mvacant, skybox
     );
 
     shared_ptr<Mapping> texture = make_shared<Mapping>("texture.png");
@@ -51,7 +51,7 @@ int main()
     );
 
     auto Surface = make_shared<Solid>(
-        Mdiffuse, Mair, texture, Tback, 0.5
+        Mdiffuse, Mvacant, texture, Tback, 0.5
     );
 
     shared_ptr<Object> back = make_shared<Object>(
@@ -73,7 +73,7 @@ int main()
     shared_ptr<Object> light = make_shared<Object>(
         bxdf,
         make_shared<Disc>(Vec3(-35.36, 0, 35.36), Vec3(0.707, 0, -0.707), 20),
-        make_shared<Solid>(Mlight6, Mair),
+        make_shared<Solid>(Mlight6, Mvacant),
         "light"
     );
     sence->add_object(light);

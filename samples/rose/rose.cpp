@@ -8,8 +8,8 @@ int main()
 
     shared_ptr<BxDF> bxdf = make_shared<BSDF>();
 
-    shared_ptr<Material> Mair = make_shared<Material>(
-        0, rgb(0), 1, 0, rgb(1), rgb(1), Spectrum(1), "air"
+    shared_ptr<Material> Mvacant = make_shared<Material>(
+        0, rgb(0), 1, 0, rgb(1), rgb(1), Spectrum(1), "vacant"
     );
 
     shared_ptr<Material> Msky = make_shared<Material>(
@@ -23,12 +23,12 @@ int main()
     shared_ptr<Object> skybox = make_shared<Object>(
         bxdf,
         make_shared<Sphere>(Vec3(0, 0, 0), INF / 10),
-        make_shared<Solid>(Mair, Msky),
+        make_shared<Solid>(Mvacant, Msky),
         "skybox"
     );
 
     shared_ptr<Sence> sence = make_shared<Sence>(
-        Mair, skybox
+        Mvacant, skybox
     );
 
     ObjLoader loader;

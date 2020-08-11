@@ -1,9 +1,9 @@
 include_directories(../../include)
 include_directories(../../3rdparty)
 
-set(name "test_texture")
+set(name "scene7")
 
-add_executable(${name} texture.cpp)
+add_executable(${name} scene7.cpp)
 
 target_link_libraries(${name} arc)
 target_link_libraries(${name} stb_image)
