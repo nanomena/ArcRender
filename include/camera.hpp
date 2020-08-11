@@ -8,7 +8,7 @@ class Camera
 {
 
 public:
-    Ray virtual apply(const Vec2 &t);
+    virtual Ray apply(const Vec2 &t);
 };
 
 class PerspectiveCamera : public Camera
@@ -16,7 +16,7 @@ class PerspectiveCamera : public Camera
     Vec3 o, x, y, z;
 
 public:
-    PerspectiveCamera (Vec3 _o, Vec3 _x, Vec3 _y, double _z);
+    PerspectiveCamera(Vec3 _o, Vec3 _x, Vec3 _y, double _z);
     Ray apply(const Vec2 &t) override;
 };
 
@@ -24,12 +24,13 @@ public:
 
 Ray Camera::apply(const Vec2 &t)
 {
-    throw "NotImplementedError";
+    throw std::invalid_argument("NotImplementedError");
 }
-PerspectiveCamera::PerspectiveCamera (Vec3 _o, Vec3 _x, Vec3 _y, double _z)
+PerspectiveCamera::PerspectiveCamera(Vec3 _o, Vec3 _x, Vec3 _y, double _z)
 {
-    o = _o; x = _x; y = _y;
-    z = (x ^ y); z = z / z.norm() * _z;
+    o = _o, x = _x, y = _y;
+    z = (x ^ y);
+    z = z / z.norm() * _z;
 }
 Ray PerspectiveCamera::apply(const Vec2 &t)
 {

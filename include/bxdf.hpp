@@ -10,18 +10,18 @@ class BxDF
 {
 
 public:
-    double virtual forward(const sInfo &S, Photon &photon, int &type) const;
+    virtual double forward(const sInfo &S, Photon &photon, int &type) const;
 };
 
 class BSDF : public BxDF
 {
-    double F(const sInfo &S, double cos_i, double cos_t) const;
-    double Fd(const sInfo &S, const Vec3 &in, const Vec3 &out, const Vec3 &normal) const;
-    Vec3 sampleD(const sInfo &S) const;
-    double D(const sInfo &S, const Vec3 &normal) const;
-    double Gl(const sInfo &S, const Vec3 &in, const Vec3 &out, const Vec3 &normal) const;
-    double Gt(const sInfo &S, const Vec3 &in, const Vec3 &out, const Vec3 &normal) const;
-    double through(const sInfo &S, const Vec3 &in, Vec3 &out, Spectrum &spectrum, int &type) const;
+    static double F(const sInfo &S, double cos_i, double cos_t);
+    static double Fd(const sInfo &S, const Vec3 &in, const Vec3 &out, const Vec3 &normal);
+    static Vec3 sampleD(const sInfo &S);
+    static double D(const sInfo &S, const Vec3 &normal);
+    static double Gl(const sInfo &S, const Vec3 &in, const Vec3 &out, const Vec3 &normal);
+    static double Gt(const sInfo &S, const Vec3 &in, const Vec3 &out, const Vec3 &normal);
+    static double through(const sInfo &S, const Vec3 &in, Vec3 &out, Spectrum &spectrum, int &type);
 
 public:
     double forward(const sInfo &S, Photon &photon, int &type) const override;
@@ -31,16 +31,16 @@ public:
 
 double BxDF::forward(const sInfo &S, Photon &photon, int &type) const
 {
-    throw "NotImplementedError";
+    throw std::invalid_argument("NotImplementedError");
 }
 
-double BSDF::F(const sInfo &S, double cos_i, double cos_t) const
+double BSDF::F(const sInfo &S, double cos_i, double cos_t)
 {
     double rs = (S.ior * cos_i - cos_t) / (S.ior * cos_i + cos_t);
     double rp = (S.ior * cos_t - cos_i) / (S.ior * cos_t + cos_i);
     return (rs * rs + rp * rp) * 0.5;
 }
-double BSDF::Fd(const sInfo &S, const Vec3 &in, const Vec3 &out, const Vec3 &normal) const
+double BSDF::Fd(const sInfo &S, const Vec3 &in, const Vec3 &out, const Vec3 &normal)
 {
     double cos_i = -in * normal;
     double f_in = pow(1 - -in.d[2], 5);
@@ -54,14 +54,14 @@ double BSDF::Fd(const sInfo &S, const Vec3 &in, const Vec3 &out, const Vec3 &nor
     return f;
 }
 
-double BSDF::D(const sInfo &S, const Vec3 &normal) const
+double BSDF::D(const sInfo &S, const Vec3 &normal)
 {
-   double no_no = normal.d[2] * normal.d[2];
-   double alpha2 = pow(S.rough, 4);
-   return alpha2 / (pi * (no_no * (alpha2 - 1) + 1) * (no_no * (alpha2 - 1) + 1));
+    double no_no = normal.d[2] * normal.d[2];
+    double alpha2 = pow(S.rough, 4);
+    return alpha2 / (pi * (no_no * (alpha2 - 1) + 1) * (no_no * (alpha2 - 1) + 1));
 }
 
-double BSDF::Gl(const sInfo &S, const Vec3 &in, const Vec3 &out, const Vec3 &normal) const
+double BSDF::Gl(const sInfo &S, const Vec3 &in, const Vec3 &out, const Vec3 &normal)
 {
     double alpha = S.rough * S.rough;
     double k = alpha / 4;
@@ -70,7 +70,7 @@ double BSDF::Gl(const sInfo &S, const Vec3 &in, const Vec3 &out, const Vec3 &nor
     double g = g_in * g_out;
     return g;
 }
-double BSDF::Gt(const sInfo &S, const Vec3 &in, const Vec3 &out, const Vec3 &normal) const
+double BSDF::Gt(const sInfo &S, const Vec3 &in, const Vec3 &out, const Vec3 &normal)
 {
     double alpha = S.rough * S.rough;
     double k = alpha / 4;
@@ -82,17 +82,17 @@ double BSDF::Gt(const sInfo &S, const Vec3 &in, const Vec3 &out, const Vec3 &nor
     double cos_t = -out * normal;
     return g * cos_i * cos_t / pow((cos_i + cos_t / S.ior) / 2, 2);
 }
-Vec3 BSDF::sampleD(const sInfo &S) const
+Vec3 BSDF::sampleD(const sInfo &S)
 {
     double alpha2 = pow(S.rough, 4);
     double p = RD.rand();
-    double costheta = sqrt((1 - p) / (p * (alpha2 - 1) + 1));
-    double sintheta = sqrt(1 - costheta * costheta);
+    double cos_theta = sqrt((1 - p) / (p * (alpha2 - 1) + 1));
+    double sin_theta = sqrt(1 - cos_theta * cos_theta);
     double q = RD.rand(-pi, pi);
-    return Vec3(cos(q) * sintheta, sin(q) * sintheta, costheta);
+    return Vec3(cos(q) * sin_theta, sin(q) * sin_theta, cos_theta);
 }
 
-double BSDF::through(const sInfo &S, const Vec3 &in, Vec3 &out, Spectrum &spectrum, int &type) const
+double BSDF::through(const sInfo &S, const Vec3 &in, Vec3 &out, Spectrum &spectrum, int &type)
 {
     if (RD.rand() < S.absorb)
     {
@@ -137,7 +137,7 @@ double BSDF::through(const sInfo &S, const Vec3 &in, Vec3 &out, Spectrum &spectr
         {
             type = 1;
             out = RD.semisphere();
-            Vec3 normal = (out - in).scale(1);
+            normal = (out - in).scale(1);
             spectrum = S.base * Fd(S, in, out, normal);
             return 1;
         }

@@ -7,15 +7,16 @@
 template<int base>
 class HaltonSequence
 {
-    long long key; double now;
+    long long key;
+    double now;
 
 public:
-    HaltonSequence ()
+    HaltonSequence()
     {
         key = 0;
         now = 0;
     }
-    double operator () ()
+    double operator ()()
     {
         double q = 1. / base;
         key += 1;
@@ -43,7 +44,8 @@ static Sampler RD;
 
 double Sampler::sample()
 {
-    return 1. * R() / (1ll << 32);
+    double result = 1. * R() / (1ll << 32);
+    return result;
 }
 double Sampler::rand(double l, double r)
 {

@@ -1,6 +1,8 @@
 #ifndef render_hpp
 #define render_hpp
 
+#include <utility>
+
 #include "utils.hpp"
 #include "obuffer.hpp"
 #include "sence.hpp"
@@ -14,8 +16,10 @@ class Render
     shared_ptr<Sence> sence;
 
 public:
-    Render (shared_ptr<oBuffer> _image, shared_ptr<Sence> _sence,
-        int _trace_mxcnt = 8, int _diffuse_mxcnt = 3, double _trace_eps = 1e-30);
+    Render(
+        shared_ptr<oBuffer> image_, shared_ptr<Sence> sence_,
+        int _trace_mxcnt = 8, int _diffuse_mxcnt = 3, double _trace_eps = 1e-30
+    );
 
     void step(int idx) const;
     void epoch(int cluster = 1) const;
@@ -23,11 +27,13 @@ public:
 
 #ifdef ARC_IMPLEMENTATION
 
-Render::Render (shared_ptr<oBuffer> _image, shared_ptr<Sence> _sence,
-    int _trace_mxcnt, int _diffuse_mxcnt, double _trace_eps)
+Render::Render(
+    shared_ptr<oBuffer> image_, shared_ptr<Sence> sence_,
+    int _trace_mxcnt, int _diffuse_mxcnt, double _trace_eps
+)
 {
-    image = _image;
-    sence = _sence;
+    image = std::move(image_);
+    sence = std::move(sence_);
     trace_limit = _trace_mxcnt;
     diffuse_limit = _diffuse_mxcnt;
     trace_eps = _trace_eps;
@@ -42,16 +48,20 @@ void Render::step(int idx) const
     double weight = 1;
     Photon photon(image->sample(idx), Spectrum(1), sence->env);
     int diffuse_cnt = 0, matched = 0;
-    for (int trace_cnt = 0; (trace_cnt < trace_limit) && weight > trace_eps; ++ trace_cnt)
+    for (int trace_cnt = 0; (trace_cnt < trace_limit) && weight > trace_eps; ++trace_cnt)
     {
         int type;
         $ << "tracing " << photon.ray << endl;
         weight *= sence->forward(photon, type);
-        if (type == 0) {matched = 1; break;}
+        if (type == 0)
+        {
+            matched = 1;
+            break;
+        }
         if (abs(type) == 1)
         {
             if (diffuse_cnt < diffuse_limit)
-                diffuse_cnt ++;
+                diffuse_cnt++;
             else break;
         }
     }
@@ -61,9 +71,9 @@ void Render::step(int idx) const
 }
 void Render::epoch(int cluster) const
 {
-    #pragma omp parallel for
-    for (int i = 0; i < length; ++ i)
-        for (int j = 0; j < cluster; ++ j)
+#pragma omp parallel for
+    for (int i = 0; i < length; ++i)
+        for (int j = 0; j < cluster; ++j)
             step(i);
 }
 

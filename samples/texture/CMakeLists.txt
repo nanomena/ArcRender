@@ -1,7 +1,7 @@
 include_directories(../../include)
 include_directories(../../3rdparty)
 
-set(name "text_texture")
+set(name "test_texture")
 
 add_executable(${name} texture.cpp)
 

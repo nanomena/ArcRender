@@ -12,8 +12,9 @@ struct KaDanTreeNode
     shared_ptr<Object> cen;
     KaDanTreeNode *left, *right;
 
-    void load(shared_ptr<Object> objects[], int size, \
-              function<KaDanTreeNode*()> acquire, int d);
+    void load(
+        shared_ptr<Object> objects[], int size, const function<KaDanTreeNode *()> &acquire, int d
+    );
     void query(const Ray &ray, shared_ptr<Object> &next, Vec3 &hitpoint) const;
 };
 
@@ -24,9 +25,9 @@ class KaDanTree
     int cnt;
 
 public:
-    KaDanTree ();
+    KaDanTree();
 
-    KaDanTreeNode* acquire();
+    KaDanTreeNode *acquire();
 
     void load(shared_ptr<Object> objects[], int size);
     void query(const Ray &ray, shared_ptr<Object> &next, Vec3 &hitpoint) const;
@@ -34,12 +35,14 @@ public:
 
 #ifdef ARC_IMPLEMENTATION
 
-void KaDanTreeNode::load(shared_ptr<Object> objects[], int size, \
-        function<KaDanTreeNode*()> acquire, int d)
+void KaDanTreeNode::load(
+    shared_ptr<Object> objects[], int size, const function<KaDanTreeNode *()> &acquire, int d
+)
 {
     int mid = size / 2;
-    nth_element(objects, objects + mid, objects + size,
-        [&](shared_ptr<Object> a, shared_ptr<Object> b)
+    nth_element(
+        objects, objects + mid, objects + size,
+        [&](const shared_ptr<Object> &a, const shared_ptr<Object> &b)
         {
             Cuboid _a = a->outline(), _b = b->outline();
             return (_a.n.d[d] + _a.x.d[d]) < (_b.n.d[d] + _b.x.d[d]);
@@ -63,33 +66,53 @@ void KaDanTreeNode::load(shared_ptr<Object> objects[], int size, \
 
 void KaDanTreeNode::query(const Ray &ray, shared_ptr<Object> &next, Vec3 &hitpoint) const
 {
-    int hit; Vec3 candipoint;
+    int hit;
+    Vec3 candipoint;
     box.inter(ray, hit, candipoint);
     if (!hit) return;
     if ((candipoint - ray.o).norm2() >= (hitpoint - ray.o).norm2()) return;
 
-    KaDanVisit ++;
+    KaDanVisit++;
 
     cen->inter(ray, hit, candipoint);
     // $ << "ray " << ray << " " << cen->outline() << " " << hit << endl;
-    if (hit) if ((candipoint - ray.o).norm2() < (hitpoint - ray.o).norm2())
-    {
-        hitpoint = candipoint;
-        next = cen;
-    }
+    if (hit)
+        if ((candipoint - ray.o).norm2() < (hitpoint - ray.o).norm2())
+        {
+            hitpoint = candipoint;
+            next = cen;
+        }
 
     if (left == nullptr && right == nullptr) return;
-    if (left == nullptr) { right->query(ray, next, hitpoint); return; }
-    if (right == nullptr) { left->query(ray, next, hitpoint); return; }
+    if (left == nullptr)
+    {
+        right->query(ray, next, hitpoint);
+        return;
+    }
+    if (right == nullptr)
+    {
+        left->query(ray, next, hitpoint);
+        return;
+    }
 
-    int hit_left; Vec3 candipoint_l;
-    int hit_right; Vec3 candipoint_r;
+    int hit_left;
+    Vec3 candipoint_l;
+    int hit_right;
+    Vec3 candipoint_r;
     (left->box).inter(ray, hit_left, candipoint_l);
     (right->box).inter(ray, hit_right, candipoint_r);
 
     if (!hit_left && !hit_right) return;
-    if (!hit_left) { right->query(ray, next, hitpoint); return; }
-    if (!hit_right) { left->query(ray, next, hitpoint); return; }
+    if (!hit_left)
+    {
+        right->query(ray, next, hitpoint);
+        return;
+    }
+    if (!hit_right)
+    {
+        left->query(ray, next, hitpoint);
+        return;
+    }
 
     if ((candipoint_l - ray.o).norm2() < (candipoint_r - ray.o).norm2())
     {
@@ -103,19 +126,19 @@ void KaDanTreeNode::query(const Ray &ray, shared_ptr<Object> &next, Vec3 &hitpoi
     }
 }
 
-KaDanTree::KaDanTree ()
+KaDanTree::KaDanTree()
 {
-    cnt = 0;
+    cnt = 0, root = nullptr;
 }
 
-KaDanTreeNode* KaDanTree::acquire() { return &tree[cnt ++]; }
+KaDanTreeNode *KaDanTree::acquire() { return &tree[cnt++]; }
 
 void KaDanTree::load(shared_ptr<Object> objects[], int size)
 {
     cerr << "faces : " << size << endl;
     tree.resize(size);
     root = acquire();
-    root->load(objects, size, bind(&KaDanTree::acquire, this), 0);
+    root->load(objects, size, [this] { return this->acquire(); }, 0);
 }
 void KaDanTree::query(const Ray &ray, shared_ptr<Object> &next, Vec3 &hitpoint) const
 {

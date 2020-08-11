@@ -1,6 +1,8 @@
 #ifndef object_hpp
 #define object_hpp
 
+#include <utility>
+
 #include "utils.hpp"
 #include "bxdf.hpp"
 #include "shape.hpp"
@@ -13,7 +15,7 @@ class Object
 
 public:
     string name;
-    Object (shared_ptr<BxDF> _bxdf, shared_ptr<Shape> _shape, shared_ptr<Surface> _surface, string _name);
+    Object(shared_ptr<BxDF> bxdf_, shared_ptr<Shape> shape_, shared_ptr<Surface> surface_, string name_);
 
     Cuboid outline() const;
     void inter(const Ray &ray, int &hit, Vec3 &hitpoint) const;
@@ -22,13 +24,12 @@ public:
 
 #ifdef ARC_IMPLEMENTATION
 
-
-Object::Object (shared_ptr<BxDF> _bxdf, shared_ptr<Shape> _shape, shared_ptr<Surface> _surface, string _name)
+Object::Object(shared_ptr<BxDF> bxdf_, shared_ptr<Shape> shape_, shared_ptr<Surface> surface_, string name_)
 {
-    bxdf = _bxdf;
-    shape = _shape;
-    surface = _surface;
-    name = _name;
+    bxdf = std::move(bxdf_);
+    shape = std::move(shape_);
+    surface = std::move(surface_);
+    name = std::move(name_);
 }
 
 Cuboid Object::outline() const

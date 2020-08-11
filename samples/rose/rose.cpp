@@ -39,7 +39,6 @@ int main()
     shared_ptr<Object> light = make_shared<Object>(
         bxdf,
         make_shared<Flat>(
-            4,
             Vec3(-200, 600, -200),
             Vec3(-200, 600, 200),
             Vec3(200, 600, 200),
@@ -63,9 +62,7 @@ int main()
     char output[100];
     int epoch = 10000, cluster = 1;
     cerr << "target : " << epoch << endl;
-    for (
-        int i = 1; i <= epoch; ++i
-        )
+    for (int i = 1; i <= epoch; ++i)
     {
         render->epoch(cluster);
         cerr << "epoch " << i << endl;

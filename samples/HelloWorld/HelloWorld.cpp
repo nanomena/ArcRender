@@ -19,7 +19,6 @@ int main()
         1, rgb(0.14, 0.15, 0.16) * 4, 1, 0, rgb(0), rgb(0), Spectrum(0), "sky"
     );
 
-
     shared_ptr<Material> Mlight = make_shared<Material>(
         1, rgb(1) * 10, 1, 0, rgb(0), rgb(0), Spectrum(0), "light"
     );
@@ -42,7 +41,7 @@ int main()
 
     shared_ptr<Object> light = make_shared<Object>(
         bxdf,
-        make_shared<Flat>(4,
+        make_shared<Flat>(
             Vec3(-2000, 30000, -2000),
             Vec3(-2000, 30000, 2000),
             Vec3(2000, 30000, 2000),
@@ -73,7 +72,7 @@ int main()
     char output[100];
     int epoch = 5000, cluster = 1;
     cerr << "target : " << epoch << endl;
-    for (int i = 1; i <= epoch; ++ i)
+    for (int i = 1; i <= epoch; ++i)
     {
         render->epoch(cluster);
         cerr << "epoch " << i << endl;

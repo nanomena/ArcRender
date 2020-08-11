@@ -12,9 +12,9 @@ struct sInfo
     Spectrum emission, base, specular;
     shared_ptr<Material> inside, outside;
 
-    sInfo ();
-    sInfo (shared_ptr<Material> inside, shared_ptr<Material> outside, double _rough);
-    sInfo (shared_ptr<Material> material, double _rough);
+    sInfo();
+    sInfo(shared_ptr<Material> inside, shared_ptr<Material> outside, double _rough);
+    sInfo(shared_ptr<Material> material, double _rough);
 
     void apply(const Pixel &t);
 };
@@ -23,7 +23,7 @@ class Surface
 {
 
 public:
-    sInfo virtual info(const Ray &ray, Ray &normal) const;
+    virtual sInfo info(const Ray &ray, Ray &normal) const;
 };
 
 class Solid : public Surface
@@ -33,9 +33,11 @@ class Solid : public Surface
     Trans3 T;
 
 public:
-    Solid (shared_ptr<Material> _inside, shared_ptr<Material> _outside, double _rough = 0);
-    Solid (shared_ptr<Material> _inside, shared_ptr<Material> _outside, shared_ptr<Mapping> _texture,
-        const Trans3 &_T, double _rough = 0);
+    Solid(shared_ptr<Material> _inside, shared_ptr<Material> _outside, double _rough = 0);
+    Solid(
+        shared_ptr<Material> _inside, shared_ptr<Material> _outside, shared_ptr<Mapping> _texture,
+        const Trans3 &_T, double _rough = 0
+    );
 
     sInfo info(const Ray &ray, Ray &normal) const override;
 };
@@ -47,17 +49,19 @@ class Thin : public Surface
     Trans3 T;
 
 public:
-    Thin (shared_ptr<Material> material, double _rough = 0);
-    Thin (shared_ptr<Material> material, shared_ptr<Mapping> _texture,
-        const Trans3 &_T, double rough = 0);
+    Thin(shared_ptr<Material> material, double _rough = 0);
+    Thin(
+        shared_ptr<Material> material, shared_ptr<Mapping> _texture,
+        const Trans3 &_T, double rough = 0
+    );
 
     sInfo info(const Ray &ray, Ray &normal) const override;
 };
 
 #ifdef ARC_IMPLEMENTATION
 
-sInfo::sInfo () {}
-sInfo::sInfo (shared_ptr<Material> _inside, shared_ptr<Material> _outside, double _rough)
+sInfo::sInfo() {}
+sInfo::sInfo(shared_ptr<Material> _inside, shared_ptr<Material> _outside, double _rough)
 {
     inside = _inside;
     outside = _outside;
@@ -70,7 +74,7 @@ sInfo::sInfo (shared_ptr<Material> _inside, shared_ptr<Material> _outside, doubl
     emission = inside->emission;
 }
 
-sInfo::sInfo (shared_ptr<Material> material, double _rough)
+sInfo::sInfo(shared_ptr<Material> material, double _rough)
 {
     inside = outside = nullptr;
     ior = 1 / material->ior;
@@ -81,7 +85,6 @@ sInfo::sInfo (shared_ptr<Material> material, double _rough)
     specular = material->specular;
     emission = material->emission;
 }
-
 
 void sInfo::apply(const Pixel &t)
 {
@@ -96,15 +99,17 @@ sInfo Surface::info(const Ray &ray, Ray &normal) const
     throw "NotImplementedError";
 }
 
-Solid::Solid (shared_ptr<Material> _inside, shared_ptr<Material> _outside, double _rough)
+Solid::Solid(shared_ptr<Material> _inside, shared_ptr<Material> _outside, double _rough)
 {
     into = sInfo(_inside, _outside, _rough);
     outo = sInfo(_outside, _inside, _rough);
     texture = nullptr;
 }
 
-Solid::Solid (shared_ptr<Material> _inside, shared_ptr<Material> _outside, shared_ptr<Mapping> _texture,
-    const Trans3 &_T, double _rough)
+Solid::Solid(
+    shared_ptr<Material> _inside, shared_ptr<Material> _outside, shared_ptr<Mapping> _texture,
+    const Trans3 &_T, double _rough
+)
 {
     into = sInfo(_inside, _outside, _rough);
     outo = sInfo(_outside, _inside, _rough);
@@ -125,14 +130,16 @@ sInfo Solid::info(const Ray &ray, Ray &normal) const
     return result;
 }
 
-Thin::Thin (shared_ptr<Material> material, double rough)
+Thin::Thin(shared_ptr<Material> material, double rough)
 {
     surface = sInfo(material, rough);
     texture = nullptr;
 }
 
-Thin::Thin (shared_ptr<Material> material, shared_ptr<Mapping> _texture,
-    const Trans3 &_T, double rough)
+Thin::Thin(
+    shared_ptr<Material> material, shared_ptr<Mapping> _texture,
+    const Trans3 &_T, double rough
+)
 {
     surface = sInfo(material, rough);
     texture = _texture;

@@ -17,11 +17,10 @@ class ObjLoader
 public:
 
     void cleanup();
-    void newmap(string filename);
-    void load(string filename, shared_ptr<BxDF> bxdf);
-    void import(shared_ptr<Sence> sence);
+    void newmap(const string &filename);
+    void load(const string &filename, const shared_ptr<BxDF> &bxdf);
+    void import(const shared_ptr<Sence>& sence);
 };
-
 
 #ifdef ARC_IMPLEMENTATION
 
@@ -29,12 +28,12 @@ void ObjLoader::cleanup()
 {
     objects.clear();
 }
-void ObjLoader::newmap(string filename)
+void ObjLoader::newmap(const string &filename)
 {
     if (!mappings.count(filename))
         mappings[filename] = make_shared<Mapping>(filename);
 }
-void ObjLoader::load(string filename, shared_ptr<BxDF> bxdf)
+void ObjLoader::load(const string &filename, const shared_ptr<BxDF> &bxdf)
 {
     tinyobj::attrib_t attrib;
     string warn, err;
@@ -43,17 +42,17 @@ void ObjLoader::load(string filename, shared_ptr<BxDF> bxdf)
     if (!err.empty()) std::cout << err << std::endl;
     if (!ret) return;
     cerr << "shapes : " << shapes.size() << endl;
-    for (int s = 0; s < shapes.size(); ++ s)
+    for (auto & s : shapes)
     {
         int index_offset = 0;
-        for (int f = 0; f < shapes[s].mesh.num_face_vertices.size(); ++ f)
+        for (int f = 0; f < s.mesh.num_face_vertices.size(); ++f)
         {
-            int fv = shapes[s].mesh.num_face_vertices[f];
+            int fv = s.mesh.num_face_vertices[f];
 
             vector<Vec3> V, Vn, Vt;
-            for (int v = 0; v < fv; ++ v)
+            for (int v = 0; v < fv; ++v)
             {
-                tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
+                tinyobj::index_t idx = s.mesh.indices[index_offset + v];
                 tinyobj::real_t vx = attrib.vertices[3 * idx.vertex_index + 0];
                 tinyobj::real_t vy = attrib.vertices[3 * idx.vertex_index + 1];
                 tinyobj::real_t vz = attrib.vertices[3 * idx.vertex_index + 2];
@@ -63,14 +62,14 @@ void ObjLoader::load(string filename, shared_ptr<BxDF> bxdf)
                 tinyobj::real_t tx = attrib.texcoords[2 * idx.texcoord_index + 0];
                 tinyobj::real_t ty = attrib.texcoords[2 * idx.texcoord_index + 1];
 
-                V.push_back(Vec3(vx, vy, vz));
+                V.emplace_back(vx, vy, vz);
                 // Vn.push_back(Vec3(nx, ny, nz));
-                Vt.push_back(Vec3(tx, ty, 0));
+                Vt.emplace_back(tx, ty, 0);
             }
 
             index_offset += fv;
 
-            tinyobj::material_t M = materials[shapes[s].mesh.material_ids[f]];
+            tinyobj::material_t M = materials[s.mesh.material_ids[f]];
 
             Spectrum emission = rgb(M.emission[0], M.emission[1], M.emission[2]),
                 diffuse = rgb(M.diffuse[0], M.diffuse[1], M.diffuse[2]),
@@ -98,7 +97,7 @@ void ObjLoader::load(string filename, shared_ptr<BxDF> bxdf)
 
             double rough = 1 - M.shininess / 1000;
             shared_ptr<Surface> surface;
-            if (M.diffuse_texname != "")
+            if (!M.diffuse_texname.empty())
             {
                 Trans3 trans(
                     V[0], V[1], V[2], Vt[0], Vt[1], Vt[2]
@@ -127,9 +126,9 @@ void ObjLoader::load(string filename, shared_ptr<BxDF> bxdf)
     }
 }
 
-void ObjLoader::import(shared_ptr<Sence> sence)
+void ObjLoader::import(const shared_ptr<Sence>& sence)
 {
-    for (auto object : objects) sence->add_object(object);
+    for (const auto& object : objects) sence->add_object(object);
     cleanup();
 }
 #endif

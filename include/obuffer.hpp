@@ -1,6 +1,8 @@
 #ifndef obuffer_hpp
 #define obuffer_hpp
 
+#include <utility>
+
 #include "utils.hpp"
 #include "camera.hpp"
 #include "spectrum.hpp"
@@ -15,21 +17,21 @@ class oBuffer
     vector<double> weight;
 
 public:
-    oBuffer (int _width, int _height, shared_ptr<Camera> _camera);
+    oBuffer(int width_, int height_, shared_ptr<Camera> camera_);
 
     int epoch() const;
     Ray sample(int idx) const;
     void draw(int idx, Spectrum c, double w = 1);
-    void save(const char* path, double white = 1, double gamma = 2.2) const;
+    void save(const char *path, double white = 1, double gamma = 2.2) const;
 };
 
 #ifdef ARC_IMPLEMENTATION
 
-oBuffer::oBuffer (int _width, int _height, shared_ptr<Camera> _camera)
+oBuffer::oBuffer(int width_, int height_, shared_ptr<Camera> camera_)
 {
-    width = _width;
-    height = _height;
-    camera = _camera;
+    width = width_;
+    height = height_;
+    camera = std::move(camera_);
     length = width * height;
     spectrum.resize(length);
     weight.resize(length);
@@ -50,20 +52,19 @@ void oBuffer::draw(int idx, Spectrum c, double w)
     spectrum[idx] = spectrum[idx] + c * w;
     weight[idx] += w;
 }
-void oBuffer::save(const char* path, double white, double gamma) const
+void oBuffer::save(const char *path, double white, double gamma) const
 {
     ofstream out(path);
     out << "P6" << endl;
     out << width << " " << height << endl;
     out << 255 << endl;
-    for (int i = 0; i < length; ++ i)
+    for (int i = 0; i < length; ++i)
     {
         auto _c = (spectrum[i] / weight[i]).rgb888(white, gamma);
         out << char(_c / 65536) << char(_c / 256 % 256) << char(_c % 256);
     }
     out.close();
 }
-
 
 #endif
 #endif /* obuffer_hpp */

@@ -1,7 +1,7 @@
 include_directories(../../include)
 include_directories(../../3rdparty)
 
-set(name "text_surface")
+set(name "test_surface")
 
 add_executable(${name} surface.cpp)
 

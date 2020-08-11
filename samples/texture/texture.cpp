@@ -57,7 +57,6 @@ int main()
     shared_ptr<Object> back = make_shared<Object>(
         bxdf,
         make_shared<Flat>(
-            4,
             Vec3(-30, -30, -25),
             Vec3(-30, 30, -25),
             Vec3(30, 30, -25),
@@ -91,9 +90,7 @@ int main()
 
     int epoch = 10000, cluster = 1;
     cerr << "target : " << epoch << endl;
-    for (
-        int i = 1; i <= epoch; ++i
-        )
+    for (int i = 1; i <= epoch; ++i)
     {
         render->epoch(cluster);
         cerr << "epoch " << i << endl;
