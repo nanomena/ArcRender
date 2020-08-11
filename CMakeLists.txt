@@ -2,13 +2,12 @@ cmake_minimum_required(VERSION 3.16)
 project(ARCrender)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_C_STANDARD 17)
 
 
-if (CMAKE_BUILD_TYPE EQUAL Debug)
-    message("CMAKE IN DEBUG MODE")
+if (CMAKE_BUILD_TYPE EQUAL Single)
+    add_compile_options(-Ofast)
 elseif(CMAKE_BUILD_TYPE EQUAL Release)
-    message("CMAKE IN RELEASE MODE")
-
     find_package(OpenMP)
     IF (OPENMP_FOUND)
         message("Found OpenMP!")

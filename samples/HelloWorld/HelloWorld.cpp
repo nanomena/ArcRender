@@ -76,11 +76,11 @@ int main()
     {
         render->epoch(cluster);
         cerr << "epoch " << i << endl;
-        sprintf(output, "HelloWorld.ppm");
+        sprintf(output, "HelloWorld.png");
         image->save(output, 0.24);
         if (i % 1 == 0)
         {
-            sprintf(output, "HelloWorld%d.ppm", i);
+            sprintf(output, "HelloWorld%d.png", i);
             image->save(output, 0.24);
         }
     }

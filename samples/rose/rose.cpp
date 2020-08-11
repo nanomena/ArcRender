@@ -60,17 +60,18 @@ int main()
     shared_ptr<Render> render = make_shared<Render>(image, sence);
 
     char output[100];
-    int epoch = 10000, cluster = 1;
-    cerr << "target : " << epoch << endl;
+    int epoch = 5, cluster = 1;
+    time_t start = time(0);
+    cerr << "[T + 0] | target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++i)
     {
         render->epoch(cluster);
-        cerr << "epoch " << i << endl;
-        sprintf(output, "rose.ppm");
+        cerr << "[T + " << time(0) - start << "] | epoch " << i << endl;
+        sprintf(output, "rose.png");
         image->save(output, 0.24);
         if (i % 10 == 0)
         {
-            sprintf(output, "rose%d.ppm", i);
+            sprintf(output, "rose%d.png", i);
             image->save(output, 0.24);
         }
     }

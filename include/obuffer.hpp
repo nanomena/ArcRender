@@ -54,7 +54,7 @@ void oBuffer::draw(int idx, Spectrum c, double w)
 }
 void oBuffer::save(const char *path, double white, double gamma) const
 {
-    shared_ptr<char[]> buffer(new char[width * height * 3]);
+    vector<char> buffer; buffer.resize(length * 3);
     for (int i = 0; i < length; ++i)
     {
         auto _c = (spectrum[i] / weight[i]).rgb888(white, gamma);
@@ -62,7 +62,7 @@ void oBuffer::save(const char *path, double white, double gamma) const
         buffer[i * 3 + 1] = char(_c / 256 % 256);
         buffer[i * 3 + 2] = char(_c % 256);
     }
-    stbi_write_png(path, width, height, 3, buffer.get(), width * 3);
+    stbi_write_png(path, width, height, 3, &buffer.front(), width * 3);
 }
 
 #endif
