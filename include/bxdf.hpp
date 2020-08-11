@@ -6,7 +6,7 @@
 #include "surface.hpp"
 #include "photon.hpp"
 
-enum hit_type { nonevent, mirror_refr, diff_refr, matched, diff_refl, mirror_refl };
+enum hit_type { mirror_refr, diff_refr, source, diff_refl, mirror_refl, nonevent };
 
 class BxDF
 {
@@ -99,7 +99,7 @@ double BSDF::through(const sInfo &S, const Vec3 &in, Vec3 &out, Spectrum &spectr
     if (RD.rand() < S.absorb)
     {
         spectrum = S.emission;
-        type = matched;
+        type = source;
         return 1;
     }
 
@@ -174,7 +174,7 @@ double BSDF::forward(const sInfo &S, Photon &photon, hit_type &type) const
     photon.ray.o = Vec3();
     photon.ray.d = out;
     photon.trans(spectrum);
-    if (type < 0) photon.into(S.inside);
+    if ((type == mirror_refr) || (type == diff_refr)) photon.into(S.inside);
     return weight;
 }
 

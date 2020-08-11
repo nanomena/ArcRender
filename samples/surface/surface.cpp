@@ -66,7 +66,7 @@ int main()
     cin >> rough;
     char output[100];
     sprintf(
-        output, "%03.0lf|%02.0lf|%02.0lf.ppm", ior * 10, diffuse * 10,
+        output, "%03.0lf|%02.0lf|%02.0lf.png", ior * 10, diffuse * 10,
         rough * 10
     );
 

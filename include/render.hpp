@@ -53,7 +53,7 @@ void Render::step(int idx) const
         hit_type type;
         $ << "tracing " << photon.ray << endl;
         weight *= sence->forward(photon, type);
-        if (type == matched)
+        if (type == source)
         {
             matched = 1;
             break;
