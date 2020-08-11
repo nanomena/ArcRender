@@ -25,7 +25,7 @@
 #include <functional>
 #include <string>
 #include <fstream>
-#include <stdarg.h>
+#include <cstdarg>
 #include <algorithm>
 #include <map>
 #include "stb_image.h"

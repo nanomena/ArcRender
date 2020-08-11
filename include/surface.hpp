@@ -1,6 +1,8 @@
 #ifndef surface_hpp
 #define surface_hpp
 
+#include <utility>
+
 #include "utils.hpp"
 #include "material.hpp"
 #include "spectrum.hpp"
@@ -13,8 +15,8 @@ struct sInfo
     shared_ptr<Material> inside, outside;
 
     sInfo();
-    sInfo(shared_ptr<Material> inside, shared_ptr<Material> outside, double _rough);
-    sInfo(shared_ptr<Material> material, double _rough);
+    sInfo(shared_ptr<Material> inside_, shared_ptr<Material> outside_, double rough_);
+    sInfo(const shared_ptr<Material> &material, double rough_);
 
     void apply(const Pixel &t);
 };
@@ -33,10 +35,10 @@ class Solid : public Surface
     Trans3 T;
 
 public:
-    Solid(shared_ptr<Material> _inside, shared_ptr<Material> _outside, double _rough = 0);
+    Solid(const shared_ptr<Material> &inside_, const shared_ptr<Material> &outside_, double rough_ = 0);
     Solid(
-        shared_ptr<Material> _inside, shared_ptr<Material> _outside, shared_ptr<Mapping> _texture,
-        const Trans3 &_T, double _rough = 0
+        const shared_ptr<Material> &inside_, const shared_ptr<Material> &outside_, shared_ptr<Mapping> texture_,
+        const Trans3 &T_, double rough_ = 0
     );
 
     sInfo info(const Ray &ray, Ray &normal) const override;
@@ -49,10 +51,10 @@ class Thin : public Surface
     Trans3 T;
 
 public:
-    Thin(shared_ptr<Material> material, double _rough = 0);
+    explicit Thin(const shared_ptr<Material> &material, double rough_ = 0);
     Thin(
-        shared_ptr<Material> material, shared_ptr<Mapping> _texture,
-        const Trans3 &_T, double rough = 0
+        const shared_ptr<Material> &material, shared_ptr<Mapping> texture_,
+        const Trans3 &T_, double rough = 0
     );
 
     sInfo info(const Ray &ray, Ray &normal) const override;
@@ -60,13 +62,13 @@ public:
 
 #ifdef ARC_IMPLEMENTATION
 
-sInfo::sInfo() {}
-sInfo::sInfo(shared_ptr<Material> _inside, shared_ptr<Material> _outside, double _rough)
+sInfo::sInfo() = default;
+sInfo::sInfo(shared_ptr<Material> inside_, shared_ptr<Material> outside_, double rough_)
 {
-    inside = _inside;
-    outside = _outside;
+    inside = std::move(inside_);
+    outside = std::move(outside_);
     ior = outside->ior / inside->ior;
-    rough = _rough;
+    rough = rough_;
     absorb = inside->absorb;
     diffuse = inside->diffuse;
     base = inside->base;
@@ -74,11 +76,11 @@ sInfo::sInfo(shared_ptr<Material> _inside, shared_ptr<Material> _outside, double
     emission = inside->emission;
 }
 
-sInfo::sInfo(shared_ptr<Material> material, double _rough)
+sInfo::sInfo(const shared_ptr<Material> &material, double rough_)
 {
     inside = outside = nullptr;
     ior = 1 / material->ior;
-    rough = _rough * (ior - 1);
+    rough = rough_ * (ior - 1);
     absorb = material->absorb;
     diffuse = material->diffuse;
     base = material->base;
@@ -96,25 +98,25 @@ void sInfo::apply(const Pixel &t)
 
 sInfo Surface::info(const Ray &ray, Ray &normal) const
 {
-    throw "NotImplementedError";
+    throw invalid_argument("NotImplementedError");
 }
 
-Solid::Solid(shared_ptr<Material> _inside, shared_ptr<Material> _outside, double _rough)
+Solid::Solid(const shared_ptr<Material> &inside_, const shared_ptr<Material> &outside_, double rough_)
 {
-    into = sInfo(_inside, _outside, _rough);
-    outo = sInfo(_outside, _inside, _rough);
+    into = sInfo(inside_, outside_, rough_);
+    outo = sInfo(outside_, inside_, rough_);
     texture = nullptr;
 }
 
 Solid::Solid(
-    shared_ptr<Material> _inside, shared_ptr<Material> _outside, shared_ptr<Mapping> _texture,
-    const Trans3 &_T, double _rough
+    const shared_ptr<Material> &inside_, const shared_ptr<Material> &outside_, shared_ptr<Mapping> texture_,
+    const Trans3 &T_, double rough_
 )
 {
-    into = sInfo(_inside, _outside, _rough);
-    outo = sInfo(_outside, _inside, _rough);
-    texture = _texture;
-    T = _T;
+    into = sInfo(inside_, outside_, rough_);
+    outo = sInfo(outside_, inside_, rough_);
+    texture = std::move(texture_);
+    T = T_;
 }
 
 sInfo Solid::info(const Ray &ray, Ray &normal) const
@@ -130,20 +132,20 @@ sInfo Solid::info(const Ray &ray, Ray &normal) const
     return result;
 }
 
-Thin::Thin(shared_ptr<Material> material, double rough)
+Thin::Thin(const shared_ptr<Material> &material, double rough_)
 {
-    surface = sInfo(material, rough);
+    surface = sInfo(material, rough_);
     texture = nullptr;
 }
 
 Thin::Thin(
-    shared_ptr<Material> material, shared_ptr<Mapping> _texture,
-    const Trans3 &_T, double rough
+    const shared_ptr<Material> &material, shared_ptr<Mapping> texture_,
+    const Trans3 &T_, double rough
 )
 {
     surface = sInfo(material, rough);
-    texture = _texture;
-    T = _T;
+    texture = std::move(texture_);
+    T = T_;
 }
 
 sInfo Thin::info(const Ray &ray, Ray &normal) const

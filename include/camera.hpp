@@ -24,7 +24,7 @@ public:
 
 Ray Camera::apply(const Vec2 &t)
 {
-    throw std::invalid_argument("NotImplementedError");
+    throw invalid_argument("NotImplementedError");
 }
 PerspectiveCamera::PerspectiveCamera(Vec3 _o, Vec3 _x, Vec3 _y, double _z)
 {

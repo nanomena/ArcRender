@@ -85,11 +85,11 @@ public:
 
 void Shape::inter(const Ray &ray, int &hit, Vec3 &hitpoint) const
 {
-    throw std::invalid_argument("NotImplementedError");
+    throw invalid_argument("NotImplementedError");
 }
 Ray Shape::normal(const Ray &ray, const Vec3 &inter) const
 {
-    throw std::invalid_argument("NotImplementedError");
+    throw invalid_argument("NotImplementedError");
 }
 
 Cuboid Shape::outline() const

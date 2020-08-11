@@ -31,7 +31,7 @@ public:
 
 double BxDF::forward(const sInfo &S, Photon &photon, int &type) const
 {
-    throw std::invalid_argument("NotImplementedError");
+    throw invalid_argument("NotImplementedError");
 }
 
 double BSDF::F(const sInfo &S, double cos_i, double cos_t)
