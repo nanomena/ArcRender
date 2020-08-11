@@ -28,8 +28,10 @@
 #include <cstdarg>
 #include <algorithm>
 #include <map>
+#include <array>
 #include "stb_image.h"
 #include "tiny_obj_loader.h"
+#include "stb_image_write.h"
 using namespace std;
 
 

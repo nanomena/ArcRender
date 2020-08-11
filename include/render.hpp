@@ -50,15 +50,15 @@ void Render::step(int idx) const
     int diffuse_cnt = 0, matched = 0;
     for (int trace_cnt = 0; (trace_cnt < trace_limit) && weight > trace_eps; ++trace_cnt)
     {
-        int type;
+        hit_type type;
         $ << "tracing " << photon.ray << endl;
         weight *= sence->forward(photon, type);
-        if (type == 0)
+        if (type == matched)
         {
             matched = 1;
             break;
         }
-        if (abs(type) == 1)
+        if ((type == diff_refr) || (type == diff_refl))
         {
             if (diffuse_cnt < diffuse_limit)
                 diffuse_cnt++;

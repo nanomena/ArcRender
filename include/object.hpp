@@ -19,7 +19,7 @@ public:
 
     Cuboid outline() const;
     void inter(const Ray &ray, int &hit, Vec3 &hitpoint) const;
-    double forward(const Vec3 &inter, Photon &photon, int &type) const;
+    double forward(const Vec3 &inter, Photon &photon, hit_type &type) const;
 };
 
 #ifdef ARC_IMPLEMENTATION
@@ -41,7 +41,7 @@ void Object::inter(const Ray &ray, int &hit, Vec3 &hitpoint) const
     shape->inter(ray, hit, hitpoint);
     if ((hitpoint - ray.o).norm2() < EPS) hit = 0;
 }
-double Object::forward(const Vec3 &inter, Photon &photon, int &type) const
+double Object::forward(const Vec3 &inter, Photon &photon, hit_type &type) const
 {
     $ << name << endl;
     Ray normal = shape->normal(photon.ray, inter);

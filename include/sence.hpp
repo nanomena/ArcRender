@@ -22,7 +22,7 @@ public:
     void build_graph();
 
 //    shared_ptr<Material> outside();
-    double forward(Photon &photon, int &type) const;
+    double forward(Photon &photon, hit_type &type) const;
 };
 
 #ifdef ARC_IMPLEMENTATION
@@ -42,7 +42,7 @@ void Sence::build_graph()
     graph.load(&(objects.front()), static_cast<int>(objects.size()));
 }
 
-double Sence::forward(Photon &photon, int &type) const
+double Sence::forward(Photon &photon, hit_type &type) const
 {
     shared_ptr<Object> next = skybox;
     int hit;

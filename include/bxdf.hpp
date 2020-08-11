@@ -6,11 +6,13 @@
 #include "surface.hpp"
 #include "photon.hpp"
 
+enum hit_type { nonevent, mirror_refr, diff_refr, matched, diff_refl, mirror_refl };
+
 class BxDF
 {
 
 public:
-    virtual double forward(const sInfo &S, Photon &photon, int &type) const;
+    virtual double forward(const sInfo &S, Photon &photon, hit_type &type) const;
 };
 
 class BSDF : public BxDF
@@ -21,15 +23,15 @@ class BSDF : public BxDF
     static double D(const sInfo &S, const Vec3 &normal);
     static double Gl(const sInfo &S, const Vec3 &in, const Vec3 &out, const Vec3 &normal);
     static double Gt(const sInfo &S, const Vec3 &in, const Vec3 &out, const Vec3 &normal);
-    static double through(const sInfo &S, const Vec3 &in, Vec3 &out, Spectrum &spectrum, int &type);
+    static double through(const sInfo &S, const Vec3 &in, Vec3 &out, Spectrum &spectrum, hit_type &type);
 
 public:
-    double forward(const sInfo &S, Photon &photon, int &type) const override;
+    double forward(const sInfo &S, Photon &photon, hit_type &type) const override;
 };
 
 #ifdef ARC_IMPLEMENTATION
 
-double BxDF::forward(const sInfo &S, Photon &photon, int &type) const
+double BxDF::forward(const sInfo &S, Photon &photon, hit_type &type) const
 {
     throw invalid_argument("NotImplementedError");
 }
@@ -92,12 +94,12 @@ Vec3 BSDF::sampleD(const sInfo &S)
     return Vec3(cos(q) * sin_theta, sin(q) * sin_theta, cos_theta);
 }
 
-double BSDF::through(const sInfo &S, const Vec3 &in, Vec3 &out, Spectrum &spectrum, int &type)
+double BSDF::through(const sInfo &S, const Vec3 &in, Vec3 &out, Spectrum &spectrum, hit_type &type)
 {
     if (RD.rand() < S.absorb)
     {
         spectrum = S.emission;
-        type = 0;
+        type = matched;
         return 1;
     }
 
@@ -106,6 +108,7 @@ double BSDF::through(const sInfo &S, const Vec3 &in, Vec3 &out, Spectrum &spectr
 
     if (cos_i < 0)
     {
+        type = nonevent;
         spectrum = Spectrum(0);
         return 0;
     }
@@ -121,12 +124,13 @@ double BSDF::through(const sInfo &S, const Vec3 &in, Vec3 &out, Spectrum &spectr
         out = in + normal * cos_i * 2;
         if (out.d[2] < 0)
         {
+            type = nonevent;
             spectrum = Spectrum(0);
             return 0;
         }
         else
         {
-            type = 2;
+            type = mirror_refl;
             spectrum = S.specular * Gl(S, in, out, normal);
             return 1;
         }
@@ -135,7 +139,7 @@ double BSDF::through(const sInfo &S, const Vec3 &in, Vec3 &out, Spectrum &spectr
     {
         if (RD.rand() < S.diffuse)
         {
-            type = 1;
+            type = diff_refl;
             out = RD.semisphere();
             normal = (out - in).scale(1);
             spectrum = S.base * Fd(S, in, out, normal);
@@ -146,7 +150,7 @@ double BSDF::through(const sInfo &S, const Vec3 &in, Vec3 &out, Spectrum &spectr
             out = (in * S.ior + normal * (cos_i * S.ior - cos_t)).scale(1);
             if (out.d[2] > 0 || RD.rand() > Gt(S, in, out, normal))
             {
-                type = -1;
+                type = diff_refr;
                 out = RD.semisphere();
                 out.d[2] *= -1;
                 spectrum = S.base;
@@ -154,7 +158,7 @@ double BSDF::through(const sInfo &S, const Vec3 &in, Vec3 &out, Spectrum &spectr
             }
             else
             {
-                type = -2;
+                type = mirror_refr;
                 spectrum = Spectrum(1);
                 return 1;
             }
@@ -162,7 +166,7 @@ double BSDF::through(const sInfo &S, const Vec3 &in, Vec3 &out, Spectrum &spectr
     }
 }
 
-double BSDF::forward(const sInfo &S, Photon &photon, int &type) const
+double BSDF::forward(const sInfo &S, Photon &photon, hit_type &type) const
 {
     Vec3 in = photon.ray.d, out;
     Spectrum spectrum;

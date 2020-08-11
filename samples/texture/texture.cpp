@@ -68,7 +68,7 @@ int main()
     sence->add_object(back);
 
     char output[100];
-    sprintf(output, "result.ppm");
+    sprintf(output, "result.png");
 
     shared_ptr<Object> light = make_shared<Object>(
         bxdf,
