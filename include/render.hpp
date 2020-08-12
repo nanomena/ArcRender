@@ -38,8 +38,6 @@ Render::Render(
     diffuse_limit = _diffuse_mxcnt;
     trace_eps = _trace_eps;
     length = image->epoch();
-
-    sence->build_graph();
 }
 
 void Render::step(int idx) const

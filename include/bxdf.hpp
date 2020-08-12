@@ -6,7 +6,7 @@
 #include "surface.hpp"
 #include "photon.hpp"
 
-enum hit_type { mirror_refr, diff_refr, source, diff_refl, mirror_refl, nonevent };
+enum hit_type { mirror_refr, diff_refr, source, diff_refl, mirror_refl};
 
 class BxDF
 {
@@ -108,8 +108,8 @@ double BSDF::through(const sInfo &S, const Vec3 &in, Vec3 &out, Spectrum &spectr
 
     if (cos_i < 0)
     {
-        type = nonevent;
         spectrum = Spectrum(0);
+        type = source;
         return 0;
     }
     double reflect;
@@ -124,8 +124,8 @@ double BSDF::through(const sInfo &S, const Vec3 &in, Vec3 &out, Spectrum &spectr
         out = in + normal * cos_i * 2;
         if (out.d[2] < 0)
         {
-            type = nonevent;
             spectrum = Spectrum(0);
+            type = source;
             return 0;
         }
         else

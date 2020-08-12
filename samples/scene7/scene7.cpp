@@ -165,24 +165,17 @@ int main()
         )
     );
 
-
-//    sence->add_object(
-//        make_shared<Object>(
-//            bxdf,
-//            make_shared<Sphere>(Vec3(7, 9, 13), 6),
-//            make_shared<Solid>(Mgold, Mvacant, 0.3),
-//            "ball1"
-//        )
-//    );
-//
-//    sence->add_object(
-//        make_shared<Object>(
-//            bxdf,
-//            make_shared<Sphere>(Vec3(-5, 9, 5), 6),
-//            make_shared<Solid>(Mgold, Mvacant, 0.3),
-//            "ball2"
-//        )
-//    );
+    ObjLoader loader;
+    loader.load(
+        "teapot.obj", bxdf,
+        Trans3(
+            Vec3(0.0125, 0, 0),
+            Vec3(0, 0.0125, 0),
+            Vec3(0, 0, 0.0125),
+            Vec3(0, -0.75, -1)
+        )
+    );
+    loader.import_to(sence);
 
     shared_ptr<Camera> camera = make_shared<PerspectiveCamera>(
         Vec3(0, 0, 1.5),
@@ -197,14 +190,14 @@ int main()
     char output[100];
     sprintf(output, "result.png");
 
-    int epoch = 1000, cluster = 1;
+    int epoch = 3000, cluster = 1;
     cerr << "[T + " << (clock() / (double)CLOCKS_PER_SEC) << "] | target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++i)
     {
         render->epoch(cluster);
         cerr << "[T + " << (clock() / (double)CLOCKS_PER_SEC) << "] | epoch " << i << endl;
         if (i % 5 == 0)
-            image->save(output, 0.5);
+            image->save(output, 0.55);
     }
-    image->save(output, 0.5);
+    image->save(output, 0.55);
 }

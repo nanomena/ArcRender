@@ -14,7 +14,7 @@ struct Vec2
     double d[2];
 
     Vec2();
-    Vec2(double _d[]);
+    Vec2(double d_[]);
     Vec2(double x, double y);
 
     Vec2 operator -() const;
@@ -29,7 +29,7 @@ struct Vec3
     double d[3];
 
     Vec3();
-    Vec3(double _d[]);
+    Vec3(double d_[]);
     Vec3(double x, double y, double z);
 
     Vec3 operator -() const;
@@ -55,7 +55,7 @@ struct Ray
     Vec3 o, d;
 
     Ray();
-    Ray(Vec3 _o, Vec3 _d);
+    Ray(Vec3 o_, Vec3 d_);
 
     void move(double length);
 
@@ -67,7 +67,7 @@ struct Mat3
     double d[3][3];
 
     Mat3();
-    Mat3(double _d[][3]);
+    Mat3(double d_[][3]);
 
     Mat3 operator +(const Mat3 &t) const;
     Mat3 operator -(const Mat3 &t) const;
@@ -88,7 +88,7 @@ struct Cuboid
 
     Cuboid();
     Cuboid(Vec3 p);
-    Cuboid(Vec3 _n, Vec3 _x);
+    Cuboid(Vec3 n_, Vec3 x_);
 
     Cuboid operator +(const Cuboid &t) const;
     double operator *(const Cuboid &t) const;
@@ -104,7 +104,8 @@ struct Trans3
     Vec3 O;
 
     Trans3();
-    Trans3(Mat3 _T, Vec3 _O);
+    Trans3(Mat3 T_, Vec3 O_);
+    Trans3(Vec3 x, Vec3 y, Vec3 z, Vec3 O_);
     Trans3(Vec3 V0, Vec3 V1, Vec3 V2, Vec3 Vt0, Vec3 Vt1, Vec3 Vt2);
 
     Vec3 apply(const Vec3 &t) const;
@@ -120,10 +121,10 @@ Vec2::Vec2()
 {
     d[0] = d[1] = 0;
 }
-Vec2::Vec2(double _d[])
+Vec2::Vec2(double d_[])
 {
-    d[0] = _d[0];
-    d[1] = _d[1];
+    d[0] = d_[0];
+    d[1] = d_[1];
 }
 Vec2::Vec2(double x, double y)
 {
@@ -156,11 +157,11 @@ Vec3::Vec3()
 {
     d[0] = d[1] = d[2] = 0;
 }
-Vec3::Vec3(double _d[])
+Vec3::Vec3(double d_[])
 {
-    d[0] = _d[0];
-    d[1] = _d[1];
-    d[2] = _d[2];
+    d[0] = d_[0];
+    d[1] = d_[1];
+    d[2] = d_[2];
 }
 Vec3::Vec3(double x, double y, double z)
 {
@@ -241,10 +242,10 @@ ostream &operator <<(ostream &s, Vec3 t)
 }
 
 Ray::Ray() {}
-Ray::Ray(Vec3 _o, Vec3 _d)
+Ray::Ray(Vec3 o_, Vec3 d_)
 {
-    o = _o;
-    d = _d;
+    o = o_;
+    d = d_;
 }
 
 void Ray::move(double length)
@@ -264,11 +265,11 @@ Mat3::Mat3()
         for (int j = 0; j < 3; ++j)
             d[i][j] = 0;
 }
-Mat3::Mat3(double _d[][3])
+Mat3::Mat3(double d_[][3])
 {
     for (int i = 0; i < 3; ++i)
         for (int j = 0; j < 3; ++j)
-            d[i][j] = _d[i][j];
+            d[i][j] = d_[i][j];
 }
 
 Mat3 Mat3::operator +(const Mat3 &t) const
@@ -375,10 +376,10 @@ Cuboid::Cuboid(Vec3 p)
 {
     n = x = p;
 }
-Cuboid::Cuboid(Vec3 _n, Vec3 _x)
+Cuboid::Cuboid(Vec3 n_, Vec3 x_)
 {
-    n = _n;
-    x = _x;
+    n = n_;
+    x = x_;
 }
 
 Cuboid Cuboid::operator +(const Cuboid &t) const
@@ -430,12 +431,19 @@ ostream &operator <<(ostream &s, Cuboid t)
 
 Trans3::Trans3()
 {
-
+    for (int i = 0; i < 3; ++i)
+        for (int j = 0; j < 3; ++j)
+            T.d[i][j] = (i == j);
 }
-Trans3::Trans3(Mat3 _T, Vec3 _O)
+Trans3::Trans3(Mat3 T_, Vec3 O_)
 {
-    T = _T;
-    O = _O;
+    T = T_;
+    O = O_;
+}
+Trans3::Trans3(Vec3 x, Vec3 y, Vec3 z, Vec3 O_)
+{
+    T = axis_I(x, y, z);
+    O = O_;
 }
 Trans3::Trans3(Vec3 V0, Vec3 V1, Vec3 V2, Vec3 Vt0, Vec3 Vt1, Vec3 Vt2)
 {

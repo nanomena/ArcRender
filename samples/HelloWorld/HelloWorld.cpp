@@ -37,7 +37,7 @@ int main()
     ObjLoader loader;
 
     loader.load("HelloWorld.obj", bxdf);
-    loader.import(sence);
+    loader.import_to(sence);
 
     shared_ptr<Object> light = make_shared<Object>(
         bxdf,

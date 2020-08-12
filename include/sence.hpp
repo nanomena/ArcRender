@@ -11,15 +11,14 @@
 class Sence
 {
     shared_ptr<Object> skybox;
-    vector<shared_ptr<Object>> objects;
-    KaDanTree graph;
+    vector<shared_ptr<KaDanTree>> graphs;
 
 public:
     shared_ptr<Material> env;
     Sence(shared_ptr<Material> env_, shared_ptr<Object> skybox_);
 
-    void add_object(const shared_ptr<Object>& object);
-    void build_graph();
+    void add_object(const shared_ptr<Object> &object);
+    void add_objects(const vector<shared_ptr<Object>> &object);
 
 //    shared_ptr<Material> outside();
     double forward(Photon &photon, hit_type &type) const;
@@ -33,13 +32,14 @@ Sence::Sence(shared_ptr<Material> env_, shared_ptr<Object> skybox_)
     skybox = std::move(skybox_);
 }
 
-void Sence::add_object(const shared_ptr<Object>& object)
+void Sence::add_object(const shared_ptr<Object> &object)
 {
-    objects.push_back(object);
+    vector<shared_ptr<Object>> objects{object};
+    graphs.push_back(make_shared<KaDanTree>(objects));
 }
-void Sence::build_graph()
+void Sence::add_objects(const vector<shared_ptr<Object>> &objects)
 {
-    graph.load(&(objects.front()), static_cast<int>(objects.size()));
+    graphs.push_back(make_shared<KaDanTree>(objects));
 }
 
 double Sence::forward(Photon &photon, hit_type &type) const
@@ -48,7 +48,8 @@ double Sence::forward(Photon &photon, hit_type &type) const
     int hit;
     Vec3 hitpoint;
     skybox->inter(photon.ray, hit, hitpoint);
-    graph.query(photon.ray, next, hitpoint);
+    for (const auto &graph : graphs)
+        graph->query(photon.ray, next, hitpoint);
 
     photon.trans(photon.inside->through((hitpoint - photon.ray.o).norm()));
     double weight = next->forward(hitpoint, photon, type);

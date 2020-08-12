@@ -18,8 +18,8 @@ public:
 
     void cleanup();
     void newmap(const string &filename);
-    void load(const string &filename, const shared_ptr<BxDF> &bxdf);
-    void import(const shared_ptr<Sence>& sence);
+    void load(const string &filename, const shared_ptr<BxDF> &bxdf, const Trans3 &trans = Trans3());
+    void import_to(const shared_ptr<Sence>& sence);
 };
 
 #ifdef ARC_IMPLEMENTATION
@@ -33,7 +33,7 @@ void ObjLoader::newmap(const string &filename)
     if (!mappings.count(filename))
         mappings[filename] = make_shared<Mapping>(filename);
 }
-void ObjLoader::load(const string &filename, const shared_ptr<BxDF> &bxdf)
+void ObjLoader::load(const string &filename, const shared_ptr<BxDF> &bxdf, const Trans3 &trans)
 {
     tinyobj::attrib_t attrib;
     string warn, err;
@@ -62,7 +62,7 @@ void ObjLoader::load(const string &filename, const shared_ptr<BxDF> &bxdf)
                 tinyobj::real_t tx = attrib.texcoords[2 * idx.texcoord_index + 0];
                 tinyobj::real_t ty = attrib.texcoords[2 * idx.texcoord_index + 1];
 
-                V.emplace_back(vx, vy, vz);
+                V.push_back(trans.apply(Vec3(vx, vy, vz)));
                 // Vn.emplace_back(nx, ny, nz);
                 Vt.emplace_back(tx, ty, 0);
             }
@@ -83,11 +83,8 @@ void ObjLoader::load(const string &filename, const shared_ptr<BxDF> &bxdf)
                 specular = specular * (emission.norm() + diffuse.norm());
             }
             shared_ptr<Material> material = make_shared<Material>(
-                prob,
-                emission,
-                M.ior, M.dissolve,
-                diffuse,
-                specular,
+                prob, emission, M.ior, M.dissolve,
+                diffuse, specular,
                 Spectrum(1), M.name
             );
 
@@ -126,9 +123,9 @@ void ObjLoader::load(const string &filename, const shared_ptr<BxDF> &bxdf)
     }
 }
 
-void ObjLoader::import(const shared_ptr<Sence>& sence)
+void ObjLoader::import_to(const shared_ptr<Sence>& sence)
 {
-    for (const auto& object : objects) sence->add_object(object);
+    sence->add_objects(objects);
     cleanup();
 }
 #endif

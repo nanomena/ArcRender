@@ -25,11 +25,10 @@ class KaDanTree
     int cnt;
 
 public:
-    KaDanTree();
+    explicit KaDanTree(vector<shared_ptr<Object>> objects);
 
     KaDanTreeNode *acquire();
 
-    void load(shared_ptr<Object> objects[], int size);
     void query(const Ray &ray, shared_ptr<Object> &next, Vec3 &hitpoint) const;
 };
 
@@ -126,20 +125,17 @@ void KaDanTreeNode::query(const Ray &ray, shared_ptr<Object> &next, Vec3 &hitpoi
     }
 }
 
-KaDanTree::KaDanTree()
+KaDanTree::KaDanTree(vector<shared_ptr<Object>> objects)
 {
-    cnt = 0, root = nullptr;
+    cerr << "faces : " << objects.size() << endl;
+    cnt = 0;
+    tree.resize(objects.size());
+    root = acquire();
+    root->load(&(objects.front()), objects.size(), [this] { return this->acquire(); }, 0);
 }
 
 KaDanTreeNode *KaDanTree::acquire() { return &tree[cnt++]; }
 
-void KaDanTree::load(shared_ptr<Object> objects[], int size)
-{
-    cerr << "faces : " << size << endl;
-    tree.resize(size);
-    root = acquire();
-    root->load(objects, size, [this] { return this->acquire(); }, 0);
-}
 void KaDanTree::query(const Ray &ray, shared_ptr<Object> &next, Vec3 &hitpoint) const
 {
     KaDanVisit = 0;
