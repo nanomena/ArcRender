@@ -1,4 +1,3 @@
-#define ARC_IMPLEMENTATION
 #include "arc.hpp"
 #include <bits/stdc++.h>
 using namespace std;
@@ -211,5 +210,4 @@ int main()
         if (i % 5 == 0)
             image->save(output, 0.25);
     }
-    image->save(output, 0.25);
 }

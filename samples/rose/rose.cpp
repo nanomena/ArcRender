@@ -6,7 +6,7 @@ int main()
 {
     ios::sync_with_stdio(0);
 
-    shared_ptr<BxDF> bxdf = make_shared<BSDF>();
+    shared_ptr<BxDF> bxdf = make_shared<BSDF_Thin>();
 
     shared_ptr<Material> Mvacant = make_shared<Material>(
         0, rgb(0), 1, 0, rgb(1), rgb(1), Spectrum(1), "vacant"
@@ -33,7 +33,7 @@ int main()
 
     ObjLoader loader;
 
-    loader.load("Rose_Model_3_decimated.obj", bxdf, Mvacant);
+    loader.load("Rose_Model_3_decimated.obj", bxdf);
     loader.import_to(sence);
 
     shared_ptr<Object> light = make_shared<Object>(
@@ -74,5 +74,4 @@ int main()
             image->save(output, 0.24);
         }
     }
-    image->save(output, 0.24);
 }

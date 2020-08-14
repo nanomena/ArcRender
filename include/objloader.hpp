@@ -19,7 +19,7 @@ public:
     void cleanup();
     void newmap(const string &filename);
     void load(
-        const string &filename, const shared_ptr<BxDF> &bxdf, const shared_ptr<Material> &outside,
+        const string &filename, const shared_ptr<BxDF> &bxdf, const shared_ptr<Material> &outside = nullptr,
         const Trans3 &trans = Trans3()
     );
     void import_to(const shared_ptr<Sence> &sence);
@@ -61,9 +61,9 @@ void ObjLoader::load(
                 tinyobj::real_t vx = attrib.vertices[3 * idx.vertex_index + 0];
                 tinyobj::real_t vy = attrib.vertices[3 * idx.vertex_index + 1];
                 tinyobj::real_t vz = attrib.vertices[3 * idx.vertex_index + 2];
-                // tinyobj::real_t nx = attrib.normals[3 * idx.normal_index + 0];
-                // tinyobj::real_t ny = attrib.normals[3 * idx.normal_index + 1];
-                // tinyobj::real_t nz = attrib.normals[3 * idx.normal_index + 2];
+                tinyobj::real_t nx = attrib.normals[3 * idx.normal_index + 0];
+                tinyobj::real_t ny = attrib.normals[3 * idx.normal_index + 1];
+                tinyobj::real_t nz = attrib.normals[3 * idx.normal_index + 2];
                 tinyobj::real_t tx = attrib.texcoords[2 * idx.texcoord_index + 0];
                 tinyobj::real_t ty = attrib.texcoords[2 * idx.texcoord_index + 1];
 
@@ -105,15 +105,21 @@ void ObjLoader::load(
                     V[0], V[1], V[2], Vt[0], Vt[1], Vt[2]
                 );
                 newmap(M.diffuse_texname);
-                surface = make_shared<Solid>(
-                    material, outside, mappings[M.diffuse_texname], mapper, rough
-                );
+                if (outside != nullptr)
+                    surface = make_shared<Solid>(
+                        material, outside, mappings[M.diffuse_texname], mapper, rough
+                    );
+                else
+                    surface = make_shared<Thin>(
+                        material, mappings[M.diffuse_texname], mapper, rough
+                    );
             }
             else
             {
-                surface = make_shared<Solid>(
-                    material, outside, rough
-                );
+                if (outside != nullptr)
+                    surface = make_shared<Solid>(material, outside, rough);
+                else
+                    surface = make_shared<Thin>(material, rough);
             }
 
             objects.push_back(

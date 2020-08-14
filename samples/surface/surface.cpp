@@ -110,5 +110,4 @@ int main()
         if (i % 5 == 0)
             image->save(output, 1);
     }
-    image->save(output, 1);
 }

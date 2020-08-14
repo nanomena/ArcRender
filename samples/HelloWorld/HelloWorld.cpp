@@ -36,7 +36,7 @@ int main()
 
     ObjLoader loader;
 
-    loader.load("HelloWorld.obj", bxdf, Mvacant);
+    loader.load("HelloWorld.obj", bxdf);
     loader.import_to(sence);
 
     shared_ptr<Object> light = make_shared<Object>(
@@ -84,5 +84,4 @@ int main()
             image->save(output, 0.24);
         }
     }
-    image->save(output, 0.24);
 }
