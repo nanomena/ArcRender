@@ -14,7 +14,7 @@ struct sInfo
     Spectrum emission, base, specular;
     shared_ptr<Material> inside, outside;
 
-    sInfo();
+    sInfo() {}
     sInfo(shared_ptr<Material> inside_, shared_ptr<Material> outside_, double rough_);
     sInfo(const shared_ptr<Material> &material, double rough_);
 
@@ -62,7 +62,6 @@ public:
 
 #ifdef ARC_IMPLEMENTATION
 
-sInfo::sInfo() = default;
 sInfo::sInfo(shared_ptr<Material> inside_, shared_ptr<Material> outside_, double rough_)
 {
     inside = std::move(inside_);
@@ -76,11 +75,11 @@ sInfo::sInfo(shared_ptr<Material> inside_, shared_ptr<Material> outside_, double
     emission = inside->emission;
 }
 
-sInfo::sInfo(const shared_ptr<Material> &material, double rough_)
+sInfo::sInfo(const shared_ptr<Material> &material, double rough_) // need to be fixed later
 {
     inside = outside = nullptr;
     ior = 1 / material->ior;
-    rough = rough_ * (ior - 1);
+    rough = rough_;
     absorb = material->absorb;
     diffuse = material->diffuse;
     base = material->base;
@@ -101,29 +100,17 @@ sInfo Surface::info(const Ray &ray, Ray &normal) const
     throw invalid_argument("NotImplementedError");
 }
 
-Solid::Solid(const shared_ptr<Material> &inside_, const shared_ptr<Material> &outside_, double rough_)
-{
-    into = sInfo(inside_, outside_, rough_);
-    outo = sInfo(outside_, inside_, rough_);
-    texture = nullptr;
-}
+Solid::Solid(const shared_ptr<Material> &inside_, const shared_ptr<Material> &outside_, double rough_) :
+    into(inside_, outside_, rough_), outo(outside_, inside_, rough_), texture(nullptr) {}
 
 Solid::Solid(
     const shared_ptr<Material> &inside_, const shared_ptr<Material> &outside_, shared_ptr<Mapping> texture_,
     const Trans3 &T_, double rough_
-)
-{
-    into = sInfo(inside_, outside_, rough_);
-    outo = sInfo(outside_, inside_, rough_);
-    texture = std::move(texture_);
-    T = T_;
-}
+) : into(inside_, outside_, rough_), outo(outside_, inside_, rough_), texture(std::move(texture_)), T(T_) {}
 
 sInfo Solid::info(const Ray &ray, Ray &normal) const
 {
-    sInfo result;
-    if (ray.d * normal.d < 0) result = into;
-    else result = outo;
+    sInfo result = ray.d * normal.d < 0 ? into : outo;
     if (texture != nullptr)
     {
         Vec3 p = T.apply(normal.o);
@@ -132,21 +119,13 @@ sInfo Solid::info(const Ray &ray, Ray &normal) const
     return result;
 }
 
-Thin::Thin(const shared_ptr<Material> &material, double rough_)
-{
-    surface = sInfo(material, rough_);
-    texture = nullptr;
-}
+Thin::Thin(const shared_ptr<Material> &material, double rough_) :
+    surface(material, rough_), texture(nullptr) {}
 
 Thin::Thin(
     const shared_ptr<Material> &material, shared_ptr<Mapping> texture_,
-    const Trans3 &T_, double rough
-)
-{
-    surface = sInfo(material, rough);
-    texture = std::move(texture_);
-    T = T_;
-}
+    const Trans3 &T_, double rough_
+) : surface(material, rough_), texture(std::move(texture_)), T(T_) {}
 
 sInfo Thin::info(const Ray &ray, Ray &normal) const
 {

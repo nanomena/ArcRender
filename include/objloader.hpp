@@ -18,8 +18,11 @@ public:
 
     void cleanup();
     void newmap(const string &filename);
-    void load(const string &filename, const shared_ptr<BxDF> &bxdf, const Trans3 &trans = Trans3());
-    void import_to(const shared_ptr<Sence>& sence);
+    void load(
+        const string &filename, const shared_ptr<BxDF> &bxdf, const shared_ptr<Material> &outside,
+        const Trans3 &trans = Trans3()
+    );
+    void import_to(const shared_ptr<Sence> &sence);
 };
 
 #ifdef ARC_IMPLEMENTATION
@@ -33,7 +36,9 @@ void ObjLoader::newmap(const string &filename)
     if (!mappings.count(filename))
         mappings[filename] = make_shared<Mapping>(filename);
 }
-void ObjLoader::load(const string &filename, const shared_ptr<BxDF> &bxdf, const Trans3 &trans)
+void ObjLoader::load(
+    const string &filename, const shared_ptr<BxDF> &bxdf, const shared_ptr<Material> &outside, const Trans3 &trans
+)
 {
     tinyobj::attrib_t attrib;
     string warn, err;
@@ -42,7 +47,7 @@ void ObjLoader::load(const string &filename, const shared_ptr<BxDF> &bxdf, const
     if (!err.empty()) std::cout << err << std::endl;
     if (!ret) return;
     cerr << "shapes : " << shapes.size() << endl;
-    for (auto & s : shapes)
+    for (auto &s : shapes)
     {
         int index_offset = 0;
         for (int f = 0; f < s.mesh.num_face_vertices.size(); ++f)
@@ -96,34 +101,31 @@ void ObjLoader::load(const string &filename, const shared_ptr<BxDF> &bxdf, const
             shared_ptr<Surface> surface;
             if (!M.diffuse_texname.empty())
             {
-                Trans3 trans(
+                Trans3 mapper(
                     V[0], V[1], V[2], Vt[0], Vt[1], Vt[2]
                 );
                 newmap(M.diffuse_texname);
-                surface = make_shared<Thin>(
-                    material, mappings[M.diffuse_texname], trans, rough
+                surface = make_shared<Solid>(
+                    material, outside, mappings[M.diffuse_texname], mapper, rough
                 );
             }
             else
             {
-                surface = make_shared<Thin>(
-                    material, rough
+                surface = make_shared<Solid>(
+                    material, outside, rough
                 );
             }
 
             objects.push_back(
                 make_shared<Object>(
-                    bxdf,
-                    shape,
-                    surface,
-                    "imported_object"
+                    bxdf, shape, surface, "imported_object"
                 )
             );
         }
     }
 }
 
-void ObjLoader::import_to(const shared_ptr<Sence>& sence)
+void ObjLoader::import_to(const shared_ptr<Sence> &sence)
 {
     sence->add_objects(objects);
     cleanup();

@@ -18,7 +18,7 @@ class Render
 public:
     Render(
         shared_ptr<oBuffer> image_, shared_ptr<Sence> sence_,
-        int _trace_mxcnt = 8, int _diffuse_mxcnt = 3, double _trace_eps = 1e-30
+        int _trace_mxcnt = 8, int _diffuse_mxcnt = 2, double _trace_eps = 1e-4
     );
 
     void step(int idx) const;

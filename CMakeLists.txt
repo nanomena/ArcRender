@@ -7,13 +7,16 @@ set(CMAKE_C_STANDARD 17)
 
 if (CMAKE_BUILD_TYPE EQUAL Single)
     add_compile_options(-Ofast)
-elseif(CMAKE_BUILD_TYPE EQUAL Release)
+elseif (CMAKE_BUILD_TYPE EQUAL Release)
     find_package(OpenMP)
     IF (OPENMP_FOUND)
         message("Found OpenMP!")
         add_compile_options(-fopenmp)
     ENDIF ()
     add_compile_options(-Ofast)
+elseif (CMAKE_BUILD_TYPE EQUAL Debug)
+    add_compile_options(-g)
+    add_compile_options(-fsanitize=address)
 endif ()
 
 

@@ -33,7 +33,7 @@ int main()
 
     ObjLoader loader;
 
-    loader.load("Rose_Model_3_decimated.obj", bxdf);
+    loader.load("Rose_Model_3_decimated.obj", bxdf, Mvacant);
     loader.import_to(sence);
 
     shared_ptr<Object> light = make_shared<Object>(

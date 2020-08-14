@@ -1,3 +1,4 @@
+#define ARC_IMPLEMENTATION
 #include "arc.hpp"
 #include <bits/stdc++.h>
 using namespace std;
@@ -14,6 +15,12 @@ int main()
         Spectrum(1), "vacant"
     );
 
+    shared_ptr<Material> Mwater = make_shared<Material>(
+        0, Spectrum(0), 1.3, 0,
+        Spectrum(1), Spectrum(1),
+        Spectrum(1), "water"
+    );
+
     shared_ptr<Material> Mlight0 = make_shared<Material>(
         1, Spectrum(0), 1, 0,
         Spectrum(0), Spectrum(0),
@@ -26,32 +33,26 @@ int main()
         Spectrum(0), "light1"
     );
 
-    shared_ptr<Material> Mgold = make_shared<Material>(
-        0, Spectrum(0), 30, 1,
-        rgb888(218, 178, 115), rgb888(218, 178, 115),
-        Spectrum(1), "gold"
-    );
-
     shared_ptr<Material> Msilver = make_shared<Material>(
         0, Spectrum(0), 30, 1,
-        rgb888(192, 192, 192), rgb888(192, 192, 192),
+        rgb888(252, 250, 245), rgb888(252, 250, 245),
         Spectrum(1), "silver"
     );
 
     shared_ptr<Material> Mred = make_shared<Material>(
-        0, Spectrum(0), 30, 1,
-        rgb888(255, 200, 200), rgb888(255, 200, 200),
+        0, Spectrum(0), 1.3, 1,
+        rgb888(255, 150, 150), rgb888(255),
         Spectrum(1), "red"
     );
 
     shared_ptr<Material> Mblue = make_shared<Material>(
-        0, Spectrum(0), 30, 1,
-        rgb888(200, 200, 255), rgb888(200, 200, 255),
+        0, Spectrum(0), 1.3, 1,
+        rgb888(150, 150, 255), rgb888(255),
         Spectrum(1), "blue"
     );
 
     shared_ptr<Material> Mwhite = make_shared<Material>(
-        0, Spectrum(0), 30, 1,
+        0, Spectrum(0), 1.3, 1,
         rgb888(255), rgb888(255),
         Spectrum(1), "white"
     );
@@ -104,7 +105,7 @@ int main()
                 Vec3(1, -1, -2),
                 Vec3(1, 1, -2)
             ),
-            make_shared<Solid>(Msilver, Mvacant, 0.3),
+            make_shared<Solid>(Msilver, Mvacant, 0.5),
             "back"
         )
     );
@@ -165,9 +166,20 @@ int main()
         )
     );
 
+//    sence->add_object(
+//        make_shared<Object>(
+//            bxdf,
+//            make_shared<Sphere>(
+//                Vec3(0, 0, -1), 0.5
+//            ),
+//            make_shared<Solid>(Mwater, Mvacant, 0.3),
+//            "ball"
+//        )
+//    );
+
     ObjLoader loader;
     loader.load(
-        "teapot.obj", bxdf,
+        "teapot.obj", bxdf, Mvacant,
         Trans3(
             Vec3(0.0125, 0, 0),
             Vec3(0, 0.0125, 0),
@@ -197,7 +209,7 @@ int main()
         render->epoch(cluster);
         cerr << "[T + " << (clock() / (double)CLOCKS_PER_SEC) << "] | epoch " << i << endl;
         if (i % 5 == 0)
-            image->save(output, 0.55);
+            image->save(output, 0.25);
     }
-    image->save(output, 0.55);
+    image->save(output, 0.25);
 }
