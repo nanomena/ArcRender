@@ -13,7 +13,7 @@
 #include "photon.hpp"
 #include "render.hpp"
 #include "sampler.hpp"
-#include "sence.hpp"
+#include "scene.hpp"
 #include "shape.hpp"
 #include "spectrum.hpp"
 #include "surface.hpp"

@@ -3,139 +3,107 @@
 
 #include <utility>
 
+#include "bxdf.hpp"
 #include "utils.hpp"
+#include "light.hpp"
+#include "mapping.hpp"
 #include "material.hpp"
 #include "spectrum.hpp"
-#include "mapping.hpp"
-
-struct sInfo
-{
-    double absorb, ior, rough, diffuse;
-    Spectrum emission, base, specular;
-    shared_ptr<Material> inside, outside;
-
-    sInfo() {}
-    sInfo(shared_ptr<Material> inside_, shared_ptr<Material> outside_, double rough_);
-    sInfo(const shared_ptr<Material> &material, double rough_);
-
-    void apply(const Pixel &t);
-};
 
 class Surface
 {
+    vector<pair<shared_ptr<BxDF>, Spectrum>> BxDFs;
+    vector<pair<shared_ptr<Light>, Spectrum>> Lights;
+//    shared_ptr<Material> inside, outside; @TODO Material
+    void rotate_axis(const Vec3 &N, const Vec3 &V, Mat3 &T, Mat3 &T_I) const;
 
 public:
-    virtual sInfo info(const Ray &ray, Ray &normal) const;
-};
+    Surface() {}
+    Surface(vector<pair<shared_ptr<BxDF>, Spectrum>> BxDFs_, vector<pair<shared_ptr<Light>, Spectrum>> Lights_);
+    void evaluate_VtS(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Spectrum &spectrum);
+    void evaluate_VtL(const Vec3 &inter, const Vec3 &N, const Vec3 &V, const Vec3 &L, Spectrum &spectrum);
+    void sample_VtL(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Vec3 &L, double &pdf);
+}; // @TODO better interface
 
-class Solid : public Surface
-{
-    sInfo into, outo;
-    shared_ptr<Mapping> texture;
-    Trans3 T;
-
-public:
-    Solid(const shared_ptr<Material> &inside_, const shared_ptr<Material> &outside_, double rough_ = 0);
-    Solid(
-        const shared_ptr<Material> &inside_, const shared_ptr<Material> &outside_, shared_ptr<Mapping> texture_,
-        const Trans3 &T_, double rough_ = 0
-    );
-
-    sInfo info(const Ray &ray, Ray &normal) const override;
-};
-
-class Thin : public Surface
-{
-    sInfo surface;
-    shared_ptr<Mapping> texture;
-    Trans3 T;
-
-public:
-    explicit Thin(const shared_ptr<Material> &material, double rough_ = 0);
-    Thin(
-        const shared_ptr<Material> &material, shared_ptr<Mapping> texture_,
-        const Trans3 &T_, double rough = 0
-    );
-
-    sInfo info(const Ray &ray, Ray &normal) const override;
-};
+shared_ptr<Surface> make_light(shared_ptr<Light> light, Spectrum spectrum);
+shared_ptr<Surface> make_bxdf(shared_ptr<BxDF> bxdf, Spectrum spectrum);
 
 #ifdef ARC_IMPLEMENTATION
 
-sInfo::sInfo(shared_ptr<Material> inside_, shared_ptr<Material> outside_, double rough_)
+Surface::Surface(vector<pair<shared_ptr<BxDF>, Spectrum>> BxDFs_, vector<pair<shared_ptr<Light>, Spectrum>> Lights_)
+    : BxDFs(BxDFs_), Lights(Lights_) {}
+
+shared_ptr<Surface> make_light(shared_ptr<Light> light, Spectrum spectrum)
 {
-    inside = std::move(inside_);
-    outside = std::move(outside_);
-    ior = outside->ior / inside->ior;
-    rough = rough_;
-    absorb = inside->absorb;
-    diffuse = inside->diffuse;
-    base = inside->base;
-    specular = inside->specular;
-    emission = inside->emission;
+    vector<pair<shared_ptr<BxDF>, Spectrum>> BxDFs;
+    vector<pair<shared_ptr<Light>, Spectrum>> Lights;
+    Lights.push_back(make_pair(light, spectrum));
+    return make_shared<Surface>(BxDFs, Lights);
 }
 
-sInfo::sInfo(const shared_ptr<Material> &material, double rough_) // need to be fixed later
+shared_ptr<Surface> make_bxdf(shared_ptr<BxDF> bxdf, Spectrum spectrum)
 {
-    inside = outside = nullptr;
-    ior = 1 / material->ior;
-    rough = rough_;
-    absorb = material->absorb;
-    diffuse = material->diffuse;
-    base = material->base;
-    specular = material->specular;
-    emission = material->emission;
+    vector<pair<shared_ptr<BxDF>, Spectrum>> BxDFs;
+    vector<pair<shared_ptr<Light>, Spectrum>> Lights;
+    BxDFs.push_back(make_pair(bxdf, spectrum));
+    return make_shared<Surface>(BxDFs, Lights);
 }
 
-void sInfo::apply(const Pixel &t)
+void Surface::rotate_axis(const Vec3 &N, const Vec3 &V, Mat3 &T, Mat3 &T_I) const
 {
-    emission = emission * rgb(t);
-    base = base * rgb(t);
-    specular = specular * rgb(t);
-    diffuse *= (1 - t.a);
+    Vec3 x, y, z = N;
+    if ((V ^ N).norm2() > EPS)
+        x = (V - z * (V * z)).scale(1);
+    else if (z.d[0] * z.d[0] + z.d[1] * z.d[1] > EPS)
+        x = Vec3(z.d[1], -z.d[0], 0).scale(1);
+    else
+        x = Vec3(1, 0, 0);
+    y = (x ^ z).scale(1);
+
+    T_I = axis_I(x, y, z);
+    T = T_I.I();
 }
 
-sInfo Surface::info(const Ray &ray, Ray &normal) const
+void Surface::evaluate_VtS(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Spectrum &spectrum)
 {
-    throw invalid_argument("NotImplementedError");
-}
-
-Solid::Solid(const shared_ptr<Material> &inside_, const shared_ptr<Material> &outside_, double rough_) :
-    into(inside_, outside_, rough_), outo(outside_, inside_, rough_), texture(nullptr) {}
-
-Solid::Solid(
-    const shared_ptr<Material> &inside_, const shared_ptr<Material> &outside_, shared_ptr<Mapping> texture_,
-    const Trans3 &T_, double rough_
-) : into(inside_, outside_, rough_), outo(outside_, inside_, rough_), texture(std::move(texture_)), T(T_) {}
-
-sInfo Solid::info(const Ray &ray, Ray &normal) const
-{
-    sInfo result = ray.d * normal.d < 0 ? into : outo;
-    if (texture != nullptr)
+    Mat3 T, T_I;
+    Vec3 V_, L_;
+    rotate_axis(N, V, T, T_I);
+    V_ = T * V;
+    spectrum = Spectrum();
+    for (auto Func : Lights)
     {
-        Vec3 p = T.apply(normal.o);
-        result.apply(texture->get(p.d[0], p.d[1]));
+        double weight;
+        get<0>(Func)->evaluate(V_, weight);
+        spectrum = spectrum + get<1>(Func) * Spectrum(weight);
     }
-    return result;
 }
 
-Thin::Thin(const shared_ptr<Material> &material, double rough_) :
-    surface(material, rough_), texture(nullptr) {}
-
-Thin::Thin(
-    const shared_ptr<Material> &material, shared_ptr<Mapping> texture_,
-    const Trans3 &T_, double rough_
-) : surface(material, rough_), texture(std::move(texture_)), T(T_) {}
-
-sInfo Thin::info(const Ray &ray, Ray &normal) const
+void Surface::evaluate_VtL(const Vec3 &inter, const Vec3 &N, const Vec3 &V, const Vec3 &L, Spectrum &spectrum)
 {
-    sInfo result = surface;
-    if (texture != nullptr)
+    Mat3 T, T_I;
+    Vec3 V_, L_;
+    rotate_axis(N, V, T, T_I);
+    V_ = T * V;
+    L_ = T * L;
+    spectrum = Spectrum();
+    for (auto Func : BxDFs)
     {
-        Vec3 p = T.apply(normal.o);
-        result.apply(texture->get(p.d[0], p.d[1]));
+        double weight;
+        get<0>(Func)->evaluate(V_, L_, weight);
+        spectrum = spectrum + get<1>(Func) * Spectrum(weight);
     }
-    return result;
+}
+
+void Surface::sample_VtL(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Vec3 &L, double &pdf) // @TODO MIS support
+{
+    Mat3 T, T_I;
+    Vec3 V_, L_;
+    rotate_axis(N, V, T, T_I);
+    V_ = T * V;
+    if (BxDFs.size() == 0) { L = T_I * Vec3(0, 0, 1); pdf = 1; return;}
+    get<0>(BxDFs[0])->sample(V_, L_, pdf);
+    L = T_I * L_;
 }
 
 #endif

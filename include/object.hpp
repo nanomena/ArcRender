@@ -6,71 +6,66 @@
 #include "utils.hpp"
 #include "bxdf.hpp"
 #include "shape.hpp"
+#include "surface.hpp"
 
 class Object
 {
     shared_ptr<Shape> shape;
-    shared_ptr<BxDF> bxdf;
     shared_ptr<Surface> surface;
 
 public:
+    Object(shared_ptr<Shape> shape_, shared_ptr<Surface> surface_, string name_);
+
     string name;
-    Object(shared_ptr<BxDF> bxdf_, shared_ptr<Shape> shape_, shared_ptr<Surface> surface_, string name_);
 
     Cuboid outline() const;
     void inter(const Ray &ray, int &hit, Vec3 &hitpoint) const;
-    double forward(const Vec3 &inter, Photon &photon, hit_type &type) const;
+    void evaluate_VtS(const Ray &V, Spectrum &spectrum);
+    void evaluate_VtL(const Ray &V, const Ray &L, Spectrum &spectrum);
+    void sample_VtL(const Ray &V, Ray &L, double &pdf);
 };
 
 #ifdef ARC_IMPLEMENTATION
 
-Object::Object(shared_ptr<BxDF> bxdf_, shared_ptr<Shape> shape_, shared_ptr<Surface> surface_, string name_)
-{
-    bxdf = std::move(bxdf_);
-    shape = std::move(shape_);
-    surface = std::move(surface_);
-    name = std::move(name_);
-}
+
+Object::Object(shared_ptr<Shape> shape_, shared_ptr<Surface> surface_, string name_)
+    : shape(std::move(shape_)), surface(std::move(surface_)), name(std::move(name_)) {}
 
 Cuboid Object::outline() const
 {
     return shape->outline();
 }
+
 void Object::inter(const Ray &ray, int &hit, Vec3 &hitpoint) const
 {
     shape->inter(ray, hit, hitpoint);
     if ((hitpoint - ray.o).norm2() < EPS) hit = 0;
 }
-double Object::forward(const Vec3 &inter, Photon &photon, hit_type &type) const
+
+void Object::evaluate_VtS(const Ray &V, Spectrum &spectrum)
 {
-    $ << name << endl;
-    Ray normal = shape->normal(photon.ray, inter);
+    int hit; Vec3 hitpoint;
+    shape->inter(V, hit, hitpoint);
+    assert(hit);
+    Vec3 N = shape->normal(hitpoint);
+    surface->evaluate_VtS(hitpoint, N, -V.d, spectrum);
+}
 
-    $ << "inter : " << inter << endl;
+void Object::evaluate_VtL(const Ray &V, const Ray &L, Spectrum &spectrum)
+{
+    Vec3 hitpoint = L.o;
+    Vec3 N = shape->normal(hitpoint);
+    surface->evaluate_VtL(hitpoint, N, -V.d, L.d, spectrum);
+}
 
-    sInfo S = surface->info(photon.ray, normal);
-
-    Vec3 x, y, z = (photon.ray.d * normal.d < 0 ? normal.d : -normal.d);
-    if ((photon.ray.d ^ normal.d).norm2() > EPS)
-        x = (photon.ray.d - z * (photon.ray.d * z)).scale(1);
-    else if (z.d[0] * z.d[0] + z.d[1] * z.d[1] > EPS)
-        x = Vec3(z.d[1], -z.d[0], 0).scale(1);
-    else
-        x = Vec3(1, 0, 0);
-    y = (x ^ z).scale(1);
-    Mat3 T = axis_I(x, y, z);
-
-    Vec3 O(x * inter, y * inter, z * inter),
-        d(x * photon.ray.d, y * photon.ray.d, z * photon.ray.d);
-
-    photon.apply(Ray(Vec3(), d));
-
-    // change into BRDF coordinate
-
-    double weight = bxdf->forward(S, photon, type);
-
-    photon.apply(Ray(T * (O + photon.ray.o), T * photon.ray.d));
-    return weight;
+void Object::sample_VtL(const Ray &V, Ray &L, double &pdf)
+{
+    int hit; Vec3 hitpoint;
+    shape->inter(V, hit, hitpoint);
+    assert(hit);
+    L.o = hitpoint;
+    Vec3 N = shape->normal(hitpoint);
+    surface->sample_VtL(hitpoint, N, -V.d, L.d, pdf);
 }
 
 #endif

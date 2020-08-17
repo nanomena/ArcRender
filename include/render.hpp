@@ -5,67 +5,74 @@
 
 #include "utils.hpp"
 #include "obuffer.hpp"
-#include "sence.hpp"
+#include "scene.hpp"
 #include "photon.hpp"
 
 class Render
 {
-    int trace_limit, diffuse_limit, length;
-    double trace_eps;
+    virtual void step(int idx) const
+    {
+        throw invalid_argument("NotImplementedError");
+    }
+
+protected:
+    int length;
     shared_ptr<oBuffer> image;
-    shared_ptr<Sence> sence;
+    shared_ptr<Scene> scene;
 
 public:
-    Render(
-        shared_ptr<oBuffer> image_, shared_ptr<Sence> sence_,
-        int _trace_mxcnt = 8, int _diffuse_mxcnt = 2, double _trace_eps = 1e-4
-    );
-
-    void step(int idx) const;
+    Render(shared_ptr<oBuffer> image_, shared_ptr<Scene> scene_);
     void epoch(int cluster = 1) const;
 };
 
+class NaivePathTracer : public Render
+{
+    int trace_limit;
+    double trace_eps;
+
+    void step(int idx) const override;
+public:
+    NaivePathTracer(
+        shared_ptr<oBuffer> image_, shared_ptr<Scene> scene_, int trace_limit_ = 4, double trace_eps_ = 1e-4
+    );
+};
 #ifdef ARC_IMPLEMENTATION
 
-Render::Render(
-    shared_ptr<oBuffer> image_, shared_ptr<Sence> sence_,
-    int _trace_mxcnt, int _diffuse_mxcnt, double _trace_eps
-)
+Render::Render(shared_ptr<oBuffer> image_, shared_ptr<Scene> scene_)
 {
     image = std::move(image_);
-    sence = std::move(sence_);
-    trace_limit = _trace_mxcnt;
-    diffuse_limit = _diffuse_mxcnt;
-    trace_eps = _trace_eps;
+    scene = std::move(scene_);
     length = image->epoch();
 }
 
-void Render::step(int idx) const
+NaivePathTracer::NaivePathTracer(
+    shared_ptr<oBuffer> image_, shared_ptr<Scene> scene_, int trace_limit_, double trace_eps_
+) : Render(image_, scene_), trace_limit(trace_limit_), trace_eps(trace_eps_) {}
+
+void NaivePathTracer::step(int idx) const
 {
-    $ << "STEP :: " << idx << endl;
-    double weight = 1;
-    Photon photon(image->sample(idx), Spectrum(1), sence->env);
-    int diffuse_cnt = 0, matched = 0;
-    for (int trace_cnt = 0; (trace_cnt < trace_limit) && weight > trace_eps; ++trace_cnt)
+    Ray now = image->sample(idx);
+    Spectrum mul(1), sum(0);
+
+    for (int cnt = 0; cnt < trace_limit; ++cnt)
     {
-        hit_type type;
-        $ << "tracing " << photon.ray << endl;
-        weight *= sence->forward(photon, type);
-        if (type == source)
-        {
-            matched = 1;
-            break;
-        }
-        if ((type == diff_refr) || (type == diff_refl))
-        {
-            if (diffuse_cnt < diffuse_limit)
-                diffuse_cnt++;
-            else break;
-        }
+        shared_ptr<Object> object;
+        Spectrum spectrum;
+        Vec3 hitpoint;
+        scene->inter(now, object, hitpoint);
+        object->evaluate_VtS(now, spectrum);
+        sum = sum + mul * spectrum;
+
+        Ray next;
+        double pdf;
+        object->sample_VtL(now, next, pdf);
+        object->evaluate_VtL(now, next, spectrum);
+        mul = mul * (spectrum / pdf);
+        if (spectrum.norm() < trace_eps) break;
+
+        now = next;
     }
-    $ << photon.spectrum << " " << weight << endl;
-    if (!matched) photon.trans(Spectrum(0));
-    image->draw(idx, photon.spectrum, weight);
+    image->draw(idx, sum, 1);
 }
 void Render::epoch(int cluster) const
 {

@@ -12,7 +12,7 @@ protected:
 
 public:
     virtual void inter(const Ray &ray, int &hit, Vec3 &hitpoint) const;
-    virtual Ray normal(const Ray &ray, const Vec3 &inter) const;
+    virtual Vec3 normal(const Vec3 &inter) const;
     // norm should be unitary
 
     virtual Cuboid outline() const;
@@ -29,7 +29,7 @@ public:
     Sphere(Vec3 _o, double _r);
 
     void inter(const Ray &ray, int &hit, Vec3 &hitpoint) const override;
-    Ray normal(const Ray &ray, const Vec3 &inter) const override;
+    Vec3 normal(const Vec3 &inter) const override;
 };
 
 class Flat : public Shape
@@ -47,13 +47,14 @@ public:
     template<typename... T>
     explicit Flat(T... _vertexs)
     {
-        vector<Vec3> tmp; n = 0;
+        vector<Vec3> tmp;
+        n = 0;
         (tmp.push_back(_vertexs), ...);
         new(this)Flat(tmp);
     }
 
     void inter(const Ray &ray, int &hit, Vec3 &hitpoint) const override;
-    Ray normal(const Ray &ray, const Vec3 &inter) const override;
+    Vec3 normal(const Vec3 &inter) const override;
 };
 
 class Disc : public Shape
@@ -66,7 +67,7 @@ public:
     Disc(Vec3 _o, Vec3 _norm, double _r);
 
     void inter(const Ray &ray, int &hit, Vec3 &hitpoint) const override;
-    Ray normal(const Ray &ray, const Vec3 &inter) const override;
+    Vec3 normal(const Vec3 &inter) const override;
 };
 
 class TriObj : public Shape
@@ -78,7 +79,7 @@ public:
     TriObj(Vec3 V0_, Vec3 V1_, Vec3 V2_, Vec3 Vn0_, Vec3 Vn1_, Vec3 Vn2_);
 
     void inter(const Ray &ray, int &hit, Vec3 &hitpoint) const override;
-    Ray normal(const Ray &ray, const Vec3 &inter) const override;
+    Vec3 normal(const Vec3 &inter) const override;
 };
 
 #ifdef ARC_IMPLEMENTATION
@@ -87,7 +88,7 @@ void Shape::inter(const Ray &ray, int &hit, Vec3 &hitpoint) const
 {
     throw invalid_argument("NotImplementedError");
 }
-Ray Shape::normal(const Ray &ray, const Vec3 &inter) const
+Vec3 Shape::normal(const Vec3 &inter) const
 {
     throw invalid_argument("NotImplementedError");
 }
@@ -136,9 +137,9 @@ void Sphere::inter(const Ray &ray, int &hit, Vec3 &hitpoint) const
         hitpoint = candi;
     }
 }
-Ray Sphere::normal(const Ray &ray, const Vec3 &inter) const
+Vec3 Sphere::normal(const Vec3 &inter) const
 {
-    return Ray(inter, (inter - o).scale(1));
+    return (inter - o).scale(1);
 }
 
 Flat::Flat(const vector<Vec3> &_vertexs)
@@ -194,9 +195,9 @@ void Flat::inter(const Ray &ray, int &hit, Vec3 &hitpoint) const
     hit = 1;
     hitpoint = ray.o + ray.d * dis;
 }
-Ray Flat::normal(const Ray &ray, const Vec3 &inter) const
+Vec3 Flat::normal(const Vec3 &inter) const
 {
-    return Ray(inter, norm);
+    return norm;
 }
 
 Disc::Disc(Vec3 _o, Vec3 _norm, double _r)
@@ -238,9 +239,9 @@ void Disc::inter(const Ray &ray, int &hit, Vec3 &hitpoint) const
     hit = 1;
     hitpoint = ray.o + ray.d * dis;
 }
-Ray Disc::normal(const Ray &ray, const Vec3 &inter) const
+Vec3 Disc::normal(const Vec3 &inter) const
 {
-    return Ray(inter, norm);
+    return norm;
 }
 
 TriObj::TriObj(Vec3 V0_, Vec3 V1_, Vec3 V2_)
@@ -253,64 +254,36 @@ TriObj::TriObj(Vec3 V0_, Vec3 V1_, Vec3 V2_)
 }
 TriObj::TriObj(Vec3 V0_, Vec3 V1_, Vec3 V2_, Vec3 Vn0_, Vec3 Vn1_, Vec3 Vn2_)
 {
-    V0 = V0_;
-    Vn0 = Vn0_;
-    V1 = V1_;
-    Vn1 = Vn1_;
-    V2 = V2_;
-    Vn2 = Vn2_;
+    V0 = V0_, Vn0 = Vn0_;
+    V1 = V1_, Vn1 = Vn1_;
+    V2 = V2_, Vn2 = Vn2_;
     box = Cuboid(V0) + Cuboid(V1) + Cuboid(V2);
 }
 
 void TriObj::inter(const Ray &ray, int &hit, Vec3 &hitpoint) const
 {
     Vec3 E1 = V1 - V0, E2 = V2 - V0, T = ray.o - V0;
-    Vec3 P = ray.d ^E2;
+    Vec3 P = (ray.d ^ E2);
     double det = P * E1;
-    if (det < 0)
-    {
-        det = -det;
-        T = -T;
-    }
-    if (det < EPS)
-    {
-        hit = 0;
-        return;
-    }
+    if (det < 0) det = -det, T = -T;
+    if (det < EPS) return (hit = 0, void());
     double u = P * T;
-    if (u < 0 || u > det)
-    {
-        hit = 0;
-        return;
-    }
-    Vec3 Q = T ^E1;
+    if (u < 0 || u > det) return (hit = 0, void());
+    Vec3 Q = (T ^ E1);
     double t = Q * E2;
-    if (t < 0)
-    {
-        hit = 0;
-        return;
-    }
-
+    if (t < 0) return (hit = 0, void());
     double v = Q * ray.d;
-    if (v < 0 || u + v > det)
-    {
-        hit = 0;
-        return;
-    }
+    if (v < 0 || u + v > det) return (hit = 0, void());
     hit = 1;
     hitpoint = ray.o + ray.d * (t / det);
 }
-Ray TriObj::normal(const Ray &ray, const Vec3 &inter) const
+
+Vec3 TriObj::normal(const Vec3 &inter) const
 {
-    Vec3 E1 = V1 - V0, E2 = V2 - V0, T = ray.o - V0;
-    Vec3 P = ray.d ^E2;
-    double det = P * E1;
-    Vec3 Q = T ^E1;
-//    double t = Q * E2;
-    double u = P * T / det;
-    double v = Q * ray.d / det;
-    Vec3 norm = (Vn0 * (1 - u - v) + Vn1 * u + Vn2 * v).scale(1);
-    return Ray(inter, norm);
+    double S = ((V1 - V0) ^ (V2 - V0)).norm();
+    double k1 = ((inter - V0) ^ (inter - V2)).norm() / S;
+    double k2 = ((inter - V0) ^ (inter - V1)).norm() / S;
+    return (Vn0 * (1 - k1 - k2) + Vn1 * k1 + Vn2 * k2).scale(1);
 }
 
 #endif

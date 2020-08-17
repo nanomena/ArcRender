@@ -5,7 +5,7 @@
 #include "geometry.hpp"
 #include "object.hpp"
 #include "bxdf.hpp"
-#include "sence.hpp"
+#include "scene.hpp"
 
 class ObjLoader
 {
@@ -19,10 +19,9 @@ public:
     void cleanup();
     void newmap(const string &filename);
     void load(
-        const string &filename, const shared_ptr<BxDF> &bxdf, const shared_ptr<Material> &outside = nullptr,
-        const Trans3 &trans = Trans3()
+        const string &filename, const shared_ptr<BxDF> &bxdf, const Trans3 &trans = Trans3()
     );
-    void import_to(const shared_ptr<Sence> &sence);
+    void import_to(const shared_ptr<Scene> &sence);
 };
 
 #ifdef ARC_IMPLEMENTATION
@@ -37,7 +36,7 @@ void ObjLoader::newmap(const string &filename)
         mappings[filename] = make_shared<Mapping>(filename);
 }
 void ObjLoader::load(
-    const string &filename, const shared_ptr<BxDF> &bxdf, const shared_ptr<Material> &outside, const Trans3 &trans
+    const string &filename, const shared_ptr<BxDF> &bxdf, const Trans3 &trans
 )
 {
     tinyobj::attrib_t attrib;
@@ -99,39 +98,27 @@ void ObjLoader::load(
 
             double rough = 1 - M.shininess / 1000;
             shared_ptr<Surface> surface;
-            if (!M.diffuse_texname.empty())
+            if (!M.diffuse_texname.empty()) // @TODO Texture
             {
                 Trans3 mapper(
                     V[0], V[1], V[2], Vt[0], Vt[1], Vt[2]
                 );
                 newmap(M.diffuse_texname);
-                if (outside != nullptr)
-                    surface = make_shared<Solid>(
-                        material, outside, mappings[M.diffuse_texname], mapper, rough
-                    );
-                else
-                    surface = make_shared<Thin>(
-                        material, mappings[M.diffuse_texname], mapper, rough
-                    );
             }
             else
             {
-                if (outside != nullptr)
-                    surface = make_shared<Solid>(material, outside, rough);
-                else
-                    surface = make_shared<Thin>(material, rough);
             }
 
             objects.push_back(
                 make_shared<Object>(
-                    bxdf, shape, surface, "imported_object"
+                    shape, surface, "imported"
                 )
-            );
+            ); // @TODO better name
         }
     }
 }
 
-void ObjLoader::import_to(const shared_ptr<Sence> &sence)
+void ObjLoader::import_to(const shared_ptr<Scene> &sence)
 {
     sence->add_objects(objects);
     cleanup();
