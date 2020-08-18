@@ -14,7 +14,7 @@ struct Vec2
     double d[2];
 
     Vec2();
-    Vec2(double d_[]);
+    explicit Vec2(double d_[]);
     Vec2(double x, double y);
 
     Vec2 operator -() const;
@@ -29,7 +29,7 @@ struct Vec3
     double d[3];
 
     Vec3();
-    Vec3(double d_[]);
+    explicit Vec3(double d_[]);
     Vec3(double x, double y, double z);
 
     Vec3 operator -() const;
@@ -67,7 +67,7 @@ struct Mat3
     double d[3][3];
 
     Mat3();
-    Mat3(double d_[][3]);
+    explicit Mat3(double d_[][3]);
 
     Mat3 operator +(const Mat3 &t) const;
     Mat3 operator -(const Mat3 &t) const;
@@ -87,13 +87,13 @@ struct Cuboid
     Vec3 n, x;
 
     Cuboid();
-    Cuboid(Vec3 p);
+    explicit Cuboid(Vec3 p);
     Cuboid(Vec3 n_, Vec3 x_);
 
     Cuboid operator +(const Cuboid &t) const;
     double operator *(const Cuboid &t) const;
 
-    void inter(const Ray &ray, int &hit, Vec3 &hitpoint) const;
+    void inter(const Ray &ray, int &is_inter, Vec3 &intersect) const;
 
     friend ostream &operator <<(ostream &s, Cuboid t);
 };
@@ -241,7 +241,7 @@ ostream &operator <<(ostream &s, Vec3 t)
     return s;
 }
 
-Ray::Ray() {}
+Ray::Ray() = default;
 Ray::Ray(Vec3 o_, Vec3 d_)
 {
     o = o_;
@@ -396,7 +396,7 @@ double Cuboid::operator *(const Cuboid &t) const
         * max(0., min(x.d[2], t.x.d[2]) - max(n.d[2], t.n.d[2]));
 }
 
-void Cuboid::inter(const Ray &ray, int &hit, Vec3 &hitpoint) const
+void Cuboid::inter(const Ray &ray, int &is_inter, Vec3 &intersect) const
 {
     double l = 0, r = INF;
     for (int i = 0; i < 3; ++i)
@@ -416,11 +416,11 @@ void Cuboid::inter(const Ray &ray, int &hit, Vec3 &hitpoint) const
     }
     if (l > r)
     {
-        hit = 0;
+        is_inter = 0;
         return;
     }
-    hit = 1;
-    hitpoint = ray.o + ray.d * l;
+    is_inter = 1;
+    intersect = ray.o + ray.d * l;
 }
 
 ostream &operator <<(ostream &s, Cuboid t)

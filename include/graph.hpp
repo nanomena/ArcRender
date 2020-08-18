@@ -15,7 +15,7 @@ struct KaDanTreeNode
     void load(
         shared_ptr<Object> objects[], int size, const function<KaDanTreeNode *()> &acquire, int d
     );
-    void query(const Ray &ray, shared_ptr<Object> &next, Vec3 &hitpoint) const;
+    void query(const Ray &ray, shared_ptr<Object> &next, Vec3 &intersect) const;
 };
 
 class KaDanTree
@@ -29,7 +29,7 @@ public:
 
     KaDanTreeNode *acquire();
 
-    void query(const Ray &ray, shared_ptr<Object> &next, Vec3 &hitpoint) const;
+    void query(const Ray &ray, shared_ptr<Object> &next, Vec3 &intersect) const;
 };
 
 #ifdef ARC_IMPLEMENTATION
@@ -63,34 +63,34 @@ void KaDanTreeNode::load(
     if (right != nullptr) box = box + right->box;
 }
 
-void KaDanTreeNode::query(const Ray &ray, shared_ptr<Object> &next, Vec3 &hitpoint) const
+void KaDanTreeNode::query(const Ray &ray, shared_ptr<Object> &next, Vec3 &intersect) const
 {
-    int hit;
+    int is_inter;
     Vec3 candipoint;
-    box.inter(ray, hit, candipoint);
-    if (!hit) return;
-    if ((candipoint - ray.o).norm2() >= (hitpoint - ray.o).norm2()) return;
+    box.inter(ray, is_inter, candipoint);
+    if (!is_inter) return;
+    if ((candipoint - ray.o).norm2() >= (intersect - ray.o).norm2()) return;
 
     KaDanVisit++;
 
-    cen->inter(ray, hit, candipoint);
-    // $ << "ray " << ray << " " << cen->outline() << " " << hit << endl;
-    if (hit)
-        if ((candipoint - ray.o).norm2() < (hitpoint - ray.o).norm2())
+    cen->inter(ray, is_inter, candipoint);
+    // $ << "ray " << ray << " " << cen->outline() << " " << is_inter << endl;
+    if (is_inter)
+        if ((candipoint - ray.o).norm2() < (intersect - ray.o).norm2())
         {
-            hitpoint = candipoint;
+            intersect = candipoint;
             next = cen;
         }
 
     if (left == nullptr && right == nullptr) return;
     if (left == nullptr)
     {
-        right->query(ray, next, hitpoint);
+        right->query(ray, next, intersect);
         return;
     }
     if (right == nullptr)
     {
-        left->query(ray, next, hitpoint);
+        left->query(ray, next, intersect);
         return;
     }
 
@@ -104,24 +104,24 @@ void KaDanTreeNode::query(const Ray &ray, shared_ptr<Object> &next, Vec3 &hitpoi
     if (!hit_left && !hit_right) return;
     if (!hit_left)
     {
-        right->query(ray, next, hitpoint);
+        right->query(ray, next, intersect);
         return;
     }
     if (!hit_right)
     {
-        left->query(ray, next, hitpoint);
+        left->query(ray, next, intersect);
         return;
     }
 
     if ((candipoint_l - ray.o).norm2() < (candipoint_r - ray.o).norm2())
     {
-        left->query(ray, next, hitpoint);
-        right->query(ray, next, hitpoint);
+        left->query(ray, next, intersect);
+        right->query(ray, next, intersect);
     }
     else
     {
-        right->query(ray, next, hitpoint);
-        left->query(ray, next, hitpoint);
+        right->query(ray, next, intersect);
+        left->query(ray, next, intersect);
     }
 }
 
@@ -136,10 +136,10 @@ KaDanTree::KaDanTree(vector<shared_ptr<Object>> objects)
 
 KaDanTreeNode *KaDanTree::acquire() { return &tree[cnt++]; }
 
-void KaDanTree::query(const Ray &ray, shared_ptr<Object> &next, Vec3 &hitpoint) const
+void KaDanTree::query(const Ray &ray, shared_ptr<Object> &next, Vec3 &intersect) const
 {
     KaDanVisit = 0;
-    root->query(ray, next, hitpoint);
+    root->query(ray, next, intersect);
 }
 
 #endif

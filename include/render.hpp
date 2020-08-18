@@ -58,8 +58,8 @@ void NaivePathTracer::step(int idx) const
     {
         shared_ptr<Object> object;
         Spectrum spectrum;
-        Vec3 hitpoint;
-        scene->inter(now, object, hitpoint);
+        Vec3 intersect;
+        scene->inter(now, object, intersect);
         object->evaluate_VtS(now, spectrum);
         sum = sum + mul * spectrum;
 

@@ -20,7 +20,7 @@ public:
     void add_object(const shared_ptr<Object> &object);
     void add_objects(const vector<shared_ptr<Object>> &object);
 
-    void inter(const Ray &ray, shared_ptr<Object> &object, Vec3 &hitpoint) const;
+    void inter(const Ray &ray, shared_ptr<Object> &object, Vec3 &intersect) const;
 };
 
 #ifdef ARC_IMPLEMENTATION
@@ -40,14 +40,14 @@ void Scene::add_objects(const vector<shared_ptr<Object>> &objects)
     graphs.push_back(make_shared<KaDanTree>(objects));
 }
 
-void Scene::inter(const Ray &ray, shared_ptr<Object> &object, Vec3 &hitpoint) const
+void Scene::inter(const Ray &ray, shared_ptr<Object> &object, Vec3 &intersect) const
 {
     object = skybox;
-    int hit;
-    skybox->inter(ray, hit, hitpoint);
-    assert(hit);
+    int is_inter;
+    skybox->inter(ray, is_inter, intersect);
+    assert(is_inter);
     for (const auto &graph : graphs)
-        graph->query(ray, object, hitpoint);
+        graph->query(ray, object, intersect);
 }
 
 #endif

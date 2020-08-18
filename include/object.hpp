@@ -19,7 +19,7 @@ public:
     string name;
 
     Cuboid outline() const;
-    void inter(const Ray &ray, int &hit, Vec3 &hitpoint) const;
+    void inter(const Ray &ray, int &is_inter, Vec3 &intersect) const;
     void evaluate_VtS(const Ray &V, Spectrum &spectrum);
     void evaluate_VtL(const Ray &V, const Ray &L, Spectrum &spectrum);
     void sample_VtL(const Ray &V, Ray &L, double &pdf);
@@ -36,36 +36,36 @@ Cuboid Object::outline() const
     return shape->outline();
 }
 
-void Object::inter(const Ray &ray, int &hit, Vec3 &hitpoint) const
+void Object::inter(const Ray &ray, int &is_inter, Vec3 &intersect) const
 {
-    shape->inter(ray, hit, hitpoint);
-    if ((hitpoint - ray.o).norm2() < EPS) hit = 0;
+    shape->inter(ray, is_inter, intersect);
+    if ((intersect - ray.o).norm2() < EPS) is_inter = 0;
 }
 
 void Object::evaluate_VtS(const Ray &V, Spectrum &spectrum)
 {
-    int hit; Vec3 hitpoint;
-    shape->inter(V, hit, hitpoint);
-    assert(hit);
-    Vec3 N = shape->normal(hitpoint);
-    surface->evaluate_VtS(hitpoint, N, -V.d, spectrum);
+    int is_inter; Vec3 intersect;
+    shape->inter(V, is_inter, intersect);
+    assert(is_inter);
+    Vec3 N = shape->normal(intersect);
+    surface->evaluate_VtS(intersect, N, -V.d, spectrum);
 }
 
 void Object::evaluate_VtL(const Ray &V, const Ray &L, Spectrum &spectrum)
 {
-    Vec3 hitpoint = L.o;
-    Vec3 N = shape->normal(hitpoint);
-    surface->evaluate_VtL(hitpoint, N, -V.d, L.d, spectrum);
+    Vec3 intersect = L.o;
+    Vec3 N = shape->normal(intersect);
+    surface->evaluate_VtL(intersect, N, -V.d, L.d, spectrum);
 }
 
 void Object::sample_VtL(const Ray &V, Ray &L, double &pdf)
 {
-    int hit; Vec3 hitpoint;
-    shape->inter(V, hit, hitpoint);
-    assert(hit);
-    L.o = hitpoint;
-    Vec3 N = shape->normal(hitpoint);
-    surface->sample_VtL(hitpoint, N, -V.d, L.d, pdf);
+    int is_inter; Vec3 intersect;
+    shape->inter(V, is_inter, intersect);
+    assert(is_inter);
+    L.o = intersect;
+    Vec3 N = shape->normal(intersect);
+    surface->sample_VtL(intersect, N, -V.d, L.d, pdf);
 }
 
 #endif
