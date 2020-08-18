@@ -105,15 +105,17 @@ int main()
         )
     );
 
-    scene->add_object(
-        make_shared<Object>(
-            make_shared<Sphere>(
-                Vec3(0, 0, -1), 0.5
-            ),
-            make_bxdf(make_shared<Lambert>(), rgb888(255, 255, 255)),
-            "ball"
-        )
-    );
+//    ObjLoader loader;
+//    loader.load(
+//        "scene11.obj", bxdf, Mvacant,
+//        Trans3(
+//            Vec3(0.0125, 0, 0),
+//            Vec3(0, 0.0125, 0),
+//            Vec3(0, 0, 0.0125),
+//            Vec3(0, -0.75, -1)
+//        )
+//    );
+//    loader.import_to(sence);
 
     shared_ptr<Camera> camera = make_shared<PerspectiveCamera>(
         Vec3(0, 0, 1.5),
