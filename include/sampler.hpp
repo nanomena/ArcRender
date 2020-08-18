@@ -36,6 +36,7 @@ public:
 
     Vec2 pixel(Vec2 t, double width, double height);
     Vec3 semisphere();
+    Vec3 sphere();
 };
 
 static Sampler RD;
@@ -62,6 +63,13 @@ Vec3 Sampler::semisphere()
 {
     auto v = make_pair(sample(), sample());
     double z = v.first, phi = v.second * (2 * pi) - pi;
+    return Vec3(sin(phi) * sqrt(1 - z * z), cos(phi) * sqrt(1 - z * z), z);
+}
+
+Vec3 Sampler::sphere()
+{
+    auto v = make_pair(sample(), sample());
+    double z = v.first * 2 - 1, phi = v.second * (2 * pi) - pi;
     return Vec3(sin(phi) * sqrt(1 - z * z), cos(phi) * sqrt(1 - z * z), z);
 }
 

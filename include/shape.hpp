@@ -12,8 +12,8 @@ protected:
 
 public:
     virtual void inter(const Ray &ray, int &is_inter, Vec3 &intersect) const;
-    virtual Vec3 normal(const Vec3 &inter) const;
-    // norm should be unitary
+    virtual Vec3 normal(const Vec3 &inter) const; // norm should be unitary
+    virtual void sample(const Vec3 &ref, Ray &ray, double &pdf) const;
 
     virtual Cuboid outline() const;
 };
@@ -55,6 +55,7 @@ public:
 
     void inter(const Ray &ray, int &is_inter, Vec3 &intersect) const override;
     Vec3 normal(const Vec3 &inter) const override;
+    void sample(const Vec3 &ref, Ray &ray, double &pdf) const override;
 };
 
 class Disc : public Shape
@@ -72,11 +73,10 @@ public:
 
 class TriObj : public Shape
 {
-    Vec3 V0, V1, V2, Vn0, Vn1, Vn2;
+    Vec3 V0, V1, V2, norm;
 
 public:
     TriObj(Vec3 V0_, Vec3 V1_, Vec3 V2_);
-    TriObj(Vec3 V0_, Vec3 V1_, Vec3 V2_, Vec3 Vn0_, Vec3 Vn1_, Vec3 Vn2_);
 
     void inter(const Ray &ray, int &is_inter, Vec3 &intersect) const override;
     Vec3 normal(const Vec3 &inter) const override;
@@ -92,7 +92,10 @@ Vec3 Shape::normal(const Vec3 &inter) const
 {
     throw invalid_argument("NotImplementedError");
 }
-
+void Shape::sample(const Vec3 &ref, Ray &ray, double &pdf) const
+{
+    throw invalid_argument("NotImplementedError");
+}
 Cuboid Shape::outline() const
 {
     return box;
@@ -199,6 +202,24 @@ Vec3 Flat::normal(const Vec3 &inter) const
 {
     return norm;
 }
+void Flat::sample(const Vec3 &ref, Ray &ray, double &pdf) const // @TODO better locate method
+{
+    double area = 0;
+    for (int i = 2; i < n; ++ i)
+        area += ((vertexs[i - 1] - vertexs[0]) ^ (vertexs[i] - vertexs[0])).norm() / 2;
+    double p = RD.rand(); int k = -1;
+    for (int i = 2; i < n; ++ i)
+    {
+        double w = ((vertexs[i - 1] - vertexs[0]) ^ (vertexs[i] - vertexs[0])).norm() / 2;
+        if (p < w / area) { k = i; break; }
+        else p -= w / area;
+    }
+    double a = RD.rand(), b = RD.rand();
+    if (a + b > 1) a = 1 - a, b = 1 - b;
+    Vec3 s = (vertexs[k - 1] - vertexs[0]) * a + (vertexs[k] - vertexs[0]) * b + vertexs[0];
+    ray = Ray(ref, s - ref);
+    pdf = 1 / (area * abs(ray.d * norm) / ray.d.norm() / ray.d.norm2());
+}
 
 Disc::Disc(Vec3 _o, Vec3 _norm, double _r)
 {
@@ -249,14 +270,7 @@ TriObj::TriObj(Vec3 V0_, Vec3 V1_, Vec3 V2_)
     V0 = V0_;
     V1 = V1_;
     V2 = V2_;
-    Vn0 = Vn1 = Vn2 = ((V1 - V0) ^ (V2 - V0)).scale(1);
-    box = Cuboid(V0) + Cuboid(V1) + Cuboid(V2);
-}
-TriObj::TriObj(Vec3 V0_, Vec3 V1_, Vec3 V2_, Vec3 Vn0_, Vec3 Vn1_, Vec3 Vn2_)
-{
-    V0 = V0_, Vn0 = Vn0_;
-    V1 = V1_, Vn1 = Vn1_;
-    V2 = V2_, Vn2 = Vn2_;
+    norm = ((V1 - V0) ^ (V2 - V0)).scale(1);
     box = Cuboid(V0) + Cuboid(V1) + Cuboid(V2);
 }
 
@@ -280,11 +294,15 @@ void TriObj::inter(const Ray &ray, int &is_inter, Vec3 &intersect) const
 
 Vec3 TriObj::normal(const Vec3 &inter) const
 {
-    double S = ((V1 - V0) ^ (V2 - V0)).norm();
-    double k1 = ((inter - V0) ^ (inter - V2)).norm() / S;
-    double k2 = ((inter - V0) ^ (inter - V1)).norm() / S;
-    return (Vn0 * (1 - k1 - k2) + Vn1 * k1 + Vn2 * k2).scale(1);
+    return norm;
 }
+//Vec3 TriObj::normal(const Vec3 &inter) const
+//{
+//    double S = ((V1 - V0) ^ (V2 - V0)).norm();
+//    double k1 = ((inter - V0) ^ (inter - V2)).norm() / S;
+//    double k2 = ((inter - V0) ^ (inter - V1)).norm() / S;
+//    return (Vn0 * (1 - k1 - k2) + Vn1 * k1 + Vn2 * k2).scale(1);
+//}
 
 #endif
 #endif /* shape_hpp */

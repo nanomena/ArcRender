@@ -14,7 +14,8 @@ class Scene
     vector<shared_ptr<KaDanTree>> graphs;
 
 public:
-    shared_ptr<Material> env;
+    vector<shared_ptr<Object>> Lights;
+
     explicit Scene(shared_ptr<Object> skybox_);
 
     void add_object(const shared_ptr<Object> &object);
@@ -33,10 +34,13 @@ Scene::Scene(shared_ptr<Object> skybox_)
 void Scene::add_object(const shared_ptr<Object> &object)
 {
     vector<shared_ptr<Object>> objects{object};
-    graphs.push_back(make_shared<KaDanTree>(objects));
+    add_objects(objects);
 }
 void Scene::add_objects(const vector<shared_ptr<Object>> &objects)
 {
+    for (const auto& object : objects)
+        if (object->surface_info().second > 0)
+            Lights.push_back(object);
     graphs.push_back(make_shared<KaDanTree>(objects));
 }
 

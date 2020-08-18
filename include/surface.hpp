@@ -20,6 +20,8 @@ class Surface
 public:
     Surface() {}
     Surface(vector<pair<shared_ptr<BxDF>, Spectrum>> BxDFs_, vector<pair<shared_ptr<Light>, Spectrum>> Lights_);
+
+    pair<int, int> surface_info() const;
     void evaluate_VtS(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Spectrum &spectrum);
     void evaluate_VtL(const Vec3 &inter, const Vec3 &N, const Vec3 &V, const Vec3 &L, Spectrum &spectrum);
     void sample_VtL(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Vec3 &L, double &pdf);
@@ -49,8 +51,14 @@ shared_ptr<Surface> make_bxdf(shared_ptr<BxDF> bxdf, Spectrum spectrum)
     return make_shared<Surface>(BxDFs, Lights);
 }
 
+pair<int, int> Surface::surface_info() const
+{
+    return make_pair(BxDFs.size(), Lights.size());
+}
+
 void Surface::rotate_axis(const Vec3 &N, const Vec3 &V, Mat3 &T, Mat3 &T_I) const
 {
+    assert(abs(1 - N.norm()) < EPS);
     Vec3 x, y, z = N;
     if ((V ^ N).norm2() > EPS)
         x = (V - z * (V * z)).scale(1);
