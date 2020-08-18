@@ -23,6 +23,7 @@ protected:
 public:
     Render(shared_ptr<oBuffer> image_, shared_ptr<Scene> scene_);
     void epoch(int cluster = 1) const;
+    void step_one(int idx, int cluster = 1) const;
 };
 
 class NaivePathTracer : public Render
@@ -115,8 +116,8 @@ void LightSampledPathTracer::step(int idx) const
 
         for (const auto &light : scene->Lights)
         {
-//            next = Ray(intersect, RD.sphere()); pdf = 1 / (4 * pi);
             light->sample_S(intersect, next, pdf);
+//            next = Ray(intersect, RD.sphere()); pdf = 1 / (4 * pi);
 
             shared_ptr<Object> o;
             Vec3 pos;
@@ -146,6 +147,13 @@ void Render::epoch(int cluster) const
     for (int i = 0; i < length; ++i)
         for (int j = 0; j < cluster; ++j)
             step(i);
+}
+
+void Render::step_one(int idx, int cluster) const
+{
+#pragma omp parallel for
+    for (int j = 0; j < cluster; ++ j)
+        step(idx);
 }
 
 #endif

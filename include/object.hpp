@@ -55,14 +55,14 @@ void Object::evaluate_VtS(const Ray &V, Spectrum &spectrum)
     shape->inter(V, is_inter, intersect);
     assert(is_inter);
     Vec3 N = shape->normal(intersect);
-    surface->evaluate_VtS(intersect, N, -V.d, spectrum);
+    surface->evaluate_VtS(intersect, N, -V.d.scale(1), spectrum);
 }
 
 void Object::evaluate_VtL(const Ray &V, const Ray &L, Spectrum &spectrum)
 {
     Vec3 intersect = L.o;
     Vec3 N = shape->normal(intersect);
-    surface->evaluate_VtL(intersect, N, -V.d, L.d, spectrum);
+    surface->evaluate_VtL(intersect, N, -V.d.scale(1), L.d.scale(1), spectrum);
 }
 
 void Object::sample_VtL(const Ray &V, Ray &L, double &pdf)
@@ -72,7 +72,7 @@ void Object::sample_VtL(const Ray &V, Ray &L, double &pdf)
     assert(is_inter);
     L.o = intersect;
     Vec3 N = shape->normal(intersect);
-    surface->sample_VtL(intersect, N, -V.d, L.d, pdf);
+    surface->sample_VtL(intersect, N, -V.d.scale(1), L.d, pdf);
 }
 
 void Object::sample_S(const Vec3 &ref, Ray &ray, double &pdf)

@@ -21,6 +21,7 @@ public:
 
     int epoch() const;
     Ray sample(int idx) const;
+    Spectrum get(int idx) const;
     void draw(int idx, Spectrum c, double w = 1);
     void save(const char *path, double white = 1, double gamma = 2.2) const;
 };
@@ -51,6 +52,10 @@ void oBuffer::draw(int idx, Spectrum c, double w)
 {
     spectrum[idx] = spectrum[idx] + c * w;
     weight[idx] += w;
+}
+Spectrum oBuffer::get(int idx) const
+{
+    return spectrum[idx] / weight[idx];
 }
 void oBuffer::save(const char *path, double white, double gamma) const
 {

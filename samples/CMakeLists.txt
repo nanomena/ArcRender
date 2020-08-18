@@ -2,6 +2,7 @@
 # add_subdirectory(surface)
 # add_subdirectory(rose)
 # add_subdirectory(HelloWorld)
+add_subdirectory(scene6)
 add_subdirectory(scene7)
 add_subdirectory(scene8)
 add_subdirectory(scene11)

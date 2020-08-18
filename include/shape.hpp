@@ -218,7 +218,7 @@ void Flat::sample(const Vec3 &ref, Ray &ray, double &pdf) const // @TODO better 
     if (a + b > 1) a = 1 - a, b = 1 - b;
     Vec3 s = (vertexs[k - 1] - vertexs[0]) * a + (vertexs[k] - vertexs[0]) * b + vertexs[0];
     ray = Ray(ref, s - ref);
-    pdf = 1 / (area * abs(ray.d * norm) / ray.d.norm() / ray.d.norm2());
+    pdf = 1 / (area * abs(ray.d * norm) / ray.d.norm() / norm.norm() / ray.d.norm2());
 }
 
 Disc::Disc(Vec3 _o, Vec3 _norm, double _r)
