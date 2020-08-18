@@ -17,8 +17,8 @@
 
 
 newmtl default
-  Ns 950.0000
-  Ni 30
+  Pr 0.3
+  Ni 1.5
   d 1
   Tf 1 1 1
   illum 2

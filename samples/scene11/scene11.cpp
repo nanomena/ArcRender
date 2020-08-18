@@ -105,17 +105,15 @@ int main()
         )
     );
 
-//    ObjLoader loader;
-//    loader.load(
-//        "scene11.obj", bxdf, Mvacant,
-//        Trans3(
-//            Vec3(0.0125, 0, 0),
-//            Vec3(0, 0.0125, 0),
-//            Vec3(0, 0, 0.0125),
-//            Vec3(0, -0.75, -1)
-//        )
-//    );
-//    loader.import_to(sence);
+    ObjGroup teapot;
+    teapot.T = Trans3(
+        Vec3(0.0125, 0, 0),
+        Vec3(0, 0.0125, 0),
+        Vec3(0, 0, 0.0125),
+        Vec3(0, -0.75, -1)
+    );
+    teapot.load("teapot.obj");
+    teapot.import_to(scene);
 
     shared_ptr<Camera> camera = make_shared<PerspectiveCamera>(
         Vec3(0, 0, 1.5),
