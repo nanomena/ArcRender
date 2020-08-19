@@ -50,7 +50,7 @@ public:
 void Lambert::evaluate(const Vec3 &V, const Vec3 &L, double &weight)
 {
     if (L.d[2] * V.d[2] < 0) return (weight = 0, void());
-    weight = 1. / pi * abs(L.d[2]);
+    weight = 1. / pi;
 }
 
 void Lambert::sample(const Vec3 &V, Vec3 &L, double &pdf)
@@ -88,7 +88,7 @@ void GGX::evaluate(const Vec3 &V, const Vec3 &L, double &weight)
 {
     if (L.d[2] < 0 || V.d[2] < 0) return (weight = 0, void());
     Vec3 N = (V + L).scale(1);
-    weight = (F(V, L, N) * D(N) * G(V, L, N) / (4 * V.d[2] * L.d[2]) + (1 - F(V, L, N)) / pi) * L.d[2];
+    weight = (F(V, L, N) * D(N) * G(V, L, N) / (4 * V.d[2] * L.d[2]) + (1 - F(V, L, N)) / pi);
 }
 
 void GGX::sample(const Vec3 &V, Vec3 &L, double &pdf)
@@ -107,5 +107,6 @@ void GGX::sample(const Vec3 &V, Vec3 &L, double &pdf)
         L = RD.semisphere();
     pdf = alpha2 * cos_n / (pi * pow((alpha2 - 1) * cos_n * cos_n + 1, 2)) * F0 + (1 / (2 * pi)) * (1 - F0);
 }
+
 #endif
 #endif /* BxDF_hpp */

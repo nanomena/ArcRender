@@ -23,8 +23,10 @@ public:
 
     pair<int, int> surface_info() const;
     void evaluate_VtS(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Spectrum &spectrum);
-    void evaluate_VtL(const Vec3 &inter, const Vec3 &N, const Vec3 &V, const Vec3 &L, Spectrum &spectrum);
-    void sample_VtL(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Vec3 &L, double &pdf);
+    void evaluate_StV(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Spectrum &spectrum);
+    void evaluate_T(const Vec3 &inter, const Vec3 &N, const Vec3 &V, const Vec3 &L, Spectrum &spectrum);
+    void sample_T(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Vec3 &L, double &pdf);
+    void sample_StV(const Vec3 &inter, const Vec3 &N, Vec3 &Vb, double &pdf);
 }; // @TODO better interface
 
 shared_ptr<Surface> make_light(shared_ptr<Light> light, Spectrum spectrum);
@@ -75,7 +77,7 @@ void Surface::rotate_axis(const Vec3 &N, const Vec3 &V, Mat3 &T, Mat3 &T_I) cons
 void Surface::evaluate_VtS(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Spectrum &spectrum)
 {
     Mat3 T, T_I;
-    Vec3 V_, L_;
+    Vec3 V_;
     rotate_axis(N, V, T, T_I);
     V_ = T * V;
     spectrum = Spectrum();
@@ -87,7 +89,24 @@ void Surface::evaluate_VtS(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Spec
     }
 }
 
-void Surface::evaluate_VtL(const Vec3 &inter, const Vec3 &N, const Vec3 &V, const Vec3 &L, Spectrum &spectrum)
+void Surface::evaluate_StV(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Spectrum &spectrum)
+{
+    Mat3 T, T_I;
+    Vec3 V_;
+    rotate_axis(N, V, T, T_I);
+    V_ = T * V;
+    spectrum = Spectrum();
+    for (auto Func : Lights)
+    {
+        double weight;
+        get<0>(Func)->evaluate(V_, weight);
+        spectrum = spectrum + get<1>(Func) * Spectrum(weight);
+    }
+    assert(abs(V_.norm() - 1) < EPS);
+    spectrum = spectrum * abs(V_.d[2]);
+}
+
+void Surface::evaluate_T(const Vec3 &inter, const Vec3 &N, const Vec3 &V, const Vec3 &L, Spectrum &spectrum)
 {
     Mat3 T, T_I;
     Vec3 V_, L_;
@@ -101,18 +120,29 @@ void Surface::evaluate_VtL(const Vec3 &inter, const Vec3 &N, const Vec3 &V, cons
         get<0>(Func)->evaluate(V_, L_, weight);
         spectrum = spectrum + get<1>(Func) * Spectrum(weight);
     }
+    assert(abs(L_.norm() - 1) < EPS);
+    spectrum = spectrum * abs(L_.d[2]);
 }
 
-void Surface::sample_VtL(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Vec3 &L, double &pdf) // @TODO MIS support
+void Surface::sample_T(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Vec3 &L, double &pdf) // @TODO MIS support
 {
     Mat3 T, T_I;
     Vec3 V_, L_;
     rotate_axis(N, V, T, T_I);
     V_ = T * V;
-    if (BxDFs.size() == 0) { L = T_I * Vec3(0, 0, 1); pdf = 1; return;}
+    if (BxDFs.size() == 0) { L = T_I * Vec3(0, 0, 1); pdf = 1; /* @TODO It shouldn't be this */return;}
     get<0>(BxDFs[0])->sample(V_, L_, pdf);
     L = T_I * L_;
 }
 
+void Surface::sample_StV(const Vec3 &inter, const Vec3 &N, Vec3 &V, double &pdf)
+{
+    Mat3 T, T_I;
+    Vec3 V_;
+    rotate_axis(N, N, T, T_I);
+    if (Lights.size() == 0) { V = T_I * Vec3(0, 0, 1); pdf = 1; return;}
+    get<0>(Lights[0])->sample(V_, pdf);
+    V = T_I * V_;
+}
 #endif
 #endif /* surface_hpp */

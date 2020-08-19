@@ -13,7 +13,7 @@ protected:
 public:
     virtual void inter(const Ray &ray, int &is_inter, Vec3 &intersect) const;
     virtual Vec3 normal(const Vec3 &inter) const; // norm should be unitary
-    virtual void sample(const Vec3 &ref, Ray &ray, double &pdf) const;
+    virtual void sample(Vec3 &pos, double &pdf) const;
 
     virtual Cuboid outline() const;
 };
@@ -55,7 +55,7 @@ public:
 
     void inter(const Ray &ray, int &is_inter, Vec3 &intersect) const override;
     Vec3 normal(const Vec3 &inter) const override;
-    void sample(const Vec3 &ref, Ray &ray, double &pdf) const override;
+    void sample(Vec3 &pos, double &pdf) const override;
 };
 
 class Disc : public Shape
@@ -92,7 +92,7 @@ Vec3 Shape::normal(const Vec3 &inter) const
 {
     throw invalid_argument("NotImplementedError");
 }
-void Shape::sample(const Vec3 &ref, Ray &ray, double &pdf) const
+void Shape::sample(Vec3 &pos, double &pdf) const
 {
     throw invalid_argument("NotImplementedError");
 }
@@ -202,7 +202,7 @@ Vec3 Flat::normal(const Vec3 &inter) const
 {
     return norm;
 }
-void Flat::sample(const Vec3 &ref, Ray &ray, double &pdf) const // @TODO better locate method
+void Flat::sample(Vec3 &pos, double &pdf) const // @TODO better locate method
 {
     double area = 0;
     for (int i = 2; i < n; ++ i)
@@ -216,9 +216,8 @@ void Flat::sample(const Vec3 &ref, Ray &ray, double &pdf) const // @TODO better 
     }
     double a = RD.rand(), b = RD.rand();
     if (a + b > 1) a = 1 - a, b = 1 - b;
-    Vec3 s = (vertexs[k - 1] - vertexs[0]) * a + (vertexs[k] - vertexs[0]) * b + vertexs[0];
-    ray = Ray(ref, s - ref);
-    pdf = 1 / (area * abs(ray.d * norm) / ray.d.norm() / norm.norm() / ray.d.norm2());
+    pos = (vertexs[k - 1] - vertexs[0]) * a + (vertexs[k] - vertexs[0]) * b + vertexs[0];
+    pdf = 1 / area;
 }
 
 Disc::Disc(Vec3 _o, Vec3 _norm, double _r)

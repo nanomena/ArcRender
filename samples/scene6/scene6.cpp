@@ -43,6 +43,19 @@ int main()
     scene->add_object(
         make_shared<Object>(
             make_shared<Flat>(
+                Vec3(-1, 1, 2),
+                Vec3(-1, 1, -2),
+                Vec3(1, 1, -2),
+                Vec3(1, 1, 2)
+            ),
+            make_bxdf(make_shared<Lambert>(), rgb888(255, 255, 255)),
+            "up"
+        )
+    );
+
+    scene->add_object(
+        make_shared<Object>(
+            make_shared<Flat>(
                 Vec3(1, -1, -2),
                 Vec3(1, -1, 2),
                 Vec3(1, 1, 2),
@@ -63,19 +76,6 @@ int main()
             ),
             make_bxdf(make_shared<Lambert>(), rgb888(175, 175, 255)),
             "left"
-        )
-    );
-
-    scene->add_object(
-        make_shared<Object>(
-            make_shared<Flat>(
-                Vec3(-1, 1, 2),
-                Vec3(-1, 1, -2),
-                Vec3(1, 1, -2),
-                Vec3(1, 1, 2)
-            ),
-            make_bxdf(make_shared<Lambert>(), rgb888(255, 255, 255)),
-            "up"
         )
     );
 
@@ -113,7 +113,7 @@ int main()
     );
 
     shared_ptr<oBuffer> image = make_shared<oBuffer>(800, 600, camera);
-    shared_ptr<Render> render = make_shared<LightSampledPathTracer>(image, scene);
+    shared_ptr<Render> render = make_shared<BidirectionalPathTracer>(image, scene);
 
     char output[100];
     sprintf(output, "result.png");
@@ -124,7 +124,18 @@ int main()
     {
         render->epoch(cluster);
         cerr << "[T + " << (clock() / (double)CLOCKS_PER_SEC) << "] | epoch " << i << endl;
-        if (i % 5 == 0)
+        if (i % 1 == 0)
             image->save(output, 0.35);
     }
+
+//    int epoch = 30000, cluster = 1;
+//    cerr << "[T + " << (clock() / (double)CLOCKS_PER_SEC) << "] | target : " << epoch << endl;
+//    int idx = 800 * 500 + 400;
+//    for (int i = 1; i <= epoch; ++i)
+//    {
+//        render->step_one(idx, cluster);
+//        cerr << "[T + " << (clock() / (double)CLOCKS_PER_SEC) << "] | epoch " << i << endl;
+//        cerr << image->get(idx) << endl;
+//    }
+////    (0.00528506,0.00528506,0.00528506)
 }
