@@ -49,6 +49,7 @@ void Scene::inter(const Ray &ray, shared_ptr<Object> &object, Vec3 &intersect) c
     object = skybox;
     int is_inter;
     skybox->inter(ray, is_inter, intersect);
+    if (!is_inter) return object = skybox, intersect = ray.o, void(); // F**ked !
     assert(is_inter);
     for (const auto &graph : graphs)
         graph->query(ray, object, intersect);

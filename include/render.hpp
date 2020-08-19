@@ -54,14 +54,14 @@ public:
 class BidirectionalPathTracer : public Render
 {
     vector<vector<tuple<Vec3, Ray, Spectrum>>> photons;
-    int trace_limit;
+    int trace_limit, light_cnt;
     double trace_eps;
 
     void build_graph() override;
     void step(int idx) override;
 public:
     BidirectionalPathTracer(
-        shared_ptr<oBuffer> image_, shared_ptr<Scene> scene_, int trace_limit_ = 4, double trace_eps_ = 1e-4
+        shared_ptr<oBuffer> image_, shared_ptr<Scene> scene_, int light_cnt = 1, int trace_limit_ = 4, double trace_eps_ = 1e-4
     );
 };
 #ifdef ARC_IMPLEMENTATION
@@ -82,14 +82,15 @@ LightSampledPathTracer::LightSampledPathTracer(
 ) : Render(std::move(image_), std::move(scene_)), trace_limit(trace_limit_), trace_eps(trace_eps_) {}
 
 BidirectionalPathTracer::BidirectionalPathTracer(
-    shared_ptr<oBuffer> image_, shared_ptr<Scene> scene_, int trace_limit_, double trace_eps_
-) : Render(std::move(image_), std::move(scene_)), trace_limit(trace_limit_), trace_eps(trace_eps_) {}
+    shared_ptr<oBuffer> image_, shared_ptr<Scene> scene_, int light_cnt_, int trace_limit_, double trace_eps_
+) : Render(std::move(image_), std::move(scene_)), light_cnt(light_cnt_), trace_limit(trace_limit_), trace_eps(trace_eps_) {}
 
 void NaivePathTracer::step(int idx)
 {
     Ray now = image->sample(idx);
     Spectrum mul(1);
-    vector<Spectrum> sum; sum.resize(trace_limit);
+    vector<Spectrum> sum;
+    sum.resize(trace_limit);
 
     for (int cnt = 0; cnt < trace_limit; ++cnt)
     {
@@ -118,7 +119,8 @@ void LightSampledPathTracer::step(int idx)
 {
     Ray now = image->sample(idx);
     Spectrum mul(1);
-    vector<Spectrum> sum; sum.resize(trace_limit);
+    vector<Spectrum> sum;
+    sum.resize(trace_limit);
 
     for (int cnt = 0; cnt + 1 < trace_limit; ++cnt)
     {
@@ -170,8 +172,9 @@ void BidirectionalPathTracer::build_graph()
     for (int cnt = 0; cnt < trace_limit; ++cnt)
         photons[cnt].clear();
 
-    for (const auto &light : scene->Lights)
+    for (int i = 0; i < light_cnt; ++ i)
     {
+        auto &light = scene->Lights[rand() % scene->Lights.size()];
         Spectrum mul;
         Ray now;
         double pdf;
@@ -203,7 +206,9 @@ void BidirectionalPathTracer::step(int idx)
 {
     Ray now = image->sample(idx);
     Spectrum mul(1);
-    vector<Spectrum> sum; sum.resize(trace_limit);
+    vector<vector<Spectrum>> sum;
+    sum.resize(trace_limit);
+    for (int i = 0; i < trace_limit; ++ i) sum[i].resize(trace_limit);
 
     for (int cnt = 0; cnt < trace_limit; ++cnt)
     {
@@ -213,12 +218,12 @@ void BidirectionalPathTracer::step(int idx)
         scene->inter(now, object, intersect);
         Ray next;
         double pdf;
-        if (cnt == 0) // direct light v = 1, l = 0
+        if (cnt == 0)
         {
             object->evaluate_VtS(now, spectrum);
-            sum[cnt] = sum[cnt] + mul * spectrum;
+            sum[0][0] = sum[0][0] + mul * spectrum;
 
-            for (const auto &light : scene->Lights) // v = 1, l = 1
+            for (const auto &light : scene->Lights)
             {
                 light->sample_S(intersect, next, pdf);
                 shared_ptr<Object> o;
@@ -229,30 +234,32 @@ void BidirectionalPathTracer::step(int idx)
                     Spectrum local;
                     light->evaluate_VtS(next, spectrum);
                     object->evaluate_VtL(now, next, local);
-                    sum[cnt + 1] = sum[cnt + 1] + mul * (spectrum * local / pdf);
+                    sum[0][1] = sum[0][1] + mul * (spectrum * local / pdf);
                 }
             }
         }
 
-
         for (int rev = 0; cnt + rev + 2 < trace_limit; ++rev)
+        {
             for (const auto &photon : photons[rev]) // v = i + 1, l = j + 2
             {
                 Vec3 pho;
                 Ray light;
                 tie(pho, light, spectrum) = photon;
                 Ray link(intersect, pho - intersect), link_b(pho, intersect - pho);
-                shared_ptr<Object> o;
+                shared_ptr<Object> dest;
                 Vec3 pos;
-                scene->inter(link, o, pos);
-                if ((pos - pho).norm() < EPS) // visible
+                scene->inter(link, dest, pos);
+                if ((pos - pho).norm() < EPS && dest != object) // visible
                 {
                     Spectrum local, remote;
                     object->evaluate_VtL(now, link, local);
-                    o->evaluate_LtV(light, link_b, remote);
-                    sum[cnt + rev + 2] = sum[cnt + rev + 2] + mul * (spectrum * remote * local);
+                    dest->evaluate_LtV(light, link_b, remote);
+                    sum[cnt + 1][rev + 1] = sum[cnt + 1][rev + 1]
+                        + mul * (spectrum * remote * local) / (pho - intersect).norm2() / light_cnt;
                 }
             }
+        }
 
         object->sample_VtL(now, next, pdf);
         object->evaluate_VtL(now, next, spectrum);
@@ -260,9 +267,9 @@ void BidirectionalPathTracer::step(int idx)
         if (mul.norm() < trace_eps) break;
         now = next;
     }
-    Spectrum total;
+    Spectrum total = sum[0][0];
     for (int cnt = 0; cnt < trace_limit; ++cnt)
-        total = total + sum[cnt];
+        total = total + sum[cnt][1];
     image->draw(idx, total, 1);
 }
 

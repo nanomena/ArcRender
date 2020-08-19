@@ -17,10 +17,10 @@ int main()
     scene->add_object(
         make_shared<Object>(
             make_shared<Flat>(
-                Vec3(-0.3, 0.99, -0.7),
-                Vec3(-0.3, 0.99, -1.3),
-                Vec3(0.3, 0.99, -1.3),
-                Vec3(0.3, 0.99, -0.7)
+                Vec3(-3, 9.9, -7),
+                Vec3(-3, 9.9, -13),
+                Vec3(3, 9.9, -13),
+                Vec3(3, 9.9, -7)
             ),
             make_light(make_shared<UniformLight>(), Spectrum(1)),
             "light"
@@ -30,10 +30,10 @@ int main()
     scene->add_object(
         make_shared<Object>(
             make_shared<Flat>(
-                Vec3(-1, -1, -2),
-                Vec3(-1, -1, 2),
-                Vec3(1, -1, 2),
-                Vec3(1, -1, -2)
+                Vec3(-10, -10, -20),
+                Vec3(-10, -10, 20),
+                Vec3(10, -10, 20),
+                Vec3(10, -10, -20)
             ),
             make_bxdf(make_shared<Lambert>(), rgb888(255, 255, 255)),
             "down"
@@ -43,10 +43,10 @@ int main()
     scene->add_object(
         make_shared<Object>(
             make_shared<Flat>(
-                Vec3(-1, 1, 2),
-                Vec3(-1, 1, -2),
-                Vec3(1, 1, -2),
-                Vec3(1, 1, 2)
+                Vec3(-10, 10, 20),
+                Vec3(-10, 10, -20),
+                Vec3(10, 10, -20),
+                Vec3(10, 10, 20)
             ),
             make_bxdf(make_shared<Lambert>(), rgb888(255, 255, 255)),
             "up"
@@ -56,10 +56,10 @@ int main()
     scene->add_object(
         make_shared<Object>(
             make_shared<Flat>(
-                Vec3(1, -1, -2),
-                Vec3(1, -1, 2),
-                Vec3(1, 1, 2),
-                Vec3(1, 1, -2)
+                Vec3(10, -10, -20),
+                Vec3(10, -10, 20),
+                Vec3(10, 10, 20),
+                Vec3(10, 10, -20)
             ),
             make_bxdf(make_shared<Lambert>(), rgb888(255, 175, 175)),
             "right"
@@ -69,10 +69,10 @@ int main()
     scene->add_object(
         make_shared<Object>(
             make_shared<Flat>(
-                Vec3(-1, -1, 2),
-                Vec3(-1, -1, -2),
-                Vec3(-1, 1, -2),
-                Vec3(-1, 1, 2)
+                Vec3(-10, -10, 20),
+                Vec3(-10, -10, -20),
+                Vec3(-10, 10, -20),
+                Vec3(-10, 10, 20)
             ),
             make_bxdf(make_shared<Lambert>(), rgb888(175, 175, 255)),
             "left"
@@ -82,10 +82,10 @@ int main()
     scene->add_object(
         make_shared<Object>(
             make_shared<Flat>(
-                Vec3(-1, 1, -2),
-                Vec3(-1, -1, -2),
-                Vec3(1, -1, -2),
-                Vec3(1, 1, -2)
+                Vec3(-10, 10, -20),
+                Vec3(-10, -10, -20),
+                Vec3(10, -10, -20),
+                Vec3(10, 10, -20)
             ),
             make_bxdf(make_shared<Lambert>(), rgb888(255, 255, 255)),
             "back"
@@ -95,10 +95,10 @@ int main()
     scene->add_object(
         make_shared<Object>(
             make_shared<Flat>(
-                Vec3(-1, -1, 2),
-                Vec3(-1, 1, 2),
-                Vec3(1, 1, 2),
-                Vec3(1, -1, 2)
+                Vec3(-10, -10, 20),
+                Vec3(-10, 10, 20),
+                Vec3(10, 10, 20),
+                Vec3(10, -10, 20)
             ),
             make_bxdf(make_shared<Lambert>(), rgb888(255, 255, 255)),
             "front"
@@ -106,7 +106,7 @@ int main()
     );
 
     shared_ptr<Camera> camera = make_shared<PerspectiveCamera>(
-        Vec3(0, 0, 1.5),
+        Vec3(0, 0, 15),
         Vec3(0.8, 0, 0),
         Vec3(0, 0.6, 0),
         0.6
@@ -130,12 +130,12 @@ int main()
 
 //    int epoch = 30000, cluster = 1;
 //    cerr << "[T + " << (clock() / (double)CLOCKS_PER_SEC) << "] | target : " << epoch << endl;
-//    int idx = 800 * 500 + 400;
+//    int idx = 800 * 100 + 400;
 //    for (int i = 1; i <= epoch; ++i)
 //    {
 //        render->step_one(idx, cluster);
 //        cerr << "[T + " << (clock() / (double)CLOCKS_PER_SEC) << "] | epoch " << i << endl;
 //        cerr << image->get(idx) << endl;
 //    }
-////    (0.00528506,0.00528506,0.00528506)
+////    (0.0044293,0.0044293,0.0044293)
 }
