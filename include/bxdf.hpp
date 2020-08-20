@@ -20,6 +20,7 @@ public:
     {
         throw invalid_argument("NotImplementedError");
     }
+    void verify_sample();
 };
 
 class Lambert : public BxDF
@@ -46,6 +47,24 @@ public:
 };
 
 #ifdef ARC_IMPLEMENTATION
+
+void BxDF::verify_sample()
+{
+    const int cnt = 1000000;
+    for (int i = 0; i < 90; i += 10)
+    {
+        double w = i * pi / 180;
+        Vec3 V(sin(w), 0, cos(w));
+        double sum = 0;
+        for (int j = 0; j < cnt; ++ j)
+        {
+            Vec3 L; double pdf;
+            sample(V, L, pdf);
+            sum += 1 / pdf;
+        }
+        cout << i << ": " << sum / cnt << endl;
+    }
+}
 
 void Lambert::evaluate(const Vec3 &V, const Vec3 &L, double &weight)
 {
@@ -102,10 +121,17 @@ void GGX::sample(const Vec3 &V, Vec3 &L, double &pdf)
     Vec3 normal(cos(q) * sin_n, sin(q) * sin_n, cos_n);
 
     if (RD.rand() < F0)
+    {
         L = -V + normal * (V * normal) * 2;
+        pdf = alpha2 * cos_n / (pi * pow((alpha2 - 1) * cos_n * cos_n + 1, 2)) * F0 * 2;
+    }
     else
+    {
         L = RD.semisphere();
-    pdf = alpha2 * cos_n / (pi * pow((alpha2 - 1) * cos_n * cos_n + 1, 2)) * F0 + (1 / (2 * pi)) * (1 - F0);
+        pdf = (1 / (2 * pi)) * (1 - F0) * 2;
+    }
+//    L = RD.semisphere();
+//    pdf = (1 / (2 * pi));
 }
 
 #endif
