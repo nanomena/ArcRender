@@ -1,8 +1,6 @@
 #ifndef sence_hpp
 #define sence_hpp
 
-#include <utility>
-
 #include "utils.hpp"
 #include "object.hpp"
 #include "graph.hpp"

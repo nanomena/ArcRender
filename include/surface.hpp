@@ -1,8 +1,6 @@
 #ifndef surface_hpp
 #define surface_hpp
 
-#include <utility>
-
 #include "bxdf.hpp"
 #include "utils.hpp"
 #include "light.hpp"

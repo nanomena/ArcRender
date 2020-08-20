@@ -1,8 +1,6 @@
 #ifndef object_hpp
 #define object_hpp
 
-#include <utility>
-
 #include "utils.hpp"
 #include "bxdf.hpp"
 #include "shape.hpp"

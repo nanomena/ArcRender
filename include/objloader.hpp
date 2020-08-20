@@ -7,6 +7,11 @@
 #include "bxdf.hpp"
 #include "scene.hpp"
 
+#include "bxdfs/ggx.hpp"
+#include "shapes/triangle.hpp"
+#include "lights/uniform.hpp"
+// @TODO so this part has sicking coupling
+
 class ObjGroup
 {
     tinyobj::attrib_t attrib;
@@ -82,7 +87,7 @@ void ObjGroup::load_objects()
 //                );
             }
             index_offset += fv;
-            shared_ptr<Shape> shape = make_shared<TriObj>(
+            shared_ptr<Shape> shape = make_shared<Triangle>(
                 T.apply(V[0]), T.apply(V[1]), T.apply(V[2])
             );
             objects.push_back(obj_dealer(shape, surfaces[s.mesh.material_ids[f]]));

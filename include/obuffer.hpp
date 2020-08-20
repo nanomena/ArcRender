@@ -1,8 +1,6 @@
 #ifndef obuffer_hpp
 #define obuffer_hpp
 
-#include <utility>
-
 #include "utils.hpp"
 #include "camera.hpp"
 #include "spectrum.hpp"

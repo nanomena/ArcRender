@@ -128,7 +128,7 @@ int main()
     char output[100];
     sprintf(output, "result.png");
 
-    int epoch = 3000, cluster = 1;
+    int epoch = 5, cluster = 1;
     cerr << "[T + " << (clock() / (double)CLOCKS_PER_SEC) << "] | target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++i)
     {

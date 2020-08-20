@@ -112,7 +112,7 @@ int main()
             make_shared<Sphere>(
                 Vec3(0, 0, -1), 0.5
             ),
-            make_bxdf(make_shared<GGX>(30, 0.5), rgb888(255, 255, 255)),
+            make_bxdf(make_shared<GGX>(30, 1), rgb888(255, 255, 255)),
             "ball"
         )
     );

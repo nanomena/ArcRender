@@ -1,8 +1,6 @@
 #ifndef material_hpp
 #define material_hpp
 
-#include <utility>
-
 #include "utils.hpp"
 #include "spectrum.hpp"
 

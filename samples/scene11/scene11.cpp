@@ -123,12 +123,12 @@ int main()
     );
 
     shared_ptr<oBuffer> image = make_shared<oBuffer>(800, 600, camera);
-    shared_ptr<Render> render = make_shared<LightSampledPathTracer>(image, scene);
+    shared_ptr<Render> render = make_shared<BidirectionalPathTracer>(image, scene);
 
     char output[100];
     sprintf(output, "result.png");
 
-    int epoch = 3000, cluster = 1;
+    int epoch = 100, cluster = 1;
     cerr << "[T + " << (clock() / (double)CLOCKS_PER_SEC) << "] | target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++i)
     {
