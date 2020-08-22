@@ -71,14 +71,14 @@ void Object::evaluate_VtL(const Ray &V, const Ray &L, Spectrum &spectrum)
 {
     Vec3 intersect = L.o;
     Vec3 N = shape->normal(intersect);
-    surface->evaluate_T(intersect, N, -V.d.scale(1), L.d.scale(1), spectrum);
+    surface->evaluate_VtL(intersect, N, -V.d.scale(1), L.d.scale(1), spectrum);
 }
 
 void Object::evaluate_LtV(const Ray &Lb, const Ray &Vb, Spectrum &spectrum)
 {
     Vec3 intersect = Vb.o;
     Vec3 N = shape->normal(intersect);
-    surface->evaluate_T(intersect, N, -Lb.d.scale(1), Vb.d.scale(1), spectrum);
+    surface->evaluate_LtV(intersect, N, -Lb.d.scale(1), Vb.d.scale(1), spectrum);
 }
 
 void Object::sample_VtL(const Ray &V, Ray &L, double &pdf)
@@ -88,7 +88,7 @@ void Object::sample_VtL(const Ray &V, Ray &L, double &pdf)
     assert(is_inter);
     L.o = intersect;
     Vec3 N = shape->normal(intersect);
-    surface->sample_T(intersect, N, -V.d.scale(1), L.d, pdf);
+    surface->sample_VtL(intersect, N, -V.d.scale(1), L.d, pdf);
 }
 
 void Object::sample_LtV(const Ray &Lb, Ray &Vb, double &pdf)
@@ -98,7 +98,7 @@ void Object::sample_LtV(const Ray &Lb, Ray &Vb, double &pdf)
     assert(is_inter);
     Vb.o = intersect;
     Vec3 N = shape->normal(intersect);
-    surface->sample_T(intersect, N, -Lb.d.scale(1), Vb.d, pdf);
+    surface->sample_LtV(intersect, N, -Lb.d.scale(1), Vb.d, pdf);
 }
 
 void Object::sample_S(const Vec3 &ref, Ray &V, double &pdf)

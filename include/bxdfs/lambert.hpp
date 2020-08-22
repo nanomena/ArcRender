@@ -9,7 +9,8 @@ class Lambert : public BxDF
 public:
     Lambert() = default;
     void evaluate(const Vec3 &V, const Vec3 &L, double &weight) override;
-    void sample(const Vec3 &V, Vec3 &L, double &pdf) override;
+    void sample_VtL(const Vec3 &V, Vec3 &L, double &pdf) override;
+    void sample_LtV(const Vec3 &L, Vec3 &V, double &pdf) override;
 };
 
 #ifdef ARC_IMPLEMENTATION
@@ -20,10 +21,17 @@ void Lambert::evaluate(const Vec3 &V, const Vec3 &L, double &weight)
     weight = 1. / pi;
 }
 
-void Lambert::sample(const Vec3 &V, Vec3 &L, double &pdf)
+void Lambert::sample_VtL(const Vec3 &V, Vec3 &L, double &pdf)
 {
     L = RD.semisphere();
     if (V.d[2] < 0) L.d[2] *= -1;
+    pdf = 1 / (2 * pi);
+}
+
+void Lambert::sample_LtV(const Vec3 &L, Vec3 &V, double &pdf)
+{
+    V = RD.semisphere();
+    if (L.d[2] < 0) V.d[2] *= -1;
     pdf = 1 / (2 * pi);
 }
 

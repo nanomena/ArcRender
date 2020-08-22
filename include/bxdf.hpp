@@ -12,7 +12,11 @@ public:
     {
         throw invalid_argument("NotImplementedError");
     }
-    virtual void sample(const Vec3 &V, Vec3 &L, double &pdf)
+    virtual void sample_VtL(const Vec3 &V, Vec3 &L, double &pdf)
+    {
+        throw invalid_argument("NotImplementedError");
+    }
+    virtual void sample_LtV(const Vec3 &L, Vec3 &V, double &pdf)
     {
         throw invalid_argument("NotImplementedError");
     }
@@ -32,7 +36,7 @@ void BxDF::verify_sample()
         for (int j = 0; j < cnt; ++ j)
         {
             Vec3 L; double pdf;
-            sample(V, L, pdf);
+            sample_VtL(V, L, pdf);
             sum += 1 / pdf;
         }
         cout << i << ": " << sum / cnt << endl;

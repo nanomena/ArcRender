@@ -6,6 +6,8 @@ int main()
 {
     ios::sync_with_stdio(0);
 
+    make_shared<GGX>(30, 0.5)->verify_sample();
+
     shared_ptr<Object> skybox = make_shared<Object>(
         make_shared<Sphere>(Vec3(0, 0, 0), INF / 10),
         make_shared<Surface>(),
@@ -110,7 +112,7 @@ int main()
             make_shared<Sphere>(
                 Vec3(0, 0, -1), 0.5
             ),
-            make_bxdf(make_shared<Lambert>(), rgb888(255, 255, 255)),
+            make_bxdf(make_shared<BiGGX>(1.5, 0.1, 0), rgb888(255, 255, 255)),
             "ball"
         )
     );
@@ -123,7 +125,7 @@ int main()
     );
 
     shared_ptr<oBuffer> image = make_shared<oBuffer>(800, 600, camera);
-    shared_ptr<Render> render = make_shared<BidirectionalPathTracer>(image, scene);
+    shared_ptr<Render> render = make_shared<LightSampledPathTracer>(image, scene);
 
     char output[100];
     sprintf(output, "result.png");

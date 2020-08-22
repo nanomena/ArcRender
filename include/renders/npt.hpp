@@ -11,7 +11,7 @@ class NaivePathTracer : public Render
     void step(int idx) override;
 public:
     NaivePathTracer(
-        shared_ptr<oBuffer> image_, shared_ptr<Scene> scene_, int trace_limit_ = 5, double trace_eps_ = 1e-4
+        shared_ptr<oBuffer> image_, shared_ptr<Scene> scene_, int trace_limit_ = 7, double trace_eps_ = 1e-4
     );
 };
 

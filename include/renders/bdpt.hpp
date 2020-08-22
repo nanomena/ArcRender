@@ -13,7 +13,7 @@ class BidirectionalPathTracer : public Render
     void step(int idx) override;
 public:
     BidirectionalPathTracer(
-        shared_ptr<oBuffer> image_, shared_ptr<Scene> scene_, int trace_limit_ = 4, double trace_eps_ = 1e-4
+        shared_ptr<oBuffer> image_, shared_ptr<Scene> scene_, int trace_limit_ = 6, double trace_eps_ = 1e-4
     );
 };
 
