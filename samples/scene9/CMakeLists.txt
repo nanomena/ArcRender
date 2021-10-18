@@ -1,5 +1,5 @@
 include_directories(../../include)
-include_directories(../../3rdparty)
+include_directories(../../deps)
 
 set(name "scene9")
 

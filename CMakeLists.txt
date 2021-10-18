@@ -20,10 +20,10 @@ elseif (CMAKE_BUILD_TYPE EQUAL Debug)
 endif ()
 
 
-add_library(stb_image STATIC 3rdparty/stb_image.cpp 3rdparty/stb_image_write.cpp)
-add_library(obj_loader STATIC 3rdparty/tiny_obj_loader.cpp)
+add_library(stb_image STATIC deps/stb_image.cpp deps/stb_image_write.cpp)
+add_library(obj_loader STATIC deps/tiny_obj_loader.cpp)
 
-include_directories(3rdparty/)
+include_directories(deps/)
 
 add_library(arc STATIC include/arc.cpp)
 
