@@ -19,10 +19,10 @@ public:
     Cuboid outline() const;
     pair<int, int> surface_info() const;
     void inter(const Ray &ray, int &is_inter, Vec3 &intersect) const;
-    void evaluate_VtS(const Ray &V, Spectrum &spectrum);
-    void evaluate_StV(const Ray &Vb, Spectrum &spectrum);
-    void evaluate_VtL(const Ray &V, const Ray &L, Spectrum &spectrum);
-    void evaluate_LtV(const Ray &Lb, const Ray &Vb, Spectrum &spectrum);
+    void evaluate_VtS(const Ray &V, Spect &spectrum);
+    void evaluate_StV(const Ray &Vb, Spect &spectrum);
+    void evaluate_VtL(const Ray &V, const Ray &L, Spect &spectrum);
+    void evaluate_LtV(const Ray &Lb, const Ray &Vb, Spect &spectrum);
     void sample_VtL(const Ray &V, Ray &L, double &pdf);
     void sample_LtV(const Ray &Lb, Ray &Vb, double &pdf);
     void sample_S(const Vec3 &ref, Ray &V, double &pdf);
@@ -51,7 +51,7 @@ void Object::inter(const Ray &ray, int &is_inter, Vec3 &intersect) const
     if ((intersect - ray.o).norm2() < EPS) is_inter = 0;
 }
 
-void Object::evaluate_VtS(const Ray &V, Spectrum &spectrum)
+void Object::evaluate_VtS(const Ray &V, Spect &spectrum)
 {
     int is_inter; Vec3 intersect;
     shape->inter(V, is_inter, intersect);
@@ -60,21 +60,21 @@ void Object::evaluate_VtS(const Ray &V, Spectrum &spectrum)
     surface->evaluate_VtS(intersect, N, -V.d.scale(1), spectrum);
 }
 
-void Object::evaluate_StV(const Ray &Vb, Spectrum &spectrum)
+void Object::evaluate_StV(const Ray &Vb, Spect &spectrum)
 {
     Vec3 intersect = Vb.o;
     Vec3 N = shape->normal(intersect);
     surface->evaluate_StV(intersect, N, Vb.d.scale(1), spectrum);
 }
 
-void Object::evaluate_VtL(const Ray &V, const Ray &L, Spectrum &spectrum)
+void Object::evaluate_VtL(const Ray &V, const Ray &L, Spect &spectrum)
 {
     Vec3 intersect = L.o;
     Vec3 N = shape->normal(intersect);
     surface->evaluate_VtL(intersect, N, -V.d.scale(1), L.d.scale(1), spectrum);
 }
 
-void Object::evaluate_LtV(const Ray &Lb, const Ray &Vb, Spectrum &spectrum)
+void Object::evaluate_LtV(const Ray &Lb, const Ray &Vb, Spect &spectrum)
 {
     Vec3 intersect = Vb.o;
     Vec3 N = shape->normal(intersect);

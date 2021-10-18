@@ -1,5 +1,5 @@
-#ifndef obuffer_hpp
-#define obuffer_hpp
+#ifndef image_hpp
+#define image_hpp
 
 #include "utils.hpp"
 #include "camera.hpp"
@@ -7,26 +7,26 @@
 #include "geometry.hpp"
 #include "sampler.hpp"
 
-class oBuffer
+class Image
 {
     int width, height, length;
     shared_ptr<Camera> camera;
-    vector<Spectrum> spectrum;
+    vector<Spect> spectrum;
     vector<double> weight;
 
 public:
-    oBuffer(int width_, int height_, shared_ptr<Camera> camera_);
+    Image(int width_, int height_, shared_ptr<Camera> camera_);
 
     int epoch() const;
     Ray sample(int idx) const;
-    Spectrum get(int idx) const;
-    void draw(int idx, Spectrum c, double w = 1);
+    Spect get(int idx) const;
+    void draw(int idx, Spect c, double w = 1);
     void save(const char *path, double white = 1, double gamma = 2.2) const;
 };
 
 #ifdef ARC_IMPLEMENTATION
 
-oBuffer::oBuffer(int width_, int height_, shared_ptr<Camera> camera_)
+Image::Image(int width_, int height_, shared_ptr<Camera> camera_)
 {
     width = width_;
     height = height_;
@@ -36,26 +36,26 @@ oBuffer::oBuffer(int width_, int height_, shared_ptr<Camera> camera_)
     weight.resize(length);
 }
 
-int oBuffer::epoch() const
+int Image::epoch() const
 {
     return length;
 }
-Ray oBuffer::sample(int idx) const
+Ray Image::sample(int idx) const
 {
     int x = idx % width, y = idx / width;
     Vec2 v = RD.pixel(Vec2(x, y), width, height);
     return camera->apply(v);
 }
-void oBuffer::draw(int idx, Spectrum c, double w)
+void Image::draw(int idx, Spect c, double w)
 {
     spectrum[idx] = spectrum[idx] + c * w;
     weight[idx] += w;
 }
-Spectrum oBuffer::get(int idx) const
+Spect Image::get(int idx) const
 {
     return spectrum[idx] / weight[idx];
 }
-void oBuffer::save(const char *path, double white, double gamma) const
+void Image::save(const char *path, double white, double gamma) const
 {
     vector<unsigned char> buffer;
     buffer.resize(length * 3);
@@ -70,4 +70,4 @@ void oBuffer::save(const char *path, double white, double gamma) const
 }
 
 #endif
-#endif /* obuffer_hpp */
+#endif /* image_hpp */

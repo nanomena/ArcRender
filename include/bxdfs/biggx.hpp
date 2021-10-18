@@ -110,7 +110,7 @@ void BiGGX::sample_LtV(const Vec3 &L, Vec3 &V, double &pdf)
         sample_N(N, pdf);
         V = -L + N * (L * N) * 2;
         pdf = pdf / (L * N * 4);
-        if (pdf < 0) pdf = 0;
+        if (V.d[2] * L.d[2] < 0) pdf = INF; //@TODO GG
     }
     else if (RD.rand() < diffuse)
     {
@@ -123,10 +123,11 @@ void BiGGX::sample_LtV(const Vec3 &L, Vec3 &V, double &pdf)
         sample_N(N, pdf);
         if (L.d[2] < 0) N = -N;
         double cos_l = L * N, sin_l = sqrt(1 - cos_l * cos_l),
-            sin_v = sin_l * (L.d[2] < 0 ? ior : 1 / ior), cos_v = sqrt(1 - sin_l * sin_l);
+            sin_v = sin_l * (L.d[2] < 0 ? ior : 1 / ior), cos_v = sqrt(1 - sin_v * sin_v);
         V = (-L * (L.d[2] < 0 ? ior : 1 / ior) + N * (cos_v - cos_l * (L.d[2] < 0 ? ior : 1 / ior))).scale(1);
         pdf = pdf * (abs(L * N) * abs(V * N))
             / pow((L.d[2] > 0 ? 1 / ior : ior) * (L * N) + V * N, 2) / abs(V.d[2] * L.d[2]);
+        if (V.d[2] * L.d[2] > 0) pdf = INF; //@TODO GG
     }
 }
 

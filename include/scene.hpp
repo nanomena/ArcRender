@@ -1,5 +1,5 @@
-#ifndef sence_hpp
-#define sence_hpp
+#ifndef scene_hpp
+#define scene_hpp
 
 #include "utils.hpp"
 #include "object.hpp"
@@ -54,4 +54,4 @@ void Scene::inter(const Ray &ray, shared_ptr<Object> &object, Vec3 &intersect) c
 }
 
 #endif
-#endif /* sence_hpp */
+#endif /* scene_hpp */

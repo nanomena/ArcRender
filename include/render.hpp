@@ -2,7 +2,7 @@
 #define render_hpp
 
 #include "utils.hpp"
-#include "obuffer.hpp"
+#include "image.hpp"
 #include "scene.hpp"
 
 class Render
@@ -15,18 +15,18 @@ class Render
 
 protected:
     int length;
-    shared_ptr<oBuffer> image;
+    shared_ptr<Image> image;
     shared_ptr<Scene> scene;
 
 public:
-    Render(shared_ptr<oBuffer> image_, shared_ptr<Scene> scene_);
+    Render(shared_ptr<Image> image_, shared_ptr<Scene> scene_);
     void epoch(int cluster = 1);
     void step_one(int idx, int cluster = 1);
 };
 
 #ifdef ARC_IMPLEMENTATION
 
-Render::Render(shared_ptr<oBuffer> image_, shared_ptr<Scene> scene_)
+Render::Render(shared_ptr<Image> image_, shared_ptr<Scene> scene_)
 {
     image = std::move(image_);
     scene = std::move(scene_);

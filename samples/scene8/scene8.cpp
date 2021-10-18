@@ -24,7 +24,7 @@ int main()
                 Vec3(0.3, 0.99, -1.3),
                 Vec3(0.3, 0.99, -0.7)
             ),
-            make_light(make_shared<UniformLight>(), Spectrum(1)),
+            make_light(make_shared<UniformLight>(), Spect(1)),
             "light"
         )
     );
@@ -124,7 +124,7 @@ int main()
         0.6
     );
 
-    shared_ptr<oBuffer> image = make_shared<oBuffer>(800, 600, camera);
+    shared_ptr<Image> image = make_shared<Image>(800, 600, camera);
     shared_ptr<Render> render = make_shared<BidirectionalPathTracer>(image, scene);
 
     char output[100];

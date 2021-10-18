@@ -10,45 +10,45 @@
 
 class Surface
 {
-    vector<pair<shared_ptr<BxDF>, Spectrum>> BxDFs;
-    vector<pair<shared_ptr<Light>, Spectrum>> Lights;
+    vector<pair<shared_ptr<BxDF>, Spect>> BxDFs;
+    vector<pair<shared_ptr<Light>, Spect>> Lights;
 //    shared_ptr<Material> inside, outside; @TODO Material
     void rotate_axis(const Vec3 &N, const Vec3 &V, Mat3 &T, Mat3 &T_I) const;
 
 public:
     Surface() {}
-    Surface(vector<pair<shared_ptr<BxDF>, Spectrum>> BxDFs_, vector<pair<shared_ptr<Light>, Spectrum>> Lights_);
+    Surface(vector<pair<shared_ptr<BxDF>, Spect>> BxDFs_, vector<pair<shared_ptr<Light>, Spect>> Lights_);
 
     pair<int, int> surface_info() const;
-    void evaluate_VtS(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Spectrum &spectrum);
-    void evaluate_StV(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Spectrum &spectrum);
-    void evaluate_VtL(const Vec3 &inter, const Vec3 &N, const Vec3 &V, const Vec3 &L, Spectrum &spectrum);
-    void evaluate_LtV(const Vec3 &inter, const Vec3 &N, const Vec3 &L, const Vec3 &V, Spectrum &spectrum);
+    void evaluate_VtS(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Spect &spectrum);
+    void evaluate_StV(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Spect &spectrum);
+    void evaluate_VtL(const Vec3 &inter, const Vec3 &N, const Vec3 &V, const Vec3 &L, Spect &spectrum);
+    void evaluate_LtV(const Vec3 &inter, const Vec3 &N, const Vec3 &L, const Vec3 &V, Spect &spectrum);
     void sample_VtL(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Vec3 &L, double &pdf);
     void sample_LtV(const Vec3 &inter, const Vec3 &N, const Vec3 &L, Vec3 &V, double &pdf);
     void sample_StV(const Vec3 &inter, const Vec3 &N, Vec3 &Vb, double &pdf);
 }; // @TODO better interface
 
-shared_ptr<Surface> make_light(shared_ptr<Light> light, Spectrum spectrum);
-shared_ptr<Surface> make_bxdf(shared_ptr<BxDF> bxdf, Spectrum spectrum);
+shared_ptr<Surface> make_light(shared_ptr<Light> light, Spect spectrum);
+shared_ptr<Surface> make_bxdf(shared_ptr<BxDF> bxdf, Spect spectrum);
 
 #ifdef ARC_IMPLEMENTATION
 
-Surface::Surface(vector<pair<shared_ptr<BxDF>, Spectrum>> BxDFs_, vector<pair<shared_ptr<Light>, Spectrum>> Lights_)
+Surface::Surface(vector<pair<shared_ptr<BxDF>, Spect>> BxDFs_, vector<pair<shared_ptr<Light>, Spect>> Lights_)
     : BxDFs(BxDFs_), Lights(Lights_) {}
 
-shared_ptr<Surface> make_light(shared_ptr<Light> light, Spectrum spectrum)
+shared_ptr<Surface> make_light(shared_ptr<Light> light, Spect spectrum)
 {
-    vector<pair<shared_ptr<BxDF>, Spectrum>> BxDFs;
-    vector<pair<shared_ptr<Light>, Spectrum>> Lights;
+    vector<pair<shared_ptr<BxDF>, Spect>> BxDFs;
+    vector<pair<shared_ptr<Light>, Spect>> Lights;
     Lights.push_back(make_pair(light, spectrum));
     return make_shared<Surface>(BxDFs, Lights);
 }
 
-shared_ptr<Surface> make_bxdf(shared_ptr<BxDF> bxdf, Spectrum spectrum)
+shared_ptr<Surface> make_bxdf(shared_ptr<BxDF> bxdf, Spect spectrum)
 {
-    vector<pair<shared_ptr<BxDF>, Spectrum>> BxDFs;
-    vector<pair<shared_ptr<Light>, Spectrum>> Lights;
+    vector<pair<shared_ptr<BxDF>, Spect>> BxDFs;
+    vector<pair<shared_ptr<Light>, Spect>> Lights;
     BxDFs.push_back(make_pair(bxdf, spectrum));
     return make_shared<Surface>(BxDFs, Lights);
 }
@@ -74,69 +74,69 @@ void Surface::rotate_axis(const Vec3 &N, const Vec3 &V, Mat3 &T, Mat3 &T_I) cons
     T = T_I.I();
 }
 
-void Surface::evaluate_VtS(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Spectrum &spectrum)
+void Surface::evaluate_VtS(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Spect &spectrum)
 {
     Mat3 T, T_I;
     Vec3 V_;
     rotate_axis(N, V, T, T_I);
     V_ = T * V;
-    spectrum = Spectrum();
+    spectrum = Spect();
     for (auto Func : Lights)
     {
         double weight;
         get<0>(Func)->evaluate(V_, weight);
-        spectrum = spectrum + get<1>(Func) * Spectrum(weight);
+        spectrum = spectrum + get<1>(Func) * Spect(weight);
     }
 }
 
-void Surface::evaluate_StV(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Spectrum &spectrum)
+void Surface::evaluate_StV(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Spect &spectrum)
 {
     Mat3 T, T_I;
     Vec3 V_;
     rotate_axis(N, V, T, T_I);
     V_ = T * V;
-    spectrum = Spectrum();
+    spectrum = Spect();
     for (auto Func : Lights)
     {
         double weight;
         get<0>(Func)->evaluate(V_, weight);
-        spectrum = spectrum + get<1>(Func) * Spectrum(weight);
+        spectrum = spectrum + get<1>(Func) * Spect(weight);
     }
     assert(abs(V_.norm() - 1) < EPS);
     spectrum = spectrum * abs(V_.d[2]);
 }
 
-void Surface::evaluate_VtL(const Vec3 &inter, const Vec3 &N, const Vec3 &V, const Vec3 &L, Spectrum &spectrum)
+void Surface::evaluate_VtL(const Vec3 &inter, const Vec3 &N, const Vec3 &V, const Vec3 &L, Spect &spectrum)
 {
     Mat3 T, T_I;
     Vec3 V_, L_;
     rotate_axis(N, V, T, T_I);
     V_ = T * V;
     L_ = T * L;
-    spectrum = Spectrum();
+    spectrum = Spect();
     for (auto Func : BxDFs)
     {
         double weight;
         get<0>(Func)->evaluate(V_, L_, weight);
-        spectrum = spectrum + get<1>(Func) * Spectrum(weight);
+        spectrum = spectrum + get<1>(Func) * Spect(weight);
     }
     assert(abs(L_.norm() - 1) < EPS);
     spectrum = spectrum * abs(L_.d[2]);
 }
 
-void Surface::evaluate_LtV(const Vec3 &inter, const Vec3 &N, const Vec3 &L, const Vec3 &V, Spectrum &spectrum)
+void Surface::evaluate_LtV(const Vec3 &inter, const Vec3 &N, const Vec3 &L, const Vec3 &V, Spect &spectrum)
 {
     Mat3 T, T_I;
     Vec3 V_, L_;
     rotate_axis(N, V, T, T_I);
     V_ = T * V;
     L_ = T * L;
-    spectrum = Spectrum();
+    spectrum = Spect();
     for (auto Func : BxDFs)
     {
         double weight;
         get<0>(Func)->evaluate(V_, L_, weight);
-        spectrum = spectrum + get<1>(Func) * Spectrum(weight);
+        spectrum = spectrum + get<1>(Func) * Spect(weight);
     }
     assert(abs(L_.norm() - 1) < EPS);
     spectrum = spectrum * abs(V_.d[2]);

@@ -34,12 +34,12 @@ public:
 
 shared_ptr<Surface> mtl_dealer(const tinyobj::material_t &material)
 {
-    Spectrum diffuse = rgb(material.diffuse[0], material.diffuse[1], material.diffuse[2]);
-    Spectrum emission = rgb(material.emission[0], material.emission[1], material.emission[2]);
-    Spectrum specular = rgb(material.specular[0], material.specular[1], material.specular[2]);
+    Spect diffuse = rgb(material.diffuse[0], material.diffuse[1], material.diffuse[2]);
+    Spect emission = rgb(material.emission[0], material.emission[1], material.emission[2]);
+    Spect specular = rgb(material.specular[0], material.specular[1], material.specular[2]);
     double ior = material.ior, dissolve = material.dissolve, rough = material.roughness;
-    vector<pair<shared_ptr<BxDF>, Spectrum>> BxDFs;
-    vector<pair<shared_ptr<Light>, Spectrum>> Lights;
+    vector<pair<shared_ptr<BxDF>, Spect>> BxDFs;
+    vector<pair<shared_ptr<Light>, Spect>> Lights;
 
     if (specular.norm() > EPS) BxDFs.emplace_back(make_shared<GGX>(ior, rough), diffuse);
     if (emission.norm() > EPS) Lights.emplace_back(make_shared<UniformLight>(), emission);

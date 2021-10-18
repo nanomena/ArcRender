@@ -8,7 +8,7 @@
 #include "object.hpp"
 #include "render.hpp"
 #include "mapping.hpp"
-#include "obuffer.hpp"
+#include "image.hpp"
 #include "sampler.hpp"
 #include "surface.hpp"
 #include "geometry.hpp"

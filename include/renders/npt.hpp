@@ -11,27 +11,27 @@ class NaivePathTracer : public Render
     void step(int idx) override;
 public:
     NaivePathTracer(
-        shared_ptr<oBuffer> image_, shared_ptr<Scene> scene_, int trace_limit_ = 7, double trace_eps_ = 1e-4
+        shared_ptr<Image> image_, shared_ptr<Scene> scene_, int trace_limit_ = 7, double trace_eps_ = 1e-4
     );
 };
 
 #ifdef ARC_IMPLEMENTATION
 
 NaivePathTracer::NaivePathTracer(
-    shared_ptr<oBuffer> image_, shared_ptr<Scene> scene_, int trace_limit_, double trace_eps_
+    shared_ptr<Image> image_, shared_ptr<Scene> scene_, int trace_limit_, double trace_eps_
 ) : Render(std::move(image_), std::move(scene_)), trace_limit(trace_limit_), trace_eps(trace_eps_) {}
 
 void NaivePathTracer::step(int idx)
 {
     Ray now = image->sample(idx);
-    Spectrum mul(1);
-    vector<Spectrum> sum;
+    Spect mul(1);
+    vector<Spect> sum;
     sum.resize(trace_limit);
 
     for (int cnt = 0; cnt < trace_limit; ++cnt)
     {
         shared_ptr<Object> object;
-        Spectrum spectrum;
+        Spect spectrum;
         Vec3 intersect;
         scene->inter(now, object, intersect);
         object->evaluate_VtS(now, spectrum);
@@ -45,7 +45,7 @@ void NaivePathTracer::step(int idx)
         if (mul.norm() < trace_eps) break;
         now = next;
     }
-    Spectrum total;
+    Spect total;
     for (int cnt = 0; cnt < trace_limit; ++cnt)
         total = total + sum[cnt];
     image->draw(idx, total, 1);

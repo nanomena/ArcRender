@@ -4,68 +4,68 @@
 #include "utils.hpp"
 #include "mapping.hpp"
 
-struct Spectrum
+struct Spect
 {
     double r, g, b;
 
-    explicit Spectrum(double l = 0);
-    Spectrum(double _r, double _g, double _b);
-    Spectrum operator +(const Spectrum &v) const;
-    Spectrum operator -(const Spectrum &v) const;
-    Spectrum operator *(double k) const;
-    Spectrum operator *(const Spectrum &v) const;
-    Spectrum operator /(double v) const;
-    Spectrum operator ^(double v) const;
+    explicit Spect(double l = 0);
+    Spect(double _r, double _g, double _b);
+    Spect operator +(const Spect &v) const;
+    Spect operator -(const Spect &v) const;
+    Spect operator *(double k) const;
+    Spect operator *(const Spect &v) const;
+    Spect operator /(double v) const;
+    Spect operator ^(double v) const;
     int rgb888(double white, double gamma = 2.2) const;
     double norm() const;
 
-    friend ostream &operator <<(ostream &s, Spectrum t);
+    friend ostream &operator <<(ostream &s, Spect t);
 };
 
-Spectrum rgb888(double l = 0, double gamma = 2.2);
-Spectrum rgb888(double r, double g, double b, double gamma = 2.2);
-Spectrum rgb(double l, double gamma = 2.2);
-Spectrum rgb(double r, double g, double b, double gamma = 2.2);
-Spectrum rgb(const Pixel &t, double gamma = 2.2);
+Spect rgb888(double l = 0, double gamma = 2.2);
+Spect rgb888(double r, double g, double b, double gamma = 2.2);
+Spect rgb(double l, double gamma = 2.2);
+Spect rgb(double r, double g, double b, double gamma = 2.2);
+Spect rgb(const Pixel &t, double gamma = 2.2);
 
 #ifdef ARC_IMPLEMENTATION
 
-Spectrum::Spectrum(double l)
+Spect::Spect(double l)
 {
     r = g = b = l;
 }
-Spectrum::Spectrum(double _r, double _g, double _b)
+Spect::Spect(double _r, double _g, double _b)
 {
     r = _r, g = _g, b = _b;
 }
 
-Spectrum Spectrum::operator +(const Spectrum &v) const
+Spect Spect::operator +(const Spect &v) const
 {
-    return Spectrum(r + v.r, g + v.g, b + v.b);
+    return Spect(r + v.r, g + v.g, b + v.b);
 }
-Spectrum Spectrum::operator -(const Spectrum &v) const
+Spect Spect::operator -(const Spect &v) const
 {
-    return Spectrum(r - v.r, g - v.g, b - v.b);
+    return Spect(r - v.r, g - v.g, b - v.b);
 }
-Spectrum Spectrum::operator *(const Spectrum &v) const
+Spect Spect::operator *(const Spect &v) const
 {
-    return Spectrum(r * v.r, g * v.g, b * v.b);
+    return Spect(r * v.r, g * v.g, b * v.b);
 }
-Spectrum Spectrum::operator *(double k) const
+Spect Spect::operator *(double k) const
 {
-    return Spectrum(r * k, g * k, b * k);
+    return Spect(r * k, g * k, b * k);
 }
-Spectrum Spectrum::operator /(double v) const
+Spect Spect::operator /(double v) const
 {
-    if (v == 0) return Spectrum(0);
-    return Spectrum(r / v, g / v, b / v);
+    if (v == 0) return Spect(0);
+    return Spect(r / v, g / v, b / v);
 }
-Spectrum Spectrum::operator ^(double v) const
+Spect Spect::operator ^(double v) const
 {
-    return Spectrum(pow(r, v), pow(g, v), pow(b, v));
+    return Spect(pow(r, v), pow(g, v), pow(b, v));
 }
 
-int Spectrum::rgb888(double white, double gamma) const
+int Spect::rgb888(double white, double gamma) const
 {
     int _r = static_cast<int>(min(pow(r, 1 / gamma) / white, 1.) * 255),
         _g = static_cast<int>(min(pow(g, 1 / gamma) / white, 1.) * 255),
@@ -73,36 +73,36 @@ int Spectrum::rgb888(double white, double gamma) const
     return (_r * 256 + _g) * 256 + _b;
 }
 
-double Spectrum::norm() const
+double Spect::norm() const
 {
     return sqrt(r * r + g * g + b * b);
 }
 
-ostream &operator <<(ostream &s, Spectrum t)
+ostream &operator <<(ostream &s, Spect t)
 {
     s << "(" << t.r << "," << t.g << "," << t.b << ")";
     return s;
 }
 
-Spectrum rgb888(double l, double gamma)
+Spect rgb888(double l, double gamma)
 {
-    return Spectrum(pow(l / 255, gamma));
+    return Spect(pow(l / 255, gamma));
 }
-Spectrum rgb888(double r, double g, double b, double gamma)
+Spect rgb888(double r, double g, double b, double gamma)
 {
-    return Spectrum(pow(r / 255, gamma), pow(g / 255, gamma), pow(b / 255, gamma));
+    return Spect(pow(r / 255, gamma), pow(g / 255, gamma), pow(b / 255, gamma));
 }
-Spectrum rgb(double l, double gamma)
+Spect rgb(double l, double gamma)
 {
-    return Spectrum(pow(l, gamma));
+    return Spect(pow(l, gamma));
 }
-Spectrum rgb(double r, double g, double b, double gamma)
+Spect rgb(double r, double g, double b, double gamma)
 {
-    return Spectrum(pow(r, gamma), pow(g, gamma), pow(b, gamma));
+    return Spect(pow(r, gamma), pow(g, gamma), pow(b, gamma));
 }
-Spectrum rgb(const Pixel &t, double gamma)
+Spect rgb(const Pixel &t, double gamma)
 {
-    return Spectrum(pow(t.r, gamma), pow(t.g, gamma), pow(t.b, gamma));
+    return Spect(pow(t.r, gamma), pow(t.g, gamma), pow(t.b, gamma));
 }
 
 #endif
