@@ -29,6 +29,8 @@ protected:
 Mat3 operator *(const Mat3 &m0, const Mat3 &m1);
 Vec3 operator *(const Mat3 &m0, const Vec3 &v1);
 
+ostream &operator <<(ostream &o, const Mat3 &v);
+
 Mat3 makeAxisInv(const Vec3 &x, const Vec3 &y, const Vec3 &z);
 Mat3 makeAxis(const Vec3 &x, const Vec3 &y, const Vec3 &z);
 
@@ -98,23 +100,43 @@ Mat3 Mat3::I() const {
     return m;
 }
 
+ostream &operator <<(ostream &o, const Mat3 &v) {
+    for (int i = 0; i < 3; ++i) {
+        o << (i == 0 ? "[[" : " [");
+        for (int j = 0; j < 3; ++j)
+            o << v(i, j) << (j < 2 ? "," : "]");
+        o << (i == 2 ? "]" : ",") << endl;
+    }
+    return o;
+}
+
 Mat3 makeAxisInv(const Vec3 &x, const Vec3 &y, const Vec3 &z) {
+    assert(abs(1 - x.length()) < EPS);
+    assert(abs(1 - y.length()) < EPS);
+    assert(abs(1 - z.length()) < EPS);
+    assert(abs(x * y) < EPS);
+    assert(abs(x * z) < EPS);
     return {x[0], y[0], z[0], x[1], y[1], z[1], x[2], y[2], z[2]};
 }
 Mat3 makeAxis(const Vec3 &x, const Vec3 &y, const Vec3 &z) {
     return makeAxisInv(x, y, z).I();
 }
-void rotateAxis(const Vec3 &n, const Vec3 &v, Mat3 &T, Mat3 &TInv)
-{
+
+void rotateAxis(const Vec3 &n, const Vec3 &v, Mat3 &T, Mat3 &TInv) {
     assert(abs(1 - n.length()) < EPS);
     Vec3 x, y, z = n;
+//    cerr << "rotateAxis " << n << " " << v << endl;
+
     if ((v ^ n).length() > EPS)
-        x = (v - z * (v * z)).norm();
+        x = v.vert(n).norm();
     else if (sqrt(z[0] * z[0] + z[1] * z[1]) > EPS)
         x = Vec3(z[1], -z[0], 0).norm();
     else
         x = Vec3(1, 0, 0);
+
     y = (x ^ z).norm();
+
+//    cerr << n << " " << v << " " << x << " " << y <<  " " << z << endl;
     TInv = makeAxisInv(x, y, z);
     T = TInv.I();
 }

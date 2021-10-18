@@ -31,7 +31,14 @@ void NaivePathTracer::step(int idx) {
         Spectrum spectrum;
         double t;
         scene->intersect(now, object, t);
+
+//        cerr << object->name << endl;
+//        cerr << now.o << " " << now.d << endl;
+
         object->evaluate_VtS(now, spectrum);
+
+
+//        cerr << spectrum << endl;
         sum[cnt] = sum[cnt] + mul * spectrum;
 
         Ray next;

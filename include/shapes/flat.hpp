@@ -30,10 +30,17 @@ public:
 #ifdef ARC_IMPLEMENTATION
 
 Flat::Flat(const vector<Vec3> &vertices) : vertices(vertices) {
+//    cerr << "S" << endl;
     n = vertices.size();
 
+    for (auto v : vertices) cerr << v << endl;
     norm = ((vertices[1] - vertices[0]) ^ (vertices[2] - vertices[0])).norm();
-    T = makeAxis(vertices[1] - vertices[0], vertices[2] - vertices[0], norm);
+    Mat3 TInv;
+//    cerr << (vertices[1] - vertices[0]).norm() << endl;
+//    cerr << (vertices[2] - vertices[0]).norm() << endl;
+    rotateAxis((vertices[1] - vertices[0]).norm(), (vertices[2] - vertices[0]).norm(), T, TInv);
+
+//    cerr << "E" << endl;
 
     T_vertices.resize(n);
     for (int i = 0; i < n; ++i)
@@ -46,15 +53,22 @@ unsigned int Flat::onRight(const Vec3 &p1, const Vec3 &p2, const Vec3 &q) const 
     if (p1.x() > p2.x()) return onRight(p2, p1, q);
     if (q.x() < p1.x()) return 0;
     if (p2.x() <= q.x()) return 0;
-    return (q.y() - p1.y()) * (p2.x() - p1.x())
-        > (q.x() - p1.x()) * (p2.y() - p1.y());
+    return (q.z() - p1.z()) * (p2.x() - p1.x())
+        > (q.x() - p1.x()) * (p2.z() - p1.z());
 }
 
 bool Flat::intersect(const Ray &ray, double &t) const {
-    Ray T_ray = Ray(T * ray.o, T * ray.d);
-    if (abs(T_ray.d.z()) < EPS) return false;
+//    cerr << "here!" << endl;
 
-    t = (T_vertices[0].z() - T_ray.o.z()) / T_ray.d.z();
+    Ray T_ray = Ray(T * ray.o, T * ray.d);
+    if (abs(T_ray.d.y()) < EPS) return false;
+
+//    for (int i = 0; i < n; ++i) {
+//        cerr << T_vertices[i] << " ";
+//    }
+//    cerr << endl;
+//    cerr << T << endl;
+    t = (T_vertices[0].y() - T_ray.o.y()) / T_ray.d.y();
     if (t < 0) return false;
     Vec3 T_candi = T_ray.o + T_ray.d * t;
 
@@ -62,6 +76,7 @@ bool Flat::intersect(const Ray &ray, double &t) const {
     for (int i = 0; i + 1 < n; ++i)
         inside ^= onRight(T_vertices[i], T_vertices[i + 1], T_candi);
 
+//    cerr << "here!" << " " << ray.o << " " << ray.d << " " << T_candi <<  " " << inside << endl;
     return inside;
 }
 Vec3 Flat::normal(const Vec3 &inter) const {

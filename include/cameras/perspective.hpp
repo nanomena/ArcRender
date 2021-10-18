@@ -12,8 +12,7 @@ public:
 #ifdef ARC_IMPLEMENTATION
 
 PerspectiveCamera::PerspectiveCamera(Vec3 o, Vec3 x, Vec3 y, double zLength) : o(o), x(x), y(y) {
-    z = (x ^ y);
-    z = z / z.length() * zLength;
+    z = (x ^ y).norm(zLength);
 }
 Ray PerspectiveCamera::apply(const Vec2 &t) {
     return Ray(o, (x * t.x() - y * t.y() - z).norm());

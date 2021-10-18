@@ -65,6 +65,7 @@ void Object::evaluate_StV(const Ray &Vb, Spectrum &spectrum) {
 void Object::evaluate_VtL(const Ray &V, const Ray &L, Spectrum &spectrum) {
     Vec3 intersect = L.o;
     Vec3 N = shape->normal(intersect);
+//    cerr << "evaluate VtL" << " " << V.o << " " << V.d << " " << L.o << " " << L.d << endl;
     surface->evaluate_VtL(intersect, N, -V.d.norm(), L.d.norm(), spectrum);
 }
 

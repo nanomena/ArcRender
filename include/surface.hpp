@@ -54,25 +54,10 @@ pair<int, int> Surface::surface_info() const {
     return make_pair(BxDFs.size(), Lights.size());
 }
 
-void Surface::rotate_axis(const Vec3 &N, const Vec3 &V, Mat3 &T, Mat3 &T_I) const {
-    assert(abs(1 - N.length()) < EPS);
-    Vec3 x, y, z = N;
-    if ((V ^ N).squaredLength() > EPS)
-        x = (V - z * (V * z)).norm();
-    else if (z.x() * z.x() + z.y() * z.y() > EPS)
-        x = Vec3(z.y(), -z.x(), 0).norm();
-    else
-        x = Vec3(1, 0, 0);
-    y = (x ^ z).norm();
-
-    T_I = makeAxisInv(x, y, z);
-    T = T_I.I();
-}
-
 void Surface::evaluate_VtS(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Spectrum &spectrum) {
     Mat3 T, T_I;
     Vec3 V_;
-    rotate_axis(N, V, T, T_I);
+    rotateAxis(N, V, T, T_I);
     V_ = T * V;
     spectrum = Spectrum();
     for (auto Func: Lights) {
@@ -85,7 +70,7 @@ void Surface::evaluate_VtS(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Spec
 void Surface::evaluate_StV(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Spectrum &spectrum) {
     Mat3 T, T_I;
     Vec3 V_;
-    rotate_axis(N, V, T, T_I);
+    rotateAxis(N, V, T, T_I);
     V_ = T * V;
     spectrum = Spectrum();
     for (auto Func: Lights) {
@@ -100,9 +85,12 @@ void Surface::evaluate_StV(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Spec
 void Surface::evaluate_VtL(const Vec3 &inter, const Vec3 &N, const Vec3 &V, const Vec3 &L, Spectrum &spectrum) {
     Mat3 T, T_I;
     Vec3 V_, L_;
-    rotate_axis(N, V, T, T_I);
+    rotateAxis(N, V, T, T_I);
     V_ = T * V;
     L_ = T * L;
+
+//    cerr << "evaluate VtL" << " " << V.length() << " " << L.length() << " " << V_.length() << " " << L_.length() << endl;
+//    cerr << "evaluate VtL" << " " << V_ << " " << L_ << endl;
     spectrum = Spectrum();
     for (auto Func: BxDFs) {
         double weight;
@@ -116,7 +104,7 @@ void Surface::evaluate_VtL(const Vec3 &inter, const Vec3 &N, const Vec3 &V, cons
 void Surface::evaluate_LtV(const Vec3 &inter, const Vec3 &N, const Vec3 &L, const Vec3 &V, Spectrum &spectrum) {
     Mat3 T, T_I;
     Vec3 V_, L_;
-    rotate_axis(N, V, T, T_I);
+    rotateAxis(N, V, T, T_I);
     V_ = T * V;
     L_ = T * L;
     spectrum = Spectrum();
@@ -132,7 +120,7 @@ void Surface::evaluate_LtV(const Vec3 &inter, const Vec3 &N, const Vec3 &L, cons
 void Surface::sample_VtL(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Vec3 &L, double &pdf) {
     Mat3 T, T_I;
     Vec3 V_, L_;
-    rotate_axis(N, V, T, T_I);
+    rotateAxis(N, V, T, T_I);
     V_ = T * V;
     if (BxDFs.size() == 0) L_ = RD.sphere(), pdf = 1 / (4 * pi);
     else get<0>(BxDFs[0])->sample_VtL(V_, L_, pdf);
@@ -142,7 +130,7 @@ void Surface::sample_VtL(const Vec3 &inter, const Vec3 &N, const Vec3 &V, Vec3 &
 void Surface::sample_LtV(const Vec3 &inter, const Vec3 &N, const Vec3 &L, Vec3 &V, double &pdf) {
     Mat3 T, T_I;
     Vec3 V_, L_;
-    rotate_axis(N, L, T, T_I);
+    rotateAxis(N, L, T, T_I);
     L_ = T * L;
     if (BxDFs.size() == 0) V_ = RD.sphere(), pdf = 1 / (4 * pi);
     else get<0>(BxDFs[0])->sample_LtV(L_, V_, pdf);
@@ -152,7 +140,7 @@ void Surface::sample_LtV(const Vec3 &inter, const Vec3 &N, const Vec3 &L, Vec3 &
 void Surface::sample_StV(const Vec3 &inter, const Vec3 &N, Vec3 &V, double &pdf) {
     Mat3 T, T_I;
     Vec3 V_;
-    rotate_axis(N, N, T, T_I);
+    rotateAxis(N, N, T, T_I);
     if (Lights.size() == 0) V_ = RD.sphere(), pdf = 1 / (4 * pi);
     else get<0>(Lights[0])->sample(V_, pdf);
     V = T_I * V_;

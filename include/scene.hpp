@@ -39,11 +39,14 @@ void Scene::add_objects(const vector<shared_ptr<Object>> &objects) {
 }
 
 void Scene::intersect(const Ray &ray, shared_ptr<Object> &object, double &t) const {
+    Ray rayX = ray;
+    rayX.d = rayX.d.norm();
+
     object = skybox;
-    bool f = skybox->intersect(ray, t);
+    bool f = skybox->intersect(rayX, t);
     assert(f);
     for (const auto &graph: graphs)
-        graph->intersect(ray, object, t);
+        graph->intersect(rayX, object, t);
 }
 
 #endif
