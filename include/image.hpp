@@ -4,14 +4,14 @@
 #include "utils.hpp"
 #include "camera.hpp"
 #include "spectrum.hpp"
-#include "geometry.hpp"
+#include "vecmath.hpp"
 #include "sampler.hpp"
 
 class Image
 {
     int width, height, length;
     shared_ptr<Camera> camera;
-    vector<Spect> spectrum;
+    vector<Spectrum> spectrum;
     vector<double> weight;
 
 public:
@@ -19,8 +19,8 @@ public:
 
     int epoch() const;
     Ray sample(int idx) const;
-    Spect get(int idx) const;
-    void draw(int idx, Spect c, double w = 1);
+    Spectrum get(int idx) const;
+    void draw(int idx, Spectrum c, double w = 1);
     void save(const char *path, double white = 1, double gamma = 2.2) const;
 };
 
@@ -46,12 +46,12 @@ Ray Image::sample(int idx) const
     Vec2 v = RD.pixel(Vec2(x, y), width, height);
     return camera->apply(v);
 }
-void Image::draw(int idx, Spect c, double w)
+void Image::draw(int idx, Spectrum c, double w)
 {
     spectrum[idx] = spectrum[idx] + c * w;
     weight[idx] += w;
 }
-Spect Image::get(int idx) const
+Spectrum Image::get(int idx) const
 {
     return spectrum[idx] / weight[idx];
 }
@@ -61,7 +61,7 @@ void Image::save(const char *path, double white, double gamma) const
     buffer.resize(length * 3);
     for (int i = 0; i < length; ++i)
     {
-        auto _c = (spectrum[i] / weight[i]).rgb888(white, gamma);
+        auto _c = (spectrum[i] / weight[i]).rgb256(white, gamma);
         buffer[i * 3 + 0] = (unsigned char)(_c / 65536);
         buffer[i * 3 + 1] = (unsigned char)(_c / 256 % 256);
         buffer[i * 3 + 2] = (unsigned char)(_c % 256);

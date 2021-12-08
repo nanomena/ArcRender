@@ -2,7 +2,7 @@
 #define objloader_hpp
 
 #include "utils.hpp"
-#include "geometry.hpp"
+#include "vecmath.hpp"
 #include "object.hpp"
 #include "bxdf.hpp"
 #include "scene.hpp"
@@ -12,8 +12,7 @@
 #include "lights/uniform.hpp"
 // @TODO so this part has sicking coupling
 
-class ObjGroup
-{
+class ObjGroup {
     tinyobj::attrib_t attrib;
     vector<tinyobj::shape_t> mtl_shapes;
     vector<tinyobj::material_t> mtl_materials;
@@ -32,8 +31,7 @@ public:
 
 #ifdef ARC_IMPLEMENTATION
 
-shared_ptr<Surface> mtl_dealer(const tinyobj::material_t &material)
-{
+shared_ptr<Surface> mtl_dealer(const tinyobj::material_t &material) {
     Spect diffuse = rgb(material.diffuse[0], material.diffuse[1], material.diffuse[2]);
     Spect emission = rgb(material.emission[0], material.emission[1], material.emission[2]);
     Spect specular = rgb(material.specular[0], material.specular[1], material.specular[2]);
@@ -46,29 +44,23 @@ shared_ptr<Surface> mtl_dealer(const tinyobj::material_t &material)
     return make_shared<Surface>(BxDFs, Lights);
 }
 
-shared_ptr<Object> obj_dealer(const shared_ptr<Shape> &shape, const shared_ptr<Surface> &surface)
-{
+shared_ptr<Object> obj_dealer(const shared_ptr<Shape> &shape, const shared_ptr<Surface> &surface) {
     return make_shared<Object>(shape, surface, "imported");
 }
 
-void ObjGroup::load_materials()
-{
-    for (const auto &mtl_material : mtl_materials)
+void ObjGroup::load_materials() {
+    for (const auto &mtl_material: mtl_materials)
         surfaces.push_back(mtl_dealer(mtl_material));
 }
 
-void ObjGroup::load_objects()
-{
-    for (const auto &s : mtl_shapes)
-    {
+void ObjGroup::load_objects() {
+    for (const auto &s: mtl_shapes) {
         int index_offset = 0;
-        for (int f = 0; f < s.mesh.num_face_vertices.size(); ++f)
-        {
+        for (int f = 0; f < s.mesh.num_face_vertices.size(); ++f) {
             int fv = s.mesh.num_face_vertices[f];
             assert(fv == 3);
             vector<Vec3> V, Vn, Vt;
-            for (int v = 0; v < fv; ++v)
-            {
+            for (int v = 0; v < fv; ++v) {
                 tinyobj::index_t idx = s.mesh.indices[index_offset + v];
                 V.emplace_back(
                     attrib.vertices[3 * idx.vertex_index + 0],
@@ -95,8 +87,7 @@ void ObjGroup::load_objects()
     }
 }
 
-void ObjGroup::load(const string &filename)
-{
+void ObjGroup::load(const string &filename) {
     string warn, err;
     bool ret = tinyobj::LoadObj(&attrib, &mtl_shapes, &mtl_materials, &warn, &err, filename.c_str());
     if (!warn.empty()) std::cerr << warn << std::endl;
@@ -107,8 +98,7 @@ void ObjGroup::load(const string &filename)
     load_objects();
 }
 
-void ObjGroup::import_to(const shared_ptr<Scene> &scene)
-{
+void ObjGroup::import_to(const shared_ptr<Scene> &scene) {
     scene->add_objects(objects);
 }
 #endif

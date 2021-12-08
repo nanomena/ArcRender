@@ -6,8 +6,7 @@
 #include "shape.hpp"
 #include "surface.hpp"
 
-class Object
-{
+class Object {
     shared_ptr<Shape> shape;
     shared_ptr<Surface> surface;
 
@@ -16,13 +15,13 @@ public:
 
     string name;
 
-    Cuboid outline() const;
+    Box3 outline() const;
     pair<int, int> surface_info() const;
-    void inter(const Ray &ray, int &is_inter, Vec3 &intersect) const;
-    void evaluate_VtS(const Ray &V, Spect &spectrum);
-    void evaluate_StV(const Ray &Vb, Spect &spectrum);
-    void evaluate_VtL(const Ray &V, const Ray &L, Spect &spectrum);
-    void evaluate_LtV(const Ray &Lb, const Ray &Vb, Spect &spectrum);
+    bool intersect(const Ray &ray, double &t) const;
+    void evaluate_VtS(const Ray &V, Spectrum &spectrum);
+    void evaluate_StV(const Ray &Vb, Spectrum &spectrum);
+    void evaluate_VtL(const Ray &V, const Ray &L, Spectrum &spectrum);
+    void evaluate_LtV(const Ray &Lb, const Ray &Vb, Spectrum &spectrum);
     void sample_VtL(const Ray &V, Ray &L, double &pdf);
     void sample_LtV(const Ray &Lb, Ray &Vb, double &pdf);
     void sample_S(const Vec3 &ref, Ray &V, double &pdf);
@@ -31,87 +30,79 @@ public:
 
 #ifdef ARC_IMPLEMENTATION
 
-
 Object::Object(shared_ptr<Shape> shape_, shared_ptr<Surface> surface_, string name_)
     : shape(std::move(shape_)), surface(std::move(surface_)), name(std::move(name_)) {}
 
-Cuboid Object::outline() const
-{
+Box3 Object::outline() const {
     return shape->outline();
 }
 
-pair<int, int> Object::surface_info() const
-{
+pair<int, int> Object::surface_info() const {
     return surface->surface_info();
 }
 
-void Object::inter(const Ray &ray, int &is_inter, Vec3 &intersect) const
-{
-    shape->inter(ray, is_inter, intersect);
-    if ((intersect - ray.o).norm2() < EPS) is_inter = 0;
+bool Object::intersect(const Ray &ray, double &t) const {
+    bool ok = shape->intersect(ray, t);
+    if (t < EPS) return false;
+    return ok;
 }
 
-void Object::evaluate_VtS(const Ray &V, Spect &spectrum)
-{
-    int is_inter; Vec3 intersect;
-    shape->inter(V, is_inter, intersect);
-    assert(is_inter);
+void Object::evaluate_VtS(const Ray &V, Spectrum &spectrum) {
+    double t;
+    bool f = shape->intersect(V, t);
+    assert(f);
+    Vec3 intersect = V.o + V.d * t;
     Vec3 N = shape->normal(intersect);
-    surface->evaluate_VtS(intersect, N, -V.d.scale(1), spectrum);
+    surface->evaluate_VtS(intersect, N, -V.d.norm(), spectrum);
 }
 
-void Object::evaluate_StV(const Ray &Vb, Spect &spectrum)
-{
+void Object::evaluate_StV(const Ray &Vb, Spectrum &spectrum) {
     Vec3 intersect = Vb.o;
     Vec3 N = shape->normal(intersect);
-    surface->evaluate_StV(intersect, N, Vb.d.scale(1), spectrum);
+    surface->evaluate_StV(intersect, N, Vb.d.norm(), spectrum);
 }
 
-void Object::evaluate_VtL(const Ray &V, const Ray &L, Spect &spectrum)
-{
+void Object::evaluate_VtL(const Ray &V, const Ray &L, Spectrum &spectrum) {
     Vec3 intersect = L.o;
     Vec3 N = shape->normal(intersect);
-    surface->evaluate_VtL(intersect, N, -V.d.scale(1), L.d.scale(1), spectrum);
+    surface->evaluate_VtL(intersect, N, -V.d.norm(), L.d.norm(), spectrum);
 }
 
-void Object::evaluate_LtV(const Ray &Lb, const Ray &Vb, Spect &spectrum)
-{
+void Object::evaluate_LtV(const Ray &Lb, const Ray &Vb, Spectrum &spectrum) {
     Vec3 intersect = Vb.o;
     Vec3 N = shape->normal(intersect);
-    surface->evaluate_LtV(intersect, N, -Lb.d.scale(1), Vb.d.scale(1), spectrum);
+    surface->evaluate_LtV(intersect, N, -Lb.d.norm(), Vb.d.norm(), spectrum);
 }
 
-void Object::sample_VtL(const Ray &V, Ray &L, double &pdf)
-{
-    int is_inter; Vec3 intersect;
-    shape->inter(V, is_inter, intersect);
-    assert(is_inter);
+void Object::sample_VtL(const Ray &V, Ray &L, double &pdf) {
+    double t;
+    bool f = shape->intersect(V, t);
+    assert(f);
+    Vec3 intersect = V.o + V.d * t;
     L.o = intersect;
     Vec3 N = shape->normal(intersect);
-    surface->sample_VtL(intersect, N, -V.d.scale(1), L.d, pdf);
+    surface->sample_VtL(intersect, N, -V.d.norm(), L.d, pdf);
 }
 
-void Object::sample_LtV(const Ray &Lb, Ray &Vb, double &pdf)
-{
-    int is_inter; Vec3 intersect;
-    shape->inter(Lb, is_inter, intersect);
-    assert(is_inter);
+void Object::sample_LtV(const Ray &Lb, Ray &Vb, double &pdf) {
+    double t;
+    bool f = shape->intersect(Lb, t);
+    assert(f);
+    Vec3 intersect = Lb.o + Lb.d * t;
     Vb.o = intersect;
     Vec3 N = shape->normal(intersect);
-    surface->sample_LtV(intersect, N, -Lb.d.scale(1), Vb.d, pdf);
+    surface->sample_LtV(intersect, N, -Lb.d.norm(), Vb.d, pdf);
 }
 
-void Object::sample_S(const Vec3 &ref, Ray &V, double &pdf)
-{
+void Object::sample_S(const Vec3 &ref, Ray &V, double &pdf) {
     Vec3 pos;
     shape->sample(pos, pdf);
     V = Ray(ref, pos - ref);
     Vec3 N = shape->normal(pos);
-    pdf = pdf / (abs(V.d * N) / V.d.norm() / V.d.norm2());
+    pdf = pdf / (abs(V.d * N) / pow(V.d.length(), 3));
 }
 
-void Object::sample_StV(Ray &Vb, double &pdf)
-{
+void Object::sample_StV(Ray &Vb, double &pdf) {
     double pdf1, pdf2;
     shape->sample(Vb.o, pdf1);
     Vec3 N = shape->normal(Vb.o);

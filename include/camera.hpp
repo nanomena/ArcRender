@@ -2,7 +2,7 @@
 #define camera_hpp
 
 #include "utils.hpp"
-#include "geometry.hpp"
+#include "vecmath.hpp"
 
 class Camera
 {

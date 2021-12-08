@@ -6,8 +6,7 @@
 #include "graph.hpp"
 #include "material.hpp"
 
-class Scene
-{
+class Scene {
     shared_ptr<Object> skybox;
     vector<shared_ptr<KaDanTree>> graphs;
 
@@ -19,38 +18,32 @@ public:
     void add_object(const shared_ptr<Object> &object);
     void add_objects(const vector<shared_ptr<Object>> &object);
 
-    void inter(const Ray &ray, shared_ptr<Object> &object, Vec3 &intersect) const;
+    void intersect(const Ray &ray, shared_ptr<Object> &object, double &t) const;
 };
 
 #ifdef ARC_IMPLEMENTATION
 
-Scene::Scene(shared_ptr<Object> skybox_)
-{
+Scene::Scene(shared_ptr<Object> skybox_) {
     skybox = std::move(skybox_);
 }
 
-void Scene::add_object(const shared_ptr<Object> &object)
-{
+void Scene::add_object(const shared_ptr<Object> &object) {
     vector<shared_ptr<Object>> objects{object};
     add_objects(objects);
 }
-void Scene::add_objects(const vector<shared_ptr<Object>> &objects)
-{
-    for (const auto& object : objects)
+void Scene::add_objects(const vector<shared_ptr<Object>> &objects) {
+    for (const auto &object: objects)
         if (object->surface_info().second > 0)
             Lights.push_back(object);
     graphs.push_back(make_shared<KaDanTree>(objects));
 }
 
-void Scene::inter(const Ray &ray, shared_ptr<Object> &object, Vec3 &intersect) const
-{
+void Scene::intersect(const Ray &ray, shared_ptr<Object> &object, double &t) const {
     object = skybox;
-    int is_inter;
-    skybox->inter(ray, is_inter, intersect);
-    if (!is_inter) return object = skybox, intersect = ray.o, void(); // F**ked !
-    assert(is_inter);
-    for (const auto &graph : graphs)
-        graph->query(ray, object, intersect);
+    bool f = skybox->intersect(ray, t);
+    assert(f);
+    for (const auto &graph: graphs)
+        graph->intersect(ray, object, t);
 }
 
 #endif

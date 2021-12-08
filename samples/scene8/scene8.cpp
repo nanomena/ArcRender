@@ -24,7 +24,7 @@ int main()
                 Vec3(0.3, 0.99, -1.3),
                 Vec3(0.3, 0.99, -0.7)
             ),
-            make_light(make_shared<UniformLight>(), Spect(1)),
+            make_light(make_shared<UniformLight>(), Spectrum(1)),
             "light"
         )
     );
@@ -37,7 +37,7 @@ int main()
                 Vec3(1, -1, 2),
                 Vec3(1, -1, -2)
             ),
-            make_bxdf(make_shared<Lambert>(), rgb888(255, 255, 255)),
+            make_bxdf(make_shared<Lambert>(), rgb256(255, 255, 255)),
             "down"
         )
     );
@@ -50,7 +50,7 @@ int main()
                 Vec3(1, 1, 2),
                 Vec3(1, 1, -2)
             ),
-            make_bxdf(make_shared<Lambert>(), rgb888(255, 175, 175)),
+            make_bxdf(make_shared<Lambert>(), rgb256(255, 175, 175)),
             "right"
         )
     );
@@ -63,7 +63,7 @@ int main()
                 Vec3(-1, 1, -2),
                 Vec3(-1, 1, 2)
             ),
-            make_bxdf(make_shared<Lambert>(), rgb888(175, 175, 255)),
+            make_bxdf(make_shared<Lambert>(), rgb256(175, 175, 255)),
             "left"
         )
     );
@@ -76,7 +76,7 @@ int main()
                 Vec3(1, 1, -2),
                 Vec3(1, 1, 2)
             ),
-            make_bxdf(make_shared<Lambert>(), rgb888(255, 255, 255)),
+            make_bxdf(make_shared<Lambert>(), rgb256(255, 255, 255)),
             "up"
         )
     );
@@ -89,7 +89,7 @@ int main()
                 Vec3(1, -1, -2),
                 Vec3(1, 1, -2)
             ),
-            make_bxdf(make_shared<Lambert>(), rgb888(255, 255, 255)),
+            make_bxdf(make_shared<Lambert>(), rgb256(255, 255, 255)),
             "back"
         )
     );
@@ -102,7 +102,7 @@ int main()
                 Vec3(1, 1, 2),
                 Vec3(1, -1, 2)
             ),
-            make_bxdf(make_shared<Lambert>(), rgb888(255, 255, 255)),
+            make_bxdf(make_shared<Lambert>(), rgb256(255, 255, 255)),
             "front"
         )
     );
@@ -112,7 +112,7 @@ int main()
             make_shared<Sphere>(
                 Vec3(0, 0, -1), 0.5
             ),
-            make_bxdf(make_shared<GGX>(30, 1), rgb888(255, 255, 255)),
+            make_bxdf(make_shared<GGX>(30, 1), rgb256(255, 255, 255)),
             "ball"
         )
     );

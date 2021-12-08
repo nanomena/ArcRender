@@ -2,22 +2,19 @@
 #define sampler_hpp
 
 #include "utils.hpp"
-#include "geometry.hpp"
+#include "vecmath.hpp"
 
 template<int base>
-class HaltonSequence
-{
+class HaltonSequence {
     long long key;
     double now;
 
 public:
-    HaltonSequence()
-    {
+    HaltonSequence() {
         key = 0;
         now = 0;
     }
-    double operator ()()
-    {
+    double operator ()() {
         double q = 1. / base;
         key += 1;
         for (long long i = key; i % base == 0; now -= (base - 1) * q, i /= base, q /= base);
@@ -26,8 +23,7 @@ public:
     }
 };
 
-class Sampler
-{
+class Sampler {
     mt19937 R;
 
 public:
@@ -43,34 +39,29 @@ static Sampler RD;
 
 #ifdef ARC_IMPLEMENTATION
 
-double Sampler::sample()
-{
+double Sampler::sample() {
     double result = 1. * R() / (1ll << 32);
     return result;
 }
-double Sampler::rand(double l, double r)
-{
+double Sampler::rand(double l, double r) {
     return sample() * (r - l) + l;
 }
 
-Vec2 Sampler::pixel(Vec2 t, double width, double height)
-{
+Vec2 Sampler::pixel(Vec2 t, double width, double height) {
     double _x = sample(), _y = sample();
-    double dx = (t.d[0] + _x) / width - 0.5, dy = (t.d[1] + _y) / height - 0.5;
-    return Vec2(dx, dy);
+    double dx = (t.x() + _x) / width - 0.5, dy = (t.y() + _y) / height - 0.5;
+    return {dx, dy};
 }
-Vec3 Sampler::semisphere()
-{
+Vec3 Sampler::semisphere() {
     auto v = make_pair(sample(), sample());
     double z = v.first, phi = v.second * (2 * pi) - pi;
-    return Vec3(sin(phi) * sqrt(1 - z * z), cos(phi) * sqrt(1 - z * z), z);
+    return {sin(phi) * sqrt(1 - z * z), cos(phi) * sqrt(1 - z * z), z};
 }
 
-Vec3 Sampler::sphere()
-{
+Vec3 Sampler::sphere() {
     auto v = make_pair(sample(), sample());
     double z = v.first * 2 - 1, phi = v.second * (2 * pi) - pi;
-    return Vec3(sin(phi) * sqrt(1 - z * z), cos(phi) * sqrt(1 - z * z), z);
+    return {sin(phi) * sqrt(1 - z * z), cos(phi) * sqrt(1 - z * z), z};
 }
 
 #endif

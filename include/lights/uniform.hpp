@@ -3,8 +3,7 @@
 
 #include "../light.hpp"
 
-class UniformLight : public Light
-{
+class UniformLight : public Light {
 
 public:
     UniformLight() = default;
@@ -14,15 +13,12 @@ public:
 
 #ifdef ARC_IMPLEMENTATION
 
-void UniformLight::evaluate(const Vec3 &V, double &weight)
-{
-    if (V.d[2] < 0)
-        return (weight = 0, void());
-    weight = 1;
+void UniformLight::evaluate(const Vec3 &V, double &weight) {
+    if (V.z() < 0) weight = 0;
+    else weight = 1;
 }
 
-void UniformLight::sample(Vec3 &V, double &pdf)
-{
+void UniformLight::sample(Vec3 &V, double &pdf) {
     V = RD.semisphere();
     pdf = 1 / (2 * pi);
 }

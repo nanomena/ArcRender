@@ -1,14 +1,14 @@
 #ifndef render_hpp
 #define render_hpp
 
+#include <utility>
+
 #include "utils.hpp"
 #include "image.hpp"
 #include "scene.hpp"
 
-class Render
-{
-    virtual void step(int idx)
-    {
+class Render {
+    virtual void step(int idx) {
         throw invalid_argument("NotImplementedError");
     }
     virtual void build_graph() {}
@@ -19,22 +19,18 @@ protected:
     shared_ptr<Scene> scene;
 
 public:
-    Render(shared_ptr<Image> image_, shared_ptr<Scene> scene_);
+    Render(const shared_ptr<Image>& image, shared_ptr<Scene> scene);
     void epoch(int cluster = 1);
     void step_one(int idx, int cluster = 1);
 };
 
 #ifdef ARC_IMPLEMENTATION
 
-Render::Render(shared_ptr<Image> image_, shared_ptr<Scene> scene_)
-{
-    image = std::move(image_);
-    scene = std::move(scene_);
+Render::Render(const shared_ptr<Image>& image, shared_ptr<Scene> scene) : image(image), scene(std::move(scene)) {
     length = image->epoch();
 }
 
-void Render::epoch(int cluster)
-{
+void Render::epoch(int cluster) {
     build_graph();
 #pragma omp parallel for
     for (int i = 0; i < length; ++i)
@@ -42,8 +38,7 @@ void Render::epoch(int cluster)
             step(i);
 }
 
-void Render::step_one(int idx, int cluster)
-{
+void Render::step_one(int idx, int cluster) {
     build_graph();
 #pragma omp parallel for
     for (int j = 0; j < cluster; ++j)

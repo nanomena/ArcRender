@@ -11,10 +11,10 @@
 #include "image.hpp"
 #include "sampler.hpp"
 #include "surface.hpp"
-#include "geometry.hpp"
+#include "vecmath.hpp"
 #include "material.hpp"
 #include "spectrum.hpp"
-#include "objloader.hpp"
+//#include "objloader.hpp"
 
 #include "bxdfs/lambert.hpp"
 #include "bxdfs/biggx.hpp"

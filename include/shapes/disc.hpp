@@ -3,62 +3,52 @@
 
 #include "../shape.hpp"
 
-class Disc : public Shape
-{
+class Disc : public Shape {
     Vec3 o, T_o, norm;
     double r;
     Mat3 T;
 
 public:
-    Disc(Vec3 _o, Vec3 _norm, double _r);
+    Disc(Vec3 o, Vec3 norm, double r);
 
-    void inter(const Ray &ray, int &is_inter, Vec3 &intersect) const override;
+    bool intersect(const Ray &ray, double &t) const override;
     Vec3 normal(const Vec3 &inter) const override;
 };
 
 #ifdef ARC_IMPLEMENTATION
 
-Disc::Disc(Vec3 _o, Vec3 _norm, double _r)
-{
-    o = _o;
-    norm = _norm.scale(1);
-    r = _r;
+Disc::Disc(Vec3 o, Vec3 norm, double r) : o(o), norm(norm.norm()), r(r) {
     Vec3 x, y, z = norm;
 
-    if (z.d[0] * z.d[0] + z.d[1] * z.d[1] > EPS)
-        x = Vec3(z.d[1], -z.d[0], 0).scale(1);
+    if (z.x() * z.x() + z.y() * z.y() > EPS)
+        x = Vec3(z.y(), -z.x(), 0).norm();
     else
         x = Vec3(1, 0, 0);
-    y = (x ^ z).scale(1);
+    y = (x ^ z).norm();
 
-    T = axis(x, y, z);
+    T = makeAxis(x, y, z);
     T_o = T * o;
 
     Vec3 p(
-        (Vec3(1, 0, 0) ^ norm).norm(),
-        (Vec3(0, 1, 0) ^ norm).norm(),
-        (Vec3(0, 0, 1) ^ norm).norm()
+        (Vec3(1, 0, 0) ^ norm).length(),
+        (Vec3(0, 1, 0) ^ norm).length(),
+        (Vec3(0, 0, 1) ^ norm).length()
     );
-    box = Cuboid(o - p * r, o + p * r);
+    box = Box3(o - p * r, o + p * r);
 }
 
-void Disc::inter(const Ray &ray, int &is_inter, Vec3 &intersect) const
-{
+bool Disc::intersect(const Ray &ray, double &t) const {
     Ray T_ray = Ray(T * ray.o, T * ray.d);
-    if (abs(T_ray.d.d[2]) < EPS) return (is_inter = 0, void());
+    if (abs(T_ray.d.z()) < EPS) return false;
 
-    double dis = (T_o.d[2] - T_ray.o.d[2]) / T_ray.d.d[2];
-    if (dis < 0) return (is_inter = 0, void());
-    Vec3 T_candi = T_ray.o + T_ray.d * dis;
+    t = (T_o.z() - T_ray.o.z()) / T_ray.d.z();
+    if (t < 0) return false;
+    Vec3 T_candi = T_ray.o + T_ray.d * t;
 
-    int inside = ((T_candi - T_o).norm2() < r * r);
-
-    if (!inside) return (is_inter = 0, void());
-    is_inter = 1;
-    intersect = ray.o + ray.d * dis;
+    int inside = ((T_candi - T_o).squaredLength() < r * r);
+    return inside;
 }
-Vec3 Disc::normal(const Vec3 &inter) const
-{
+Vec3 Disc::normal(const Vec3 &inter) const {
     return norm;
 }
 

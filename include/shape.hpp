@@ -2,38 +2,33 @@
 #define shape_hpp
 
 #include "utils.hpp"
-#include "geometry.hpp"
+#include "vecmath.hpp"
 
-class Shape
-{
+class Shape {
 
 protected:
-    Cuboid box;
+    Box3 box;
 
 public:
-    virtual void inter(const Ray &ray, int &is_inter, Vec3 &intersect) const;
+    virtual bool intersect(const Ray &ray, double &t) const;
     virtual Vec3 normal(const Vec3 &inter) const; // norm should be unitary
     virtual void sample(Vec3 &pos, double &pdf) const;
 
-    virtual Cuboid outline() const;
+    virtual Box3 outline() const;
 };
 
 #ifdef ARC_IMPLEMENTATION
 
-void Shape::inter(const Ray &ray, int &is_inter, Vec3 &intersect) const
-{
+bool Shape::intersect(const Ray &ray, double &t) const {
     throw invalid_argument("NotImplementedError");
 }
-Vec3 Shape::normal(const Vec3 &inter) const
-{
+Vec3 Shape::normal(const Vec3 &inter) const {
     throw invalid_argument("NotImplementedError");
 }
-void Shape::sample(Vec3 &pos, double &pdf) const
-{
+void Shape::sample(Vec3 &pos, double &pdf) const {
     throw invalid_argument("NotImplementedError");
 }
-Cuboid Shape::outline() const
-{
+Box3 Shape::outline() const {
     return box;
 }
 

@@ -3,8 +3,7 @@
 
 #include "../render.hpp"
 
-class NaivePathTracer : public Render
-{
+class NaivePathTracer : public Render {
     int trace_limit;
     double trace_eps;
 
@@ -21,19 +20,17 @@ NaivePathTracer::NaivePathTracer(
     shared_ptr<Image> image_, shared_ptr<Scene> scene_, int trace_limit_, double trace_eps_
 ) : Render(std::move(image_), std::move(scene_)), trace_limit(trace_limit_), trace_eps(trace_eps_) {}
 
-void NaivePathTracer::step(int idx)
-{
+void NaivePathTracer::step(int idx) {
     Ray now = image->sample(idx);
-    Spect mul(1);
-    vector<Spect> sum;
+    Spectrum mul(1);
+    vector<Spectrum> sum;
     sum.resize(trace_limit);
 
-    for (int cnt = 0; cnt < trace_limit; ++cnt)
-    {
+    for (int cnt = 0; cnt < trace_limit; ++cnt) {
         shared_ptr<Object> object;
-        Spect spectrum;
-        Vec3 intersect;
-        scene->inter(now, object, intersect);
+        Spectrum spectrum;
+        double t;
+        scene->intersect(now, object, t);
         object->evaluate_VtS(now, spectrum);
         sum[cnt] = sum[cnt] + mul * spectrum;
 
@@ -45,12 +42,11 @@ void NaivePathTracer::step(int idx)
         if (mul.norm() < trace_eps) break;
         now = next;
     }
-    Spect total;
+    Spectrum total;
     for (int cnt = 0; cnt < trace_limit; ++cnt)
         total = total + sum[cnt];
     image->draw(idx, total, 1);
 }
 
-
 #endif
-#endif /* renders_nrt_hpp */
+#endif /* renders_npt_hpp */
