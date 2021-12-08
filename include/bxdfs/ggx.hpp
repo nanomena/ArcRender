@@ -66,7 +66,7 @@ void GGX::sample_VtL(const Vec3 &V, Vec3 &L, double &pdf) {
         pdf = pdf / (V * N * 4);
         if (pdf < 0) pdf = 0;
     } else {
-        L = RD.semisphere();
+        L = RD.hemisphere();
         pdf = (1 / (2 * pi));
     }
 }
@@ -80,7 +80,7 @@ void GGX::sample_LtV(const Vec3 &L, Vec3 &V, double &pdf) {
         pdf = pdf / (L * N * 4);
         if (pdf < 0) pdf = 0;
     } else {
-        V = RD.semisphere();
+        V = RD.hemisphere();
         pdf = (1 / (2 * pi));
     }
 }

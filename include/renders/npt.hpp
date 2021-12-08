@@ -10,15 +10,15 @@ class NaivePathTracer : public Render {
     void step(int idx) override;
 public:
     NaivePathTracer(
-        shared_ptr<Image> image_, shared_ptr<Scene> scene_, int trace_limit_ = 7, double trace_eps_ = 1e-4
+        const shared_ptr<Image>& image, const shared_ptr<Scene> &scene, int trace_limit = 7, double trace_eps = 1e-4
     );
 };
 
 #ifdef ARC_IMPLEMENTATION
 
 NaivePathTracer::NaivePathTracer(
-    shared_ptr<Image> image_, shared_ptr<Scene> scene_, int trace_limit_, double trace_eps_
-) : Render(std::move(image_), std::move(scene_)), trace_limit(trace_limit_), trace_eps(trace_eps_) {}
+    const shared_ptr<Image>& image, const shared_ptr<Scene> &scene, int trace_limit, double trace_eps
+) : Render(image, scene), trace_limit(trace_limit), trace_eps(trace_eps) {}
 
 void NaivePathTracer::step(int idx) {
     Ray now = image->sample(idx);

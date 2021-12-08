@@ -19,7 +19,7 @@ void UniformLight::evaluate(const Vec3 &V, double &weight) {
 }
 
 void UniformLight::sample(Vec3 &V, double &pdf) {
-    V = RD.semisphere();
+    V = RD.hemisphere();
     pdf = 1 / (2 * pi);
 }
 

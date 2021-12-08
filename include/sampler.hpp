@@ -31,7 +31,7 @@ public:
     double rand(double l = 0, double r = 1);
 
     Vec2 pixel(Vec2 t, double width, double height);
-    Vec3 semisphere();
+    Vec3 hemisphere();
     Vec3 sphere();
 };
 
@@ -52,7 +52,7 @@ Vec2 Sampler::pixel(Vec2 t, double width, double height) {
     double dx = (t.x() + _x) / width - 0.5, dy = (t.y() + _y) / height - 0.5;
     return {dx, dy};
 }
-Vec3 Sampler::semisphere() {
+Vec3 Sampler::hemisphere() {
     auto v = make_pair(sample(), sample());
     double z = v.first, phi = v.second * (2 * pi) - pi;
     return {sin(phi) * sqrt(1 - z * z), cos(phi) * sqrt(1 - z * z), z};

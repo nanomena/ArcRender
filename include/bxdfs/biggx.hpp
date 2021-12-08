@@ -72,7 +72,7 @@ void BiGGX::sample_VtL(const Vec3 &V, Vec3 &L, double &pdf) {
         pdf = pdf / (V * N * 4);
         if (pdf < 0) pdf = 0;
     } else if (RD.rand() < diffuse) {
-        L = RD.semisphere();
+        L = RD.hemisphere();
         pdf = (1 / (2 * pi));
     } else {
         Vec3 N;
@@ -95,7 +95,7 @@ void BiGGX::sample_LtV(const Vec3 &L, Vec3 &V, double &pdf) {
         pdf = pdf / (L * N * 4);
         if (V.z() * L.z() < 0) pdf = INF; //@TODO GG
     } else if (RD.rand() < diffuse) {
-        V = RD.semisphere();
+        V = RD.hemisphere();
         pdf = (1 / (2 * pi));
     } else {
         Vec3 N;

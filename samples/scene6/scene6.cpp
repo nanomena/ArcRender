@@ -112,16 +112,16 @@ int main() {
     );
 
     shared_ptr<Image> image = make_shared<Image>(800, 600, camera);
-    shared_ptr<Render> render = make_shared<NaivePathTracer>(image, scene);
+    shared_ptr<Render> render = make_shared<LightSampledPathTracer>(image, scene);
 
     char output[100];
     sprintf(output, "result.png");
 
     int epoch = 3000, cluster = 1;
-    cerr << "[T + " << (clock() / (double)CLOCKS_PER_SEC) << "] | target : " << epoch << endl;
+    cerr << "[T + " << ((double) clock() / CLOCKS_PER_SEC) << "] | target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++i) {
         render->epoch(cluster);
-        cerr << "[T + " << (clock() / (double)CLOCKS_PER_SEC) << "] | epoch " << i << endl;
+        cerr << "[T + " << ((double) clock() / CLOCKS_PER_SEC) << "] | epoch " << i << endl;
         if (i % 1 == 0)
             image->save(output, 0.35);
     }

@@ -7,15 +7,14 @@
 #include "vecmath.hpp"
 #include "sampler.hpp"
 
-class Image
-{
+class Image {
     int width, height, length;
     shared_ptr<Camera> camera;
     vector<Spectrum> spectrum;
     vector<double> weight;
 
 public:
-    Image(int width_, int height_, shared_ptr<Camera> camera_);
+    Image(int width, int height, const shared_ptr<Camera> &camera);
 
     int epoch() const;
     Ray sample(int idx) const;
@@ -26,41 +25,31 @@ public:
 
 #ifdef ARC_IMPLEMENTATION
 
-Image::Image(int width_, int height_, shared_ptr<Camera> camera_)
-{
-    width = width_;
-    height = height_;
-    camera = std::move(camera_);
+Image::Image(int width, int height, const shared_ptr<Camera> &camera) : width(width), height(height), camera(camera) {
     length = width * height;
     spectrum.resize(length);
     weight.resize(length);
 }
 
-int Image::epoch() const
-{
+int Image::epoch() const {
     return length;
 }
-Ray Image::sample(int idx) const
-{
+Ray Image::sample(int idx) const {
     int x = idx % width, y = idx / width;
     Vec2 v = RD.pixel(Vec2(x, y), width, height);
     return camera->apply(v);
 }
-void Image::draw(int idx, Spectrum c, double w)
-{
+void Image::draw(int idx, Spectrum c, double w) {
     spectrum[idx] = spectrum[idx] + c * w;
     weight[idx] += w;
 }
-Spectrum Image::get(int idx) const
-{
+Spectrum Image::get(int idx) const {
     return spectrum[idx] / weight[idx];
 }
-void Image::save(const char *path, double white, double gamma) const
-{
+void Image::save(const char *path, double white, double gamma) const {
     vector<unsigned char> buffer;
     buffer.resize(length * 3);
-    for (int i = 0; i < length; ++i)
-    {
+    for (int i = 0; i < length; ++i) {
         auto _c = (spectrum[i] / weight[i]).rgb256(white, gamma);
         buffer[i * 3 + 0] = (unsigned char)(_c / 65536);
         buffer[i * 3 + 1] = (unsigned char)(_c / 256 % 256);

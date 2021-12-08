@@ -10,15 +10,15 @@ class LightSampledPathTracer : public Render {
     void step(int idx) override;
 public:
     LightSampledPathTracer(
-        shared_ptr<Image> image_, shared_ptr<Scene> scene_, int trace_limit_ = 6, double trace_eps_ = 1e-4
+        const shared_ptr<Image>& image, const shared_ptr<Scene> &scene, int trace_limit = 6, double trace_eps = 1e-4
     );
 };
 
 #ifdef ARC_IMPLEMENTATION
 
 LightSampledPathTracer::LightSampledPathTracer(
-    shared_ptr<Image> image_, shared_ptr<Scene> scene_, int trace_limit_, double trace_eps_
-) : Render(std::move(image_), std::move(scene_)), trace_limit(trace_limit_), trace_eps(trace_eps_) {}
+    const shared_ptr<Image>& image, const shared_ptr<Scene> &scene, int trace_limit, double trace_eps
+) : Render(image, scene), trace_limit(trace_limit), trace_eps(trace_eps) {}
 
 void LightSampledPathTracer::step(int idx) {
     Ray now = image->sample(idx);

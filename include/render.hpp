@@ -19,20 +19,20 @@ protected:
     shared_ptr<Scene> scene;
 
 public:
-    Render(const shared_ptr<Image>& image, shared_ptr<Scene> scene);
+    Render(const shared_ptr<Image>& image, const shared_ptr<Scene> &scene);
     void epoch(int cluster = 1);
     void step_one(int idx, int cluster = 1);
 };
 
 #ifdef ARC_IMPLEMENTATION
 
-Render::Render(const shared_ptr<Image>& image, shared_ptr<Scene> scene) : image(image), scene(std::move(scene)) {
+Render::Render(const shared_ptr<Image>& image, const shared_ptr<Scene> &scene) : image(image), scene(scene) {
     length = image->epoch();
 }
 
 void Render::epoch(int cluster) {
     build_graph();
-#pragma omp parallel for
+//#pragma omp parallel for
     for (int i = 0; i < length; ++i)
         for (int j = 0; j < cluster; ++j)
             step(i);
@@ -40,7 +40,7 @@ void Render::epoch(int cluster) {
 
 void Render::step_one(int idx, int cluster) {
     build_graph();
-#pragma omp parallel for
+//#pragma omp parallel for
     for (int j = 0; j < cluster; ++j)
         step(idx);
 }

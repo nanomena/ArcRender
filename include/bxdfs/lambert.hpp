@@ -20,13 +20,13 @@ void Lambert::evaluate(const Vec3 &V, const Vec3 &L, double &weight) {
 }
 
 void Lambert::sample_VtL(const Vec3 &V, Vec3 &L, double &pdf) {
-    L = RD.semisphere();
+    L = RD.hemisphere();
     if (V[2] < 0) L[2] *= -1;
     pdf = 1 / (2 * pi);
 }
 
 void Lambert::sample_LtV(const Vec3 &L, Vec3 &V, double &pdf) {
-    V = RD.semisphere();
+    V = RD.hemisphere();
     if (L[2] < 0) V[2] *= -1;
     pdf = 1 / (2 * pi);
 }
