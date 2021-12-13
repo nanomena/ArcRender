@@ -4,23 +4,27 @@
 #include "../light.hpp"
 
 class UniformLight : public Light {
-
 public:
-    UniformLight() = default;
-    void evaluate(const Vec3 &V, double &weight) override;
-    void sample(Vec3 &V, double &pdf) override;
+    explicit UniformLight(Spectrum color);
+    Spectrum evaluate(const Vec3 &vLocal) const override;
+    Spectrum sample(Vec3 &vLocal, double &pdf) const override;
+
+private:
+    Spectrum color;
 };
 
 #ifdef ARC_IMPLEMENTATION
 
-void UniformLight::evaluate(const Vec3 &V, double &weight) {
-    if (V.z() < 0) weight = 0;
-    else weight = 1;
+UniformLight::UniformLight(Spectrum color) : color(color) {}
+
+Spectrum UniformLight::evaluate(const Vec3 &vLocal) const {
+    if (vLocal.z() < 0) return Spectrum(); else return color;
 }
 
-void UniformLight::sample(Vec3 &V, double &pdf) {
-    V = RD.hemisphere();
+Spectrum UniformLight::sample(Vec3 &vLocal, double &pdf) const {
+    vLocal = RD.hemisphere();
     pdf = 1 / (2 * pi);
+    return color;
 }
 
 #endif

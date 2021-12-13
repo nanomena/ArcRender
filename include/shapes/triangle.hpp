@@ -7,7 +7,9 @@ class Triangle : public Shape {
     Vec3 V0, V1, V2, norm;
 
 public:
-    Triangle(Vec3 V0, Vec3 V1, Vec3 V2);
+    Triangle(
+        const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light, Vec3 V0, Vec3 V1, Vec3 V2
+    );
 
     bool intersect(const Ray &ray, double &t) const override;
     Vec3 normal(const Vec3 &inter) const override;
@@ -15,7 +17,9 @@ public:
 
 #ifdef ARC_IMPLEMENTATION
 
-Triangle::Triangle(Vec3 V0, Vec3 V1, Vec3 V2) : V0(V0), V1(V1), V2(V2) {
+Triangle::Triangle(
+    const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light, Vec3 V0, Vec3 V1, Vec3 V2
+) : Shape(BxDF, Light), V0(V0), V1(V1), V2(V2) {
     norm = ((V1 - V0) ^ (V2 - V0)).norm();
     box = Box3(V0) + Box3(V1) + Box3(V2);
 }
@@ -30,7 +34,7 @@ bool Triangle::intersect(const Ray &ray, double &t) const {
     if (u < 0 || u > det) return false;
     Vec3 Q = (T ^ E1);
     t = Q * E2 / det;
-    if (t < 0) return false;
+    if (t < EPS) return false;
     double v = Q * ray.d;
     if (v < 0 || u + v > det) return false;
     return true;

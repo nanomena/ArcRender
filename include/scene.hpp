@@ -2,43 +2,47 @@
 #define scene_hpp
 
 #include "utils.hpp"
-#include "object.hpp"
 #include "graph.hpp"
 #include "material.hpp"
 
 class Scene {
-    shared_ptr<Object> skybox;
-    vector<shared_ptr<KaDanTree>> graphs;
-
 public:
-    vector<shared_ptr<Object>> Lights;
+    shared_ptr<Shape> skybox;
+    shared_ptr<Camera> camera;
+    vector<shared_ptr<Shape>> lights;
 
-    explicit Scene(shared_ptr<Object> skybox_);
+    Scene(const shared_ptr<Camera> &camera, const shared_ptr<Shape> &skybox);
 
-    void add_object(const shared_ptr<Object> &object);
-    void add_objects(const vector<shared_ptr<Object>> &object);
+    void addObject(const shared_ptr<Shape> &object, const string &name = "");
+    void addObjects(const vector<shared_ptr<Shape>> &object, const string &name = "");
 
-    void intersect(const Ray &ray, shared_ptr<Object> &object, double &t) const;
+    void intersect(const Ray &ray, shared_ptr<Shape> &object, double &t) const;
+    bool visible(const Ray &test, const shared_ptr<Shape> &object, double dis) const;
+
+private:
+    vector<shared_ptr<KaDanTree>> graphs;
 };
 
 #ifdef ARC_IMPLEMENTATION
 
-Scene::Scene(shared_ptr<Object> skybox_) {
-    skybox = std::move(skybox_);
-}
+Scene::Scene(const shared_ptr<Camera> &camera, const shared_ptr<Shape> &skybox) : camera(camera), skybox(skybox) {}
 
-void Scene::add_object(const shared_ptr<Object> &object) {
-    vector<shared_ptr<Object>> objects{object};
-    add_objects(objects);
+void Scene::addObject(const shared_ptr<Shape> &object, const string &name) {
+    vector<shared_ptr<Shape>> objects{object};
+    addObjects(objects, name);
 }
-void Scene::add_objects(const vector<shared_ptr<Object>> &objects) {
-    for (const auto &object: objects)
-        if (object->surface_info().second > 0)
-            Lights.push_back(object);
+void Scene::addObjects(const vector<shared_ptr<Shape>> &objects, const string &name) {
+    for (const auto &object: objects) {
+        object->setIdentifier(name);
+        if (object->isLight())
+            lights.push_back(object);
+    }
     graphs.push_back(make_shared<KaDanTree>(objects));
 }
 
-void Scene::intersect(const Ray &ray, shared_ptr<Object> &object, double &t) const {
+void Scene::intersect(const Ray &ray, shared_ptr<Shape> &object, double &t) const {
+//    cerr << "intersect checking: " << ray.o << " " << ray.d << endl;
+
     Ray rayX = ray;
     rayX.d = rayX.d.norm();
 
@@ -47,6 +51,13 @@ void Scene::intersect(const Ray &ray, shared_ptr<Object> &object, double &t) con
     assert(f);
     for (const auto &graph: graphs)
         graph->intersect(rayX, object, t);
+}
+
+bool Scene::visible(const Ray &test, const shared_ptr<Shape> &object, double dis) const {
+    double t;
+    shared_ptr<Shape> actual;
+    intersect(test, actual, t);
+    return actual == object && (abs(t - dis) < EPS);
 }
 
 #endif

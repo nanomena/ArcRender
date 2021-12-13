@@ -4,8 +4,7 @@
 #include "utils.hpp"
 #include "vecmath.hpp"
 
-class Camera
-{
+class Camera {
 
 public:
     virtual Ray apply(const Vec2 &t);
@@ -13,8 +12,7 @@ public:
 
 #ifdef ARC_IMPLEMENTATION
 
-Ray Camera::apply(const Vec2 &t)
-{
+Ray Camera::apply(const Vec2 &t) {
     throw invalid_argument("NotImplementedError");
 }
 

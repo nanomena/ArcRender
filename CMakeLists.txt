@@ -13,7 +13,7 @@ elseif (CMAKE_BUILD_TYPE EQUAL Release)
     add_compile_options(-Ofast)
 elseif (CMAKE_BUILD_TYPE EQUAL Debug)
     add_compile_options(-g)
-    add_compile_options(-fsanitize=address)
+    add_compile_options(-fsanitize=undefined)
 endif ()
 
 

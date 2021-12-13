@@ -4,31 +4,37 @@
 #include "../bxdf.hpp"
 
 class Lambert : public BxDF {
-
 public:
-    Lambert() = default;
-    void evaluate(const Vec3 &V, const Vec3 &L, double &weight) override;
-    void sample_VtL(const Vec3 &V, Vec3 &L, double &pdf) override;
-    void sample_LtV(const Vec3 &L, Vec3 &V, double &pdf) override;
+    explicit Lambert(Spectrum color);
+
+private:
+    Spectrum evaluateVtL(const Vec3 &vLocal, const Vec3 &lLocal) const override;
+    Spectrum sampleVtL(const Vec3 &vLocal, Vec3 &lLocal, double &pdf) const override;
+    Spectrum sampleLtV(const Vec3 &lLocal, Vec3 &vLocal, double &pdf) const override;
+
+    Spectrum color;
 };
 
 #ifdef ARC_IMPLEMENTATION
 
-void Lambert::evaluate(const Vec3 &V, const Vec3 &L, double &weight) {
-    if (L[2] * V[2] < 0) return (weight = 0, void());
-    weight = 1. / pi;
+Lambert::Lambert(Spectrum color) : color(color) {}
+
+Spectrum Lambert::evaluateVtL(const Vec3 &V, const Vec3 &L) const {
+    if (L[2] * V[2] < 0) return Spectrum(0); else return color / pi;
 }
 
-void Lambert::sample_VtL(const Vec3 &V, Vec3 &L, double &pdf) {
-    L = RD.hemisphere();
-    if (V[2] < 0) L[2] *= -1;
+Spectrum Lambert::sampleVtL(const Vec3 &vLocal, Vec3 &lLocal, double &pdf) const {
+    lLocal = RD.hemisphere();
+    if (vLocal[2] < 0) lLocal[2] *= -1;
     pdf = 1 / (2 * pi);
+    return color / pi;
 }
 
-void Lambert::sample_LtV(const Vec3 &L, Vec3 &V, double &pdf) {
-    V = RD.hemisphere();
-    if (L[2] < 0) V[2] *= -1;
+Spectrum Lambert::sampleLtV(const Vec3 &lLocal, Vec3 &vLocal, double &pdf) const {
+    vLocal = RD.hemisphere();
+    if (lLocal[2] < 0) vLocal[2] *= -1;
     pdf = 1 / (2 * pi);
+    return color / pi;
 }
 
 #endif

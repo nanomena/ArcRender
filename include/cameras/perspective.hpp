@@ -1,6 +1,8 @@
 #ifndef cameras_perspective_hpp
 #define cameras_perspective_hpp
 
+#include "../camera.hpp"
+
 class PerspectiveCamera : public Camera {
     Vec3 o, x, y, z;
 
