@@ -16,7 +16,7 @@ public:
     virtual void initCache();
     virtual void preSample(int idx);
     virtual void sample(int idx);
-    void epoch(int preCnt);
+    void epoch(int preCnt = -1);
 
     Spectrum color(int idx, int debug = 0) const;
     void savePNG(const char *path, double white = 1, double gamma = 2.2) const;
@@ -52,6 +52,9 @@ void Tracer::sample(int idx) {
     throw invalid_argument("NotImplementedError");
 }
 void Tracer::epoch(int preCnt) {
+    if (preCnt < 0) {
+        preCnt = max(1, length / 11);
+    }
     initCache();
     for (int i = 0; i < preCnt; ++i) preSample(i);
     for (int i = 0; i < length; ++i) sample(i);

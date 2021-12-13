@@ -13,7 +13,7 @@ int main() {
     );
     skybox->setIdentifier("skybox");
 
-    shared_ptr<Medium> medium = make_shared<Transparent>(Spectrum(1, 1, 1));
+    shared_ptr<Medium> medium = make_shared<Transparent>(Spectrum(0.98, 1, 0.98));
 
 #ifdef DEBUG_FLAG
     shared_ptr<Camera> camera = make_shared<Actinometer>(
@@ -117,7 +117,7 @@ int main() {
 #ifdef DEBUG_FLAG
     shared_ptr<Tracer> tracer = make_shared<BidirectionalPathTracer>(1, 1, scene);
 #else
-    shared_ptr<Tracer> tracer = make_shared<BidirectionalPathTracer>(400, 300, scene);
+    shared_ptr<Tracer> tracer = make_shared<BidirectionalPathTracer>(800, 600, scene);
 #endif
     char output[100];
     sprintf(output, "result.png");
@@ -125,7 +125,7 @@ int main() {
     int epoch = 10000000;
     cerr << "[T + " << ((double)clock() / CLOCKS_PER_SEC) << "] | target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++i) {
-        tracer->epoch(scene->lights.size());
+        tracer->epoch();
 #ifdef DEBUG_FLAG
         if (i % 10000 == 0) {
             cerr << "[T + " << ((double)clock() / CLOCKS_PER_SEC) << "] | epoch " << i << endl;
@@ -134,7 +134,7 @@ int main() {
 #else
         if (i % 1 == 0) {
             cerr << "[T + " << ((double)clock() / CLOCKS_PER_SEC) << "] | epoch " << i << endl;
-            tracer->savePNG(output, 0.8);
+            tracer->savePNG(output, 0.6);
         }
 #endif
     }
