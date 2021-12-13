@@ -18,11 +18,12 @@ private:
 UniformLight::UniformLight(Spectrum color) : color(color) {}
 
 Spectrum UniformLight::evaluate(const Vec3 &vLocal) const {
-    if (vLocal.z() < 0) return Spectrum(); else return color;
+    if (vLocal.z() < 0) return Spectrum(0); else return color;
 }
 
 Spectrum UniformLight::sample(Vec3 &vLocal, double &pdf) const {
     vLocal = RD.hemisphere();
+    if (vLocal.z() < 0) assert(0);
     pdf = 1 / (2 * pi);
     return color;
 }

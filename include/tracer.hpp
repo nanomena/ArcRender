@@ -7,6 +7,7 @@
 #include "vecmath.hpp"
 #include "sampler.hpp"
 #include "counter.hpp"
+#include "scene.hpp"
 
 class Tracer {
 public:

@@ -3,15 +3,15 @@
 
 #include "utils.hpp"
 #include "graph.hpp"
-#include "material.hpp"
 
 class Scene {
 public:
     shared_ptr<Shape> skybox;
     shared_ptr<Camera> camera;
+    shared_ptr<Medium> medium; // global medium
     vector<shared_ptr<Shape>> lights;
 
-    Scene(const shared_ptr<Camera> &camera, const shared_ptr<Shape> &skybox);
+    Scene(const shared_ptr<Camera> &camera, const shared_ptr<Shape> &skybox, const shared_ptr<Medium> &medium);
 
     void addObject(const shared_ptr<Shape> &object, const string &name = "");
     void addObjects(const vector<shared_ptr<Shape>> &object, const string &name = "");
@@ -25,7 +25,8 @@ private:
 
 #ifdef ARC_IMPLEMENTATION
 
-Scene::Scene(const shared_ptr<Camera> &camera, const shared_ptr<Shape> &skybox) : camera(camera), skybox(skybox) {}
+Scene::Scene(const shared_ptr<Camera> &camera, const shared_ptr<Shape> &skybox, const shared_ptr<Medium> &medium)
+    : camera(camera), skybox(skybox), medium(medium) {}
 
 void Scene::addObject(const shared_ptr<Shape> &object, const string &name) {
     vector<shared_ptr<Shape>> objects{object};
@@ -57,7 +58,7 @@ bool Scene::visible(const Ray &test, const shared_ptr<Shape> &object, double dis
     double t;
     shared_ptr<Shape> actual;
     intersect(test, actual, t);
-    return actual == object && (abs(t - dis) < EPS);
+    return actual == object && (abs(t - dis) < EPS); // && (abs(object->normal(test.o + test.d * t) * test.d) > EPS);
 }
 
 #endif

@@ -105,6 +105,7 @@ Spectrum Shape::sampleLtV(const Ray &lB, Ray &vB) const {
 }
 
 Spectrum Shape::evaluateVtS(const Ray &v) const {
+    if (!isLight()) return Spectrum(0);
     assert(abs(1 - v.d.length()) < EPS);
     double t;
     bool f = intersect(v, t);
@@ -115,6 +116,7 @@ Spectrum Shape::evaluateVtS(const Ray &v) const {
 }
 
 Spectrum Shape::evaluateStV(const Ray &vB) const {
+    if (!isLight()) return Spectrum(0);
     assert(abs(1 - vB.d.length()) < EPS);
     Vec3 intersect = vB.o;
     Vec3 n = normal(intersect);
@@ -122,6 +124,7 @@ Spectrum Shape::evaluateStV(const Ray &vB) const {
 }
 
 Spectrum Shape::sampleS(const Vec3 &ref, Ray &v, double &t) const {
+    if (!isLight()) return Spectrum(0);
     Vec3 pos;
     double pdf;
     sample(pos, pdf);
@@ -132,6 +135,7 @@ Spectrum Shape::sampleS(const Vec3 &ref, Ray &v, double &t) const {
 }
 
 Spectrum Shape::sampleStV(Ray &vB) const {
+    if (!isLight()) return Spectrum(0);
     double pdf;
     sample(vB.o, pdf);
     Vec3 n = normal(vB.o);

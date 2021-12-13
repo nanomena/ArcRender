@@ -40,7 +40,12 @@ void BidirectionalPathTracer::initCache() {
 void BidirectionalPathTracer::preSample(int idx) {
     Ray lB;
     Spectrum mul = scene->lights[idx % scene->lights.size()]->sampleStV(lB);
+    shared_ptr<Medium> medium = scene->medium;
     for (int cnt = 1; cnt + 1 < traceLimit; ++cnt) {
+        if (mul.norm() < traceEPS) {
+            photons[cnt].push_back(Hit{Vec3(), Ray(), nullptr, mul});
+            continue;
+        }
 
 //        cerr << "B " << cnt << " " << lB.o << " " << lB.d << endl;
 
@@ -48,16 +53,21 @@ void BidirectionalPathTracer::preSample(int idx) {
         double t;
         scene->intersect(lB, object, t);
 
+        double tM;
+        shared_ptr<Shape> objectM = medium->sample(tM);
+        if (tM < t) object = objectM, t = tM;
+
+        mul = mul * medium->evaluate(t);
+
 //        cerr << object->name << endl;
 
-        if (object == scene->skybox) break;
+//        if (object == scene->skybox) break;
 
         Vec3 intersect = lB.o + t * lB.d;
         photons[cnt].push_back(Hit{intersect, lB, object, mul});
 
         Ray vB;
         mul = mul * object->sampleLtV(lB, vB);
-        if (mul.norm() < traceEPS) break;
         lB = vB;
     }
 }
@@ -65,7 +75,13 @@ void BidirectionalPathTracer::preSample(int idx) {
 void BidirectionalPathTracer::sample(int idx) {
     Ray v = sampleCamera(idx);
     Spectrum mul(1);
+    shared_ptr<Medium> medium = scene->medium;
     for (int cnt = 0; cnt < traceLimit; ++cnt) {
+        if (mul.norm() < traceEPS) {
+            for (int i = cnt; i < traceLimit; ++ i)
+                add(idx, Spectrum(0), i, cnt);
+            continue;
+        }
 
 //        cerr << "F " << cnt << " " << v.o << " " << v.d << " " << mul << endl;
 
@@ -73,17 +89,20 @@ void BidirectionalPathTracer::sample(int idx) {
         double t;
         scene->intersect(v, object, t);
 
+        double tM;
+        shared_ptr<Shape> objectM = medium->sample(tM);
+        if (tM < t) object = objectM, t = tM;
+
+        mul = mul * medium->evaluate(t);
 //        cerr << object->name << endl;
 
         Vec3 intersect = v.o + t * v.d;
-        if (object->isLight()) {
+        {
             Spectrum color = object->evaluateVtS(v) * mul;
             add(idx, color, cnt, cnt);
-        } else {
-            add(idx, Spectrum(0), cnt, cnt);
         }
 
-        if (object == scene->skybox) break;
+//        if (object == scene->skybox) break;
 
         if (cnt + 1 < traceLimit)
             for (const auto &light: scene->lights) {
@@ -91,25 +110,42 @@ void BidirectionalPathTracer::sample(int idx) {
                 double dis;
                 Spectrum color = light->sampleS(intersect, l, dis) * mul;
                 if (scene->visible(l, light, dis)) {
-                    color = color * object->evaluateVtL(v, l) / pow(dis, 2);
+                    color = color * object->evaluateVtL(v, l) / pow(dis, 2) * medium->evaluate(dis);
                     add(idx, color, cnt + 1, cnt);
+                } else {
+                    add(idx, Spectrum(0), cnt + 1, cnt);
                 }
             }
         for (int rev = 1; cnt + rev + 1 < traceLimit; ++rev)
             for (const auto &p: photons[rev]) {
+                if (p.color.norm() < EPS) {
+                    add(idx, Spectrum(0), cnt + rev + 1, cnt);
+                    continue;
+                }
                 double dis = (p.intersect - intersect).length();
                 Ray l = Ray(intersect, (p.intersect - intersect).norm()),
                     vB = Ray(p.intersect, (intersect - p.intersect).norm());
                 Spectrum color = p.color * mul;
                 if (scene->visible(l, p.object, dis)) {
-                    color = color * object->evaluateVtL(v, l) * p.object->evaluateLtV(p.lB, vB) / pow(dis, 2);
+//                    if (dis < 0.5) {
+//                        double rua;
+//                        shared_ptr<Shape> actual;
+//                        scene->intersect(l, actual, rua);
+//                        cerr << actual->name << " " << rua << endl;
+//                        cerr << object->name << " " << l.o << " " << l.d << endl;
+//                        cerr << p.object->name << " " << vB.o << " " << vB.d << endl;
+//                        assert(0);
+//                    }
+                    color = color * object->evaluateVtL(v, l) * p.object->evaluateLtV(p.lB, vB)
+                        / pow(dis, 2) * medium->evaluate(dis);
                     add(idx, color, cnt + rev + 1, cnt);
+                } else {
+                    add(idx, Spectrum(0), cnt + rev + 1, cnt);
                 }
             }
 
         Ray l;
         mul = mul * object->sampleVtL(v, l);
-        if (mul.norm() < traceEPS) break;
         v = l;
     }
 }

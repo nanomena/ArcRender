@@ -67,8 +67,8 @@ Spectrum GGX::sampleVtL(const Vec3 &vLocal, Vec3 &lLocal, double &pdf) const {
         Vec3 n;
         sampleN(n, pdf);
         lLocal = -vLocal + n * (vLocal * n) * 2;
-        pdf /= 4 * vLocal * n;
-        assert(pdf > 0);
+        pdf /= abs(4 * vLocal * n);
+        if (vLocal.z() * lLocal.z() < 0) return Spectrum(0);
         return F(vLocal, lLocal, n) * D(n) * G(vLocal, lLocal, n) / (4 * vLocal.z() * lLocal.z()) / prob;
     } else {
         lLocal = RD.hemisphere();
@@ -84,8 +84,8 @@ Spectrum GGX::sampleLtV(const Vec3 &lLocal, Vec3 &vLocal, double &pdf) const {
         Vec3 n;
         sampleN(n, pdf);
         vLocal = -lLocal + n * (lLocal * n) * 2;
-        pdf /= 4 * lLocal * n;
-        assert(pdf > 0);
+        pdf /= abs(4 * lLocal * n);
+        if (vLocal.z() * lLocal.z() < 0) return Spectrum(0);
         return F(vLocal, lLocal, n) * D(n) * G(vLocal, lLocal, n) / (4 * vLocal.z() * lLocal.z()) / prob;
     } else {
         vLocal = RD.hemisphere();
