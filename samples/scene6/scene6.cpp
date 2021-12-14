@@ -3,7 +3,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-//#define DEBUG_FLAG
+#define DEBUG_FLAG
 int main() {
     ios::sync_with_stdio(0);
 
@@ -18,7 +18,7 @@ int main() {
 #ifdef DEBUG_FLAG
     shared_ptr<Camera> camera = make_shared<Actinometer>(
         Vec3(0, 0, 15),
-        Vec3(0, 3, -10)
+        Vec3(3, 0, -10)
     );
 #else
     shared_ptr<Camera> camera = make_shared<PerspectiveCamera>(
@@ -32,7 +32,7 @@ int main() {
 
     scene->addObject(
         make_shared<Sphere>(
-            make_shared<BiGGX>(1.5, 0.3),
+            make_shared<BiGGX>(1.05, 0.3),
             nullptr,
             Vec3(0, -3, -10), 6
         ),
@@ -42,11 +42,11 @@ int main() {
     scene->addObject(
         make_shared<Flat>(
             make_shared<Lambert>(Spectrum(0)),
-            make_shared<UniformLight>(Spectrum(10)),
-            Vec3(-3, 9.9, -7),
-            Vec3(-3, 9.9, -13),
-            Vec3(3, 9.9, -13),
-            Vec3(3, 9.9, -7)
+            make_shared<UniformLight>(Spectrum(5)),
+            Vec3(-6, 9.9, -4),
+            Vec3(-6, 9.9, -16),
+            Vec3(6, 9.9, -16),
+            Vec3(6, 9.9, -4)
         ), "light"
     );
 
@@ -74,7 +74,7 @@ int main() {
 
     scene->addObject(
         make_shared<Flat>(
-            make_shared<Lambert>(rgb256(250, 170, 170)),
+            make_shared<GGX>(rgb256(250, 170, 170), 0.8),
             nullptr,
             Vec3(10, -10, -20),
             Vec3(10, -10, 20),
@@ -85,7 +85,7 @@ int main() {
 
     scene->addObject(
         make_shared<Flat>(
-            make_shared<Lambert>(rgb256(170, 170, 250)),
+            make_shared<GGX>(rgb256(170, 250, 170), 0.8),
             nullptr,
             Vec3(-10, -10, 20),
             Vec3(-10, -10, -20),
@@ -96,7 +96,7 @@ int main() {
 
     scene->addObject(
         make_shared<Flat>(
-            make_shared<GGX>(rgb256(250, 170, 250), 0.8),
+            make_shared<GGX>(rgb256(235, 235, 170), 0.5),
             nullptr,
             Vec3(-10, 10, -20),
             Vec3(-10, -10, -20),
