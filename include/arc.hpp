@@ -20,7 +20,7 @@
 //#include "objloader.hpp"
 
 #include "bxdfs/lambert.hpp"
-//#include "bxdfs/biggx.hpp"
+#include "bxdfs/biggx.hpp"
 #include "bxdfs/ggx.hpp"
 
 #include "shapes/sphere.hpp"

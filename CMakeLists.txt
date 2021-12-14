@@ -14,6 +14,7 @@ elseif (CMAKE_BUILD_TYPE EQUAL Release)
 elseif (CMAKE_BUILD_TYPE EQUAL Debug)
     add_compile_options(-g)
     add_compile_options(-fsanitize=undefined)
+    add_compile_options(-ftrapv)
 endif ()
 
 

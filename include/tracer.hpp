@@ -53,7 +53,7 @@ void Tracer::sample(int idx) {
 }
 void Tracer::epoch(int preCnt) {
     if (preCnt < 0) {
-        preCnt = max(1, length / 11);
+        preCnt = max(1, length / 7);
     }
     initCache();
     for (int i = 0; i < preCnt; ++i) preSample(i);

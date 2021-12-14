@@ -6,11 +6,11 @@
 class Sphere : public Shape {
     Vec3 o;
     double r;
+    bool reverse;
 
-    bool contain(const Vec3 &t) const;
 
 public:
-    Sphere(const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light, Vec3 o, double r);
+    Sphere(const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light, Vec3 o, double r, bool reverse = false);
 
     bool intersect(const Ray &ray, double &t) const override;
     Vec3 normal(const Vec3 &inter) const override;
@@ -19,31 +19,30 @@ public:
 #ifdef ARC_IMPLEMENTATION
 
 Sphere::Sphere(
-    const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light, Vec3 o, double r
-) : Shape(BxDF, Light), o(o), r(r) {
+    const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light, Vec3 o, double r, bool reverse
+) : Shape(BxDF, Light), o(o), r(r), reverse(reverse) {
     box = Box3(o - Vec3(r, r, r), o + Vec3(r, r, r));
 }
 
-bool Sphere::contain(const Vec3 &t) const {
-    return (o - t).squaredLength() <= r * r + r * EPS;
+bool Sphere::intersect(const Ray &ray, double &t) const {
+//    cerr << ray.o << " " << ray.d << " " << o << " " << r << endl;
+    double x = (o - ray.o) * ray.d, y = (ray.o + ray.d * x - o).length();
+    if (r + EPS < y) {
+//        cerr << "Not" << endl;
+        return false;
+    }
+    if ((o - ray.o).length() < r + EPS) {
+        t = x + sqrt(r * r - y * y);
+    } else {
+        t = x - sqrt(r * r - y * y);
+    }
+//    cerr << t << endl;
+    if (t < EPS) return false;
+    return true;
 }
 
-bool Sphere::intersect(const Ray &ray, double &t) const {
-    Vec3 x = (o - ray.o).proj(ray.d), y = (o - ray.o) - x;
-    double d2 = r * r - y.squaredLength();
-    if (d2 < EPS) return false;
-    Vec3 chord = ray.d.norm(sqrt(d2));
-    if (contain(ray.o)) {
-        t = (x + chord).length();
-        return true;
-    } else {
-        if ((x - chord) * ray.d <= 0) return false;
-        t = (x - chord).length();
-        return true;
-    }
-}
 Vec3 Sphere::normal(const Vec3 &inter) const {
-    return (inter - o).norm();
+    return (inter - o).norm() * (reverse ? -1 : 1);
 }
 
 #endif

@@ -17,7 +17,7 @@ public:
     void sample(int idx) override;
 
     BidirectionalPathTracer(
-        int width, int height, const shared_ptr<Scene> &scene, int traceLimit = 6, double traceEps = 1e-4
+        int width, int height, const shared_ptr<Scene> &scene, int traceLimit = 8, double traceEps = 1e-7
     );
 
 private:
@@ -38,6 +38,7 @@ void BidirectionalPathTracer::initCache() {
 }
 
 void BidirectionalPathTracer::preSample(int idx) {
+    if (scene->lights.empty()) return;
     Ray lB;
     Spectrum mul = scene->lights[idx % scene->lights.size()]->sampleStV(lB);
     shared_ptr<Medium> medium = scene->medium;
@@ -57,11 +58,15 @@ void BidirectionalPathTracer::preSample(int idx) {
         shared_ptr<Shape> objectM = medium->sample(tM);
         if (tM < t) object = objectM, t = tM;
 
+        if (object == scene->skybox) {
+            mul = Spectrum(0);
+            continue;
+        }
+
         mul = mul * medium->evaluate(t);
 
 //        cerr << object->name << endl;
 
-//        if (object == scene->skybox) break;
 
         Vec3 intersect = lB.o + t * lB.d;
         photons[cnt].push_back(Hit{intersect, lB, object, mul});
@@ -83,7 +88,7 @@ void BidirectionalPathTracer::sample(int idx) {
             continue;
         }
 
-//        cerr << "F " << cnt << " " << v.o << " " << v.d << " " << mul << endl;
+//        cerr << "F F F F F F F F" << cnt << " " << v.o << " " << v.d << " " << mul << endl;
 
         shared_ptr<Shape> object;
         double t;
@@ -102,7 +107,10 @@ void BidirectionalPathTracer::sample(int idx) {
             add(idx, color, cnt, cnt);
         }
 
-//        if (object == scene->skybox) break;
+        if (object == scene->skybox) {
+            mul = Spectrum(0);
+            continue;
+        }
 
         if (cnt + 1 < traceLimit)
             for (const auto &light: scene->lights) {
@@ -116,7 +124,7 @@ void BidirectionalPathTracer::sample(int idx) {
                     add(idx, Spectrum(0), cnt + 1, cnt);
                 }
             }
-        for (int rev = 1; cnt + rev + 1 < traceLimit; ++rev) {
+        for (int rev = 1; cnt + rev + 1 < traceLimit; ++rev) if (!photons[rev].empty()) {
             const auto &p = photons[rev][idx % photons[rev].size()];
             if (p.color.norm() < EPS) {
                 add(idx, Spectrum(0), cnt + rev + 1, cnt);

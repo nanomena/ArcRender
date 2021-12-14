@@ -9,16 +9,16 @@ int main() {
 
     shared_ptr<Shape> skybox = make_shared<Sphere>(
         make_shared<Lambert>(Spectrum(0)),
-        nullptr, Vec3(0, 0, 0), INF / 10
+        make_shared<UniformLight>(Spectrum(.53, .80, 0.92)), Vec3(0, 0, 0), INF / 10, true
     );
     skybox->setIdentifier("skybox");
 
-    shared_ptr<Medium> medium = make_shared<Transparent>(Spectrum(0.98, 1, 0.98));
+    shared_ptr<Medium> medium = make_shared<Transparent>(Spectrum(1, 1, 1));
 
 #ifdef DEBUG_FLAG
     shared_ptr<Camera> camera = make_shared<Actinometer>(
         Vec3(0, 0, 15),
-        Vec3(0, 10, -6)
+        Vec3(0, 3, -10)
     );
 #else
     shared_ptr<Camera> camera = make_shared<PerspectiveCamera>(
@@ -31,13 +31,22 @@ int main() {
     shared_ptr<Scene> scene = make_shared<Scene>(camera, skybox, medium);
 
     scene->addObject(
+        make_shared<Sphere>(
+            make_shared<BiGGX>(1.5, 0.3),
+            nullptr,
+            Vec3(0, -3, -10), 6
+        ),
+        "ball"
+    );
+
+    scene->addObject(
         make_shared<Flat>(
             make_shared<Lambert>(Spectrum(0)),
-            make_shared<UniformLight>(Spectrum(1)),
-            Vec3(-6, 9.9, -4),
-            Vec3(-6, 9.9, -16),
-            Vec3(6, 9.9, -16),
-            Vec3(6, 9.9, -4)
+            make_shared<UniformLight>(Spectrum(10)),
+            Vec3(-3, 9.9, -7),
+            Vec3(-3, 9.9, -13),
+            Vec3(3, 9.9, -13),
+            Vec3(3, 9.9, -7)
         ), "light"
     );
 
@@ -87,7 +96,7 @@ int main() {
 
     scene->addObject(
         make_shared<Flat>(
-            make_shared<GGX>(rgb256(250, 250, 250), 0.1),
+            make_shared<GGX>(rgb256(250, 170, 250), 0.8),
             nullptr,
             Vec3(-10, 10, -20),
             Vec3(-10, -10, -20),
@@ -134,7 +143,7 @@ int main() {
 #else
         if (i % 1 == 0) {
             cerr << "[T + " << ((double)clock() / CLOCKS_PER_SEC) << "] | epoch " << i << endl;
-            tracer->savePNG(output, 0.6);
+            tracer->savePNG(output, 1);
         }
 #endif
     }

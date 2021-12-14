@@ -25,7 +25,7 @@ private:
 
 GGX::GGX(Spectrum F0, double rough) : F0(F0), rough(rough) {}
 Spectrum GGX::F(const Vec3 &V, const Vec3 &L, const Vec3 &N) const {
-    return F0 + (Spectrum(1) - F0) * pow(1 - (L * N), 5);
+    return F0 + (Spectrum(1) - F0) * pow(1 - abs(L * N), 5);
 }
 
 double GGX::D(const Vec3 &N) const {
@@ -55,43 +55,43 @@ void GGX::sampleN(Vec3 &N, double &pdf) const {
 }
 
 Spectrum GGX::evaluateVtL(const Vec3 &vLocal, const Vec3 &lLocal) const {
-    if (lLocal.z() < 0 || vLocal.z() < 0) return Spectrum(0);
+    if (vLocal.z() * lLocal.z() < 0) return Spectrum(0);
     Vec3 n = (vLocal + lLocal).norm();
     return F(vLocal, lLocal, n) * D(n) * G(vLocal, lLocal, n) / (4 * vLocal.z() * lLocal.z())
-        + (Spectrum(1) - F(vLocal, lLocal, n)) / pi;
+        + F0 * (1 - G(vLocal, lLocal, n)) / pi;
 }
 
 Spectrum GGX::sampleVtL(const Vec3 &vLocal, Vec3 &lLocal, double &pdf) const {
-    double prob = (1 + F0.norm() / sqrt(3)) / 2;
+    double prob = (3 - rough) / 3;
     if (RD.rand() < prob) {
         Vec3 n;
         sampleN(n, pdf);
         lLocal = -vLocal + n * (vLocal * n) * 2;
-        pdf /= abs(4 * vLocal * n);
+        pdf = pdf / abs(4 * vLocal * n) * prob;
         if (vLocal.z() * lLocal.z() < 0) return Spectrum(0);
-        return F(vLocal, lLocal, n) * D(n) * G(vLocal, lLocal, n) / (4 * vLocal.z() * lLocal.z()) / prob;
+        return F(vLocal, lLocal, n) * D(n) * G(vLocal, lLocal, n) / (4 * vLocal.z() * lLocal.z());
     } else {
         lLocal = RD.hemisphere();
-        pdf = 1 / (2 * pi);
+        pdf = 1 / (2 * pi) * (1 - prob);
         Vec3 n = (vLocal + lLocal) / 2;
-        return (Spectrum(1) - F(vLocal, lLocal, n)) / pi / (1 - prob);
+        return F0 * (1 - G(vLocal, lLocal, n)) / pi;
     }
 }
 
 Spectrum GGX::sampleLtV(const Vec3 &lLocal, Vec3 &vLocal, double &pdf) const {
-    double prob = (1 + F0.norm() / sqrt(3)) / 2;
+    double prob = (3 - rough) / 3;
     if (RD.rand() < prob) {
         Vec3 n;
         sampleN(n, pdf);
         vLocal = -lLocal + n * (lLocal * n) * 2;
-        pdf /= abs(4 * lLocal * n);
+        pdf = pdf / abs(4 * lLocal * n) * prob;
         if (vLocal.z() * lLocal.z() < 0) return Spectrum(0);
-        return F(vLocal, lLocal, n) * D(n) * G(vLocal, lLocal, n) / (4 * vLocal.z() * lLocal.z()) / prob;
+        return F(vLocal, lLocal, n) * D(n) * G(vLocal, lLocal, n) / (4 * vLocal.z() * lLocal.z());
     } else {
         vLocal = RD.hemisphere();
-        pdf = 1 / (2 * pi);
+        pdf = 1 / (2 * pi) * (1 - prob);
         Vec3 n = (vLocal + lLocal) / 2;
-        return (Spectrum(1) - F(vLocal, lLocal, n)) / pi / (1 - prob);
+        return F0 * (1 - G(vLocal, lLocal, n)) / pi;
     }
 }
 
