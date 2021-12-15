@@ -6,11 +6,13 @@
 class BiGGX : public BxDF {
 public:
     BiGGX(double ior, double rough);
+    bool glossy() const override {
+        return true;
+    }
 
 private:
-    Spectrum evaluateVtL(const Vec3 &vLocal, const Vec3 &lLocal) const override;
-    Spectrum sampleVtL(const Vec3 &vLocal, Vec3 &lLocal, double &pdf) const override;
-    Spectrum sampleLtV(const Vec3 &lLocal, Vec3 &vLocal, double &pdf) const override;
+    Spectrum evaluate(const Vec3 &vLocal, const Vec3 &lLocal) const override;
+    Spectrum sample(const Vec3 &vLocal, Vec3 &lLocal, double &pdf) const override;
 
     Spectrum F(const Vec3 &V, const Vec3 &L, const Vec3 &N) const;
     double D(const Vec3 &N) const;
@@ -60,8 +62,7 @@ void BiGGX::sampleN(Vec3 &N, double &pdf) const {
     pdf = alpha2 * cos_n / (pi * pow((alpha2 - 1) * cos_n * cos_n + 1, 2));
 }
 
-Spectrum BiGGX::evaluateVtL(const Vec3 &vLocal, const Vec3 &lLocal) const {
-
+Spectrum BiGGX::evaluate(const Vec3 &vLocal, const Vec3 &lLocal) const {
     if (vLocal.z() * lLocal.z() > 0) {
         Vec3 n = (vLocal + lLocal).norm();
 
@@ -86,7 +87,7 @@ Spectrum BiGGX::evaluateVtL(const Vec3 &vLocal, const Vec3 &lLocal) const {
     }
 }
 
-Spectrum BiGGX::sampleVtL(const Vec3 &vLocal, Vec3 &lLocal, double &pdf) const {
+Spectrum BiGGX::sample(const Vec3 &vLocal, Vec3 &lLocal, double &pdf) const {
     Vec3 n;
     sampleN(n, pdf);
     lLocal = -vLocal + n * (vLocal * n) * 2;
@@ -94,7 +95,7 @@ Spectrum BiGGX::sampleVtL(const Vec3 &vLocal, Vec3 &lLocal, double &pdf) const {
     if (RD.rand() < prob) {
         lLocal = -vLocal + n * (vLocal * n) * 2;
         pdf = pdf / abs(4 * vLocal * n) * prob;
-        if (lLocal.z() * vLocal.z() > 0) return evaluateVtL(vLocal, lLocal);
+        if (lLocal.z() * vLocal.z() > 0) return evaluate(vLocal, lLocal);
         else return Spectrum(0);
     } else {
         double cosV = abs(vLocal * n), sinV = sqrt(1 - cosV * cosV);
@@ -112,39 +113,10 @@ Spectrum BiGGX::sampleVtL(const Vec3 &vLocal, Vec3 &lLocal, double &pdf) const {
 
         pdf = pdf * abs(lLocal * n) / (lLocal + vLocal * (vLocal.z() < 0 ? ior : 1 / ior)).squaredLength() * (1 - prob);
         if (lLocal.z() * vLocal.z() > 0) return Spectrum(0);
-        else return evaluateVtL(vLocal, lLocal);
+        else return evaluate(vLocal, lLocal);
     }
 }
 
-Spectrum BiGGX::sampleLtV(const Vec3 &lLocal, Vec3 &vLocal, double &pdf) const {
-    Vec3 n;
-    sampleN(n, pdf);
-    vLocal = -lLocal + n * (lLocal * n) * 2;
-    double prob = (0.1 + F(vLocal, lLocal, n).norm() / sqrt(3)) / 1.2;
-    if (RD.rand() < prob) {
-        vLocal = -lLocal + n * (lLocal * n) * 2;
-        pdf = pdf / abs(4 * lLocal * n) * prob;
-        if (lLocal.z() * vLocal.z() > 0) return evaluateVtL(vLocal, lLocal);
-        else return Spectrum(0);
-    } else {
-        double cosL = abs(lLocal * n), sinL = sqrt(1 - cosL * cosL);
-        double sinV = sinL * (lLocal.z() < 0 ? ior : 1 / ior);
-        if (sinV > 1) {
-            pdf = 1.;
-            return Spectrum(0);
-        }
-        if (n * lLocal < 0) n = -n;
-        vLocal = -(n + lLocal.vert(n).norm() * tan(asin(sinV))).norm();
-
-//        Vec3 nx = (lLocal + vLocal * (lLocal.z() > 0 ? ior : 1 / ior)).norm();
-//        if ((nx - n).length() > 1e-5) cerr << "?V" << nx << " " << n << endl;
-//        if ((n * lLocal) * (n * vLocal) > 0) cerr << "? ? ? ? ? ? ? ? ?  ? ? ? ? ? ? ? ? ? ? ?? ? ? ? ? ? " << endl;
-
-        pdf = pdf * abs(vLocal * n) / (vLocal + lLocal * (lLocal.z() < 0 ? ior : 1 / ior)).squaredLength() * (1 - prob);
-        if (lLocal.z() * vLocal.z() > 0) return Spectrum(0);
-        else return evaluateVtL(vLocal, lLocal);
-    }
-}
 
 #endif
 #endif /* bxdfs_biggx_hpp */

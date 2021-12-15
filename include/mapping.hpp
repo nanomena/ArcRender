@@ -35,16 +35,16 @@ Pixel::Pixel(double grey, double _a) {
 }
 Pixel::Pixel(double _r, double _g, double _b, double _a) { r = _r, g = _g, b = _b, a = _a; }
 Pixel Pixel::operator +(const Pixel &t) const {
-    return Pixel(r + t.r, g + t.g, b + t.b, a + t.a);
+    return {r + t.r, g + t.g, b + t.b, a + t.a};
 }
 Pixel Pixel::operator -(const Pixel &t) const {
-    return Pixel(r - t.r, g - t.g, b - t.b, a - t.a);
+    return {r - t.r, g - t.g, b - t.b, a - t.a};
 }
 Pixel Pixel::operator *(double t) const {
-    return Pixel(r * t, g * t, b * t, a * t);
+    return {r * t, g * t, b * t, a * t};
 }
 Pixel Pixel::operator /(double t) const {
-    return Pixel(r / t, g / t, b / t, a / t);
+    return {r / t, g / t, b / t, a / t};
 }
 ostream &operator <<(ostream &s, Pixel t) {
     s << "(" << t.r << "," << t.g << "," << t.b << "," << t.a << ")";

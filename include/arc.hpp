@@ -12,6 +12,7 @@
 #include "scene.hpp"
 #include "mapping.hpp"
 #include "image.hpp"
+#include "tree.hpp"
 #include "sampler.hpp"
 //#include "surface.hpp"
 #include "vecmath.hpp"
@@ -28,11 +29,8 @@
 //#include "shapes/disc.hpp"
 #include "shapes/triangle.hpp"
 
-//#include "renders/npt.hpp"
-//#include "renders/lspt.hpp"
-//#include "renders/bdpt.hpp"
-
 #include "tracers/bdpt.hpp"
+#include "tracers/sppm.hpp"
 
 #include "cameras/perspective.hpp"
 #include "cameras/actinometer.hpp"

@@ -2,26 +2,23 @@
 #define ARCRENDER_INCLUDE_TRACERS_BDPT_HPP
 
 #include "../tracer.hpp"
-
-struct Hit {
-    Vec3 intersect;
-    Ray lB;
-    shared_ptr<Shape> object;
-    Spectrum color;
-};
+#include "../photon.hpp"
 
 class BidirectionalPathTracer : public Tracer {
 public:
-    void initCache() override;
+    void initGraph(int preCnt) override;
     void preSample(int idx) override;
     void sample(int idx) override;
 
+    void revTrace(const int &idx, const Ray &lB, const shared_ptr<Medium> &medium, int traceDepth, Spectrum traceMul);
+    Spectrum trace(const int &idx, const Ray &v, const shared_ptr<Medium> &medium, int traceDepth, Spectrum traceMul);
+
     BidirectionalPathTracer(
-        int width, int height, const shared_ptr<Scene> &scene, int traceLimit = 8, double traceEps = 1e-7
+        int width, int height, const shared_ptr<Scene> &scene, int traceLimit = 6, double traceEps = 1e-7
     );
 
 private:
-    vector<vector<Hit>> photons;
+    vector<vector<Photon>> photons;
     int traceLimit;
     double traceEPS;
 };
@@ -32,122 +29,108 @@ BidirectionalPathTracer::BidirectionalPathTracer(
     int width, int height, const shared_ptr<Scene> &scene, int traceLimit, double traceEPS
 ) : Tracer(width, height, scene, traceLimit, traceLimit), traceLimit(traceLimit), traceEPS(traceEPS) {}
 
-void BidirectionalPathTracer::initCache() {
+void BidirectionalPathTracer::initGraph(int preCnt) {
     photons.clear();
-    photons.resize(traceLimit - 1);
+    photons.resize(traceLimit);
 }
 
 void BidirectionalPathTracer::preSample(int idx) {
-    if (scene->lights.empty()) return;
     Ray lB;
-    Spectrum mul = scene->lights[idx % scene->lights.size()]->sampleStV(lB);
-    shared_ptr<Medium> medium = scene->medium;
-    for (int cnt = 1; cnt + 1 < traceLimit; ++cnt) {
-        if (mul.norm() < traceEPS) {
-            photons[cnt].push_back(Hit{Vec3(), Ray(), nullptr, mul});
-            continue;
-        }
-
-//        cerr << "B " << cnt << " " << lB.o << " " << lB.d << endl;
-
-        shared_ptr<Shape> object;
-        double t;
-        scene->intersect(lB, object, t);
-
-        double tM;
-        shared_ptr<Shape> objectM = medium->sample(tM);
-        if (tM < t) object = objectM, t = tM;
-
-        if (object == scene->skybox) {
-            mul = Spectrum(0);
-            continue;
-        }
-
-        mul = mul * medium->evaluate(t);
-
-//        cerr << object->name << endl;
-
-
-        Vec3 intersect = lB.o + t * lB.d;
-        photons[cnt].push_back(Hit{intersect, lB, object, mul});
-
-        Ray vB;
-        mul = mul * object->sampleLtV(lB, vB);
-        lB = vB;
-    }
+    Spectrum traceMul = scene->lights[idx % scene->lights.size()]->sample(lB);
+    revTrace(idx, lB, scene->medium, 1, traceMul);
 }
 
 void BidirectionalPathTracer::sample(int idx) {
     Ray v = sampleCamera(idx);
-    Spectrum mul(1);
-    shared_ptr<Medium> medium = scene->medium;
-    for (int cnt = 0; cnt < traceLimit; ++cnt) {
-        if (mul.norm() < traceEPS) {
-            for (int i = cnt; i < traceLimit; ++i)
-                add(idx, Spectrum(0), i, cnt);
-            continue;
-        }
-
-//        cerr << "F F F F F F F F" << cnt << " " << v.o << " " << v.d << " " << mul << endl;
-
-        shared_ptr<Shape> object;
-        double t;
-        scene->intersect(v, object, t);
-
-        double tM;
-        shared_ptr<Shape> objectM = medium->sample(tM);
-        if (tM < t) object = objectM, t = tM;
-
-        mul = mul * medium->evaluate(t);
-//        cerr << object->name << endl;
-
-        Vec3 intersect = v.o + t * v.d;
-        {
-            Spectrum color = object->evaluateVtS(v) * mul;
-            add(idx, color, cnt, cnt);
-        }
-
-        if (object == scene->skybox) {
-            mul = Spectrum(0);
-            continue;
-        }
-
-        if (cnt + 1 < traceLimit)
-            for (const auto &light: scene->lights) {
-                Ray l;
-                double dis;
-                Spectrum color = light->sampleS(intersect, l, dis) * mul;
-                if (scene->visible(l, light, dis)) {
-                    color = color * object->evaluateVtL(v, l) / pow(dis, 2) * medium->evaluate(dis);
-                    add(idx, color, cnt + 1, cnt);
-                } else {
-                    add(idx, Spectrum(0), cnt + 1, cnt);
-                }
-            }
-        for (int rev = 1; cnt + rev + 1 < traceLimit; ++rev) if (!photons[rev].empty()) {
-            const auto &p = photons[rev][idx % photons[rev].size()];
-            if (p.color.norm() < EPS) {
-                add(idx, Spectrum(0), cnt + rev + 1, cnt);
-                continue;
-            }
-            double dis = (p.intersect - intersect).length();
-            Ray l = Ray(intersect, (p.intersect - intersect).norm()),
-                vB = Ray(p.intersect, (intersect - p.intersect).norm());
-            Spectrum color = p.color * mul;
-            if (scene->visible(l, p.object, dis)) {
-                color = color * object->evaluateVtL(v, l) * p.object->evaluateLtV(p.lB, vB)
-                    / pow(dis, 2) * medium->evaluate(dis);
-                add(idx, color, cnt + rev + 1, cnt);
-            } else {
-                add(idx, Spectrum(0), cnt + rev + 1, cnt);
-            }
-        }
-
-        Ray l;
-        mul = mul * object->sampleVtL(v, l);
-        v = l;
-    }
+    C[idx] += trace(idx, v, scene->medium, 1, Spectrum(1));
+    W[idx] += 1;
 }
+
+void BidirectionalPathTracer::revTrace(
+    const int &idx, const Ray &lB, const shared_ptr<Medium> &medium, int traceDepth, Spectrum traceMul
+) {
+    if (traceMul.norm() < traceEPS) return;
+    if (traceDepth >= traceLimit) return;
+
+    shared_ptr<Shape> object;
+    double t;
+    scene->intersect(lB, object, t);
+
+    double tM;
+    shared_ptr<Shape> objectM = medium->sample(tM);
+    if (tM < t) object = objectM, t = tM;
+
+    Vec3 intersect = lB.o + t * lB.d;
+    Spectrum mediumMul = medium->evaluate(t);
+
+    if (object->glossy(intersect)) {
+        Ray vB;
+        Spectrum surfaceMul = object->sample(lB, vB);
+        revTrace(idx, vB, medium, traceDepth, traceMul * mediumMul * surfaceMul);
+        return;
+    }
+    photons[traceDepth].push_back(Photon{intersect, lB, object, traceMul * mediumMul});
+
+    Ray vB;
+    Spectrum surfaceMul = object->sample(lB, vB);
+    revTrace(idx, vB, medium, traceDepth + 1, traceMul * mediumMul * surfaceMul);
+}
+
+Spectrum BidirectionalPathTracer::trace(
+    const int &idx, const Ray &v, const shared_ptr<Medium> &medium, int traceDepth, Spectrum traceMul
+) {
+    if (traceMul.norm() < traceEPS) return Spectrum(0);
+    if (traceDepth >= traceLimit) return Spectrum(0);
+
+    shared_ptr<Shape> object;
+    double t;
+    scene->intersect(v, object, t);
+
+    double tM;
+    shared_ptr<Shape> objectM = medium->sample(tM);
+    if (tM < t) object = objectM, t = tM;
+
+    Vec3 intersect = v.o + t * v.d;
+
+    Spectrum mediumMul = medium->evaluate(t);
+    Spectrum color = object->evaluate(v) / traceDepth;
+
+    if (object->glossy(intersect)) {
+        Ray l;
+        Spectrum surfaceMul = object->sample(v, l);
+        color = color + trace(idx, l, medium, traceDepth, traceMul * mediumMul * surfaceMul) * surfaceMul;
+
+        return color * mediumMul;
+    }
+
+    for (const auto &light: scene->lights) {
+        Ray l;
+        double dis;
+
+        Spectrum baseColor = light->sample(intersect, l, dis);
+        if (scene->visible(l, light, dis)) {
+            color += baseColor * object->evaluate(v, l) / pow(dis, 2) * medium->evaluate(dis) / (traceDepth + 1);
+        }
+    }
+
+    for (int rev = 1; rev < traceLimit; ++rev) if (!photons[rev].empty()) {
+        const auto &p = photons[rev][idx % photons[rev].size()];
+        double dis = (p.intersect - intersect).length();
+        Ray l = Ray(intersect, (p.intersect - intersect).norm()),
+            vB = Ray(p.intersect, (intersect - p.intersect).norm());
+        if (scene->visible(l, p.object, dis)) {
+            color += p.color * object->evaluate(v, l) * p.object->evaluate(p.lB, vB)
+                / pow(dis, 2) * medium->evaluate(dis) / (traceDepth + 1 + rev);
+        }
+    }
+
+    Ray l;
+    Spectrum surfaceMul = object->sample(v, l);
+    color = color + trace(idx, l, medium, traceDepth + 1, traceMul * mediumMul * surfaceMul) * surfaceMul;
+
+    return color * mediumMul;
+}
+
 
 #endif
 #endif //ARCRENDER_INCLUDE_TRACERS_BDPT_HPP

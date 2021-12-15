@@ -13,20 +13,20 @@ class Tracer {
 public:
     Tracer(int width, int height, const shared_ptr<Scene> &scene, int routine = 1, int pass = 1);
 
-    virtual void initCache();
+    virtual void initGraph(int preCnt);
+    virtual void buildGraph();
     virtual void preSample(int idx);
     virtual void sample(int idx);
-    void epoch(int preCnt = -1);
+    void epoch(double mul);
 
-    Spectrum color(int idx, int debug = 0) const;
     void savePNG(const char *path, double white = 1, double gamma = 2.2) const;
 
 protected:
     Ray sampleCamera(int idx) const;
-    void add(int idx, Spectrum color, int routine = 0, int pass = 0);
 
     int width, height, length;
-    vector<vector<Counter>> counters;
+    vector<Spectrum> C;
+    vector<double> W;
 
     shared_ptr<Scene> scene;
 };
@@ -37,13 +37,13 @@ Tracer::Tracer(
     int width, int height, const shared_ptr<Scene> &scene, int routine, int pass
 ) : width(width), height(height), scene(scene) {
     length = width * height;
-    counters.resize(length);
-    for (int i = 0; i < length; ++i)
-        for (int j = 0; j < routine; ++j)
-            counters[i].emplace_back(pass);
+    C.resize(length);
+    W.resize(length);
 }
 
-void Tracer::initCache() {}
+void Tracer::initGraph(int preCnt) {}
+
+void Tracer::buildGraph() {}
 
 void Tracer::preSample(int idx) {
     throw invalid_argument("NotImplementedError");
@@ -51,12 +51,11 @@ void Tracer::preSample(int idx) {
 void Tracer::sample(int idx) {
     throw invalid_argument("NotImplementedError");
 }
-void Tracer::epoch(int preCnt) {
-    if (preCnt < 0) {
-        preCnt = max(1, length / 7);
-    }
-    initCache();
+void Tracer::epoch(double mul) {
+    int preCnt = max(int(length * mul), 1);
+    initGraph(preCnt);
     for (int i = 0; i < preCnt; ++i) preSample(i);
+    buildGraph();
     for (int i = 0; i < length; ++i) sample(i);
 }
 
@@ -66,24 +65,11 @@ Ray Tracer::sampleCamera(int idx) const {
     return scene->camera->apply(v);
 }
 
-void Tracer::add(int idx, Spectrum color, int routine, int pass) {
-    counters[idx][routine].add(color, pass);
-}
-
-Spectrum Tracer::color(int idx, int debug) const {
-    Spectrum tot;
-    for (const auto &c: counters[idx]) {
-        tot = tot + c.color();
-        if (debug) cerr << c << endl;
-    }
-    return tot;
-}
-
 void Tracer::savePNG(const char *path, double white, double gamma) const {
     vector<unsigned char> buffer;
     buffer.resize(length * 3);
     for (int i = 0; i < length; ++i) {
-        auto _c = color(i).rgb256(white, gamma);
+        auto _c = (C[i] / W[i]).rgb256(white, gamma);
         buffer[i * 3 + 0] = (unsigned char)(_c / 65536);
         buffer[i * 3 + 1] = (unsigned char)(_c / 256 % 256);
         buffer[i * 3 + 2] = (unsigned char)(_c % 256);

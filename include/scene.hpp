@@ -19,6 +19,7 @@ public:
     void intersect(const Ray &ray, shared_ptr<Shape> &object, double &t) const;
     bool visible(const Ray &test, const shared_ptr<Shape> &object, double dis) const;
 
+    Box3 box() const;
 private:
     vector<shared_ptr<KaDanTree>> graphs;
 };
@@ -52,6 +53,13 @@ void Scene::intersect(const Ray &ray, shared_ptr<Shape> &object, double &t) cons
     assert(f);
     for (const auto &graph: graphs)
         graph->intersect(rayX, object, t);
+}
+
+Box3 Scene::box() const {
+    Box3 b;
+    for (const auto &graph: graphs)
+        b = b + graph->box();
+    return b;
 }
 
 bool Scene::visible(const Ray &test, const shared_ptr<Shape> &object, double dis) const {

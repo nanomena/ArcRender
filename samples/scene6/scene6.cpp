@@ -3,9 +3,9 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-#define DEBUG_FLAG
+//#define DEBUG_FLAG
 int main() {
-    ios::sync_with_stdio(0);
+    ios::sync_with_stdio(false);
 
     shared_ptr<Shape> skybox = make_shared<Sphere>(
         make_shared<Lambert>(Spectrum(0)),
@@ -126,6 +126,7 @@ int main() {
 #ifdef DEBUG_FLAG
     shared_ptr<Tracer> tracer = make_shared<BidirectionalPathTracer>(1, 1, scene);
 #else
+//    shared_ptr<Tracer> tracer = make_shared<StochasticProgressivePhotonMapping>(800, 600, scene);
     shared_ptr<Tracer> tracer = make_shared<BidirectionalPathTracer>(800, 600, scene);
 #endif
     char output[100];
@@ -134,7 +135,7 @@ int main() {
     int epoch = 10000000;
     cerr << "[T + " << ((double)clock() / CLOCKS_PER_SEC) << "] | target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++i) {
-        tracer->epoch();
+        tracer->epoch(0.15);
 #ifdef DEBUG_FLAG
         if (i % 10000 == 0) {
             cerr << "[T + " << ((double)clock() / CLOCKS_PER_SEC) << "] | epoch " << i << endl;

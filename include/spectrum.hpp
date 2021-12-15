@@ -18,6 +18,11 @@ struct Spectrum {
     int rgb256(double white, double gamma = 2.2) const;
     double norm() const;
 
+    Spectrum &operator +=(const Spectrum &v);
+    Spectrum &operator -=(const Spectrum &v);
+    Spectrum &operator *=(double f);
+    Spectrum &operator /=(double f);
+
     friend ostream &operator <<(ostream &s, Spectrum t);
 };
 
@@ -66,6 +71,11 @@ int Spectrum::rgb256(double white, double gamma) const {
 double Spectrum::norm() const {
     return sqrt(r * r + g * g + b * b);
 }
+
+Spectrum &Spectrum::operator +=(const Spectrum &v) { return *this = *this + v; }
+Spectrum &Spectrum::operator -=(const Spectrum &v) { return *this = *this - v; }
+Spectrum &Spectrum::operator *=(double f) { return *this = *this * f; }
+Spectrum &Spectrum::operator /=(double f) { return *this = *this / f; }
 
 ostream &operator <<(ostream &s, Spectrum t) {
     s << "(" << t.r << "," << t.g << "," << t.b << ")";

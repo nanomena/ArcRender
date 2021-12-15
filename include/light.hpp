@@ -8,7 +8,7 @@
 class Light {
 public:
     Spectrum evaluate(const Vec3 &n, const Vec3 &v) const;
-    Spectrum sampleStV(const Vec3 &n, Vec3 &v) const;
+    Spectrum sample(const Vec3 &n, Vec3 &v) const;
 
 private:
     virtual Spectrum evaluate(const Vec3 &vLocal) const {
@@ -28,7 +28,7 @@ Spectrum Light::evaluate(const Vec3 &n, const Vec3 &v) const {
     return evaluate(vT);
 }
 
-Spectrum Light::sampleStV(const Vec3 &n, Vec3 &v) const {
+Spectrum Light::sample(const Vec3 &n, Vec3 &v) const {
     Mat3 T, TInv;
     rotateAxis(n, n, T, TInv);
     Vec3 vT;

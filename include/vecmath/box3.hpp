@@ -11,6 +11,7 @@ public:
     Vec3 U() const;
 
     bool intersect(const Ray &ray, double &t) const;
+    bool intersectCheck(const Vec3 &o, double r) const; // may report true when false
 
 protected:
     Vec3 l, u;
@@ -20,7 +21,7 @@ Box3 operator +(const Box3 &b0, const Box3 &b1);
 
 #ifdef ARC_IMPLEMENTATION
 
-Box3::Box3() : l(-INF, -INF, -INF), u(INF, INF, INF) {}
+Box3::Box3() : l(INF, INF, INF), u(-INF, -INF, -INF) {}
 Box3::Box3(const Vec3 &p) : l(p), u(p) {}
 Box3::Box3(const Vec3 &l, const Vec3 &u) : l(l), u(u) {}
 
@@ -37,6 +38,13 @@ bool Box3::intersect(const Ray &ray, double &t) const {
     }
     if (L > U) return false;
     t = L;
+    return true;
+}
+
+bool Box3::intersectCheck(const Vec3 &o, double r) const {
+    for (int i = 0; i < 3; ++ i) {
+        if ((o[i] + r < l[i]) || (o[i] - r > u[i])) return false;
+    }
     return true;
 }
 

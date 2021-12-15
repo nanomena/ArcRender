@@ -18,16 +18,18 @@ struct KaDanTreeNode {
 };
 
 class KaDanTree {
-    vector<KaDanTreeNode> tree;
-    KaDanTreeNode *root;
-    int cnt;
-
 public:
     explicit KaDanTree(vector<shared_ptr<Shape>> objects);
 
     KaDanTreeNode *acquire();
 
     void intersect(const Ray &ray, shared_ptr<Shape> &object, double &t) const;
+    Box3 box() const;
+
+private:
+    vector<KaDanTreeNode> tree;
+    KaDanTreeNode *root;
+    int cnt;
 };
 
 #ifdef ARC_IMPLEMENTATION
@@ -117,6 +119,10 @@ void KaDanTree::intersect(const Ray &ray, shared_ptr<Shape> &object, double &t) 
                 object = node.cen;
             }
     }
+}
+
+Box3 KaDanTree::box() const {
+    return root->box;
 }
 
 #endif
