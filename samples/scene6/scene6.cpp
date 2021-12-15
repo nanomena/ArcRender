@@ -32,9 +32,9 @@ int main() {
 
     scene->addObject(
         make_shared<Sphere>(
-            make_shared<BiGGX>(1.05, 0.3),
+            make_shared<GGX>(rgb256(250, 250, 250), 0.8),
             nullptr,
-            Vec3(0, -3, -10), 6
+            Vec3(0, -6.9, -10), 3
         ),
         "ball"
     );
@@ -96,7 +96,7 @@ int main() {
 
     scene->addObject(
         make_shared<Flat>(
-            make_shared<GGX>(rgb256(235, 235, 170), 0.5),
+            make_shared<GGX>(rgb256(235, 235, 170), 0.15),
             nullptr,
             Vec3(-10, 10, -20),
             Vec3(-10, -10, -20),
@@ -135,7 +135,8 @@ int main() {
     int epoch = 10000000;
     cerr << "[T + " << ((double)clock() / CLOCKS_PER_SEC) << "] | target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++i) {
-        tracer->epoch(0.15);
+        tracer->epoch(0.013);
+//        tracer->epoch(1);
 #ifdef DEBUG_FLAG
         if (i % 10000 == 0) {
             cerr << "[T + " << ((double)clock() / CLOCKS_PER_SEC) << "] | epoch " << i << endl;

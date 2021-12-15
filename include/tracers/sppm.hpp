@@ -97,7 +97,7 @@ void StochasticProgressivePhotonMapping::revTrace(
     if (object->glossy(intersect)) {
         Ray vB;
         Spectrum surfaceMul = object->sample(lB, vB);
-        revTrace(idx, vB, medium, max(2, traceDepth), traceMul * mediumMul * surfaceMul);
+        revTrace(idx, vB, medium, traceDepth, traceMul * mediumMul * surfaceMul);
         return;
     }
 //    if (traceDepth > 1) {

@@ -5,7 +5,8 @@
 
 class Flat : public Shape {
     unsigned int n;
-    vector<Vec3> vertices, T_vertices;
+    vector<Vec3> vertices, tVert;
+    Vec3 *tVertices;
     Vec3 norm;
     Mat3 T;
 
@@ -46,9 +47,10 @@ Flat::Flat(
 
 //    cerr << "E" << endl;
 
-    T_vertices.resize(n);
+    tVert.resize(n);
     for (int i = 0; i < n; ++i)
-        T_vertices[i] = T * vertices[i];
+        tVert[i] = T * vertices[i];
+    tVertices = &(tVert.front());
     for (int i = 0; i < n; ++i)
         box = box + Box3(vertices[i]);
 }
@@ -64,23 +66,23 @@ unsigned int Flat::onRight(const Vec3 &p1, const Vec3 &p2, const Vec3 &q) const 
 bool Flat::intersect(const Ray &ray, double &t) const {
 //    cerr << "here!" << endl;
 
-    Ray T_ray = Ray(T * ray.o, T * ray.d);
-    if (abs(T_ray.d.z()) < EPS) return false;
+    Ray TRay = Ray(T * ray.o, T * ray.d);
+    if (abs(TRay.d.z()) < EPS) return false;
 
 //    for (int i = 0; i < n; ++i) {
-//        cerr << T_vertices[i] << " ";
+//        cerr << tVertices[i] << " ";
 //    }
 //    cerr << endl;
 //    cerr << T << endl;
-    t = (T_vertices[0].z() - T_ray.o.z()) / T_ray.d.z();
+    t = (tVertices[0].z() - TRay.o.z()) / TRay.d.z();
     if (t < EPS) return false;
-    Vec3 T_candi = T_ray.o + T_ray.d * t;
+    Vec3 TCandi = TRay.o + TRay.d * t;
 
-    unsigned int inside = onRight(T_vertices[0], T_vertices[n - 1], T_candi);
+    unsigned int inside = onRight(tVertices[0], tVertices[n - 1], TCandi);
     for (int i = 0; i + 1 < n; ++i)
-        inside ^= onRight(T_vertices[i], T_vertices[i + 1], T_candi);
+        inside ^= onRight(tVertices[i], tVertices[i + 1], TCandi);
 
-//    cerr << "here!" << " " << ray.o << " " << ray.d << " " << T_candi <<  " " << inside << endl;
+//    cerr << "here!" << " " << ray.o << " " << ray.d << " " << TCandi <<  " " << inside << endl;
     return inside;
 }
 Vec3 Flat::normal(const Vec3 &inter) const {

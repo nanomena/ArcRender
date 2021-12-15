@@ -7,7 +7,7 @@ class GGX : public BxDF {
 public:
     GGX(Spectrum F0, double rough);
     bool glossy() const override {
-        return false;
+        return rough < 0.2;
     }
 
 private:

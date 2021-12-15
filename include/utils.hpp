@@ -16,6 +16,7 @@
 #define $ if (DEBUG) cerr
 // #define double long double
 
+#include <omp.h>
 #include <random>
 #include <memory>
 #include <vector>

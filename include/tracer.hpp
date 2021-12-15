@@ -54,8 +54,10 @@ void Tracer::sample(int idx) {
 void Tracer::epoch(double mul) {
     int preCnt = max(int(length * mul), 1);
     initGraph(preCnt);
+//#pragma omp parallel for schedule(dynamic, 1)
     for (int i = 0; i < preCnt; ++i) preSample(i);
     buildGraph();
+//#pragma omp parallel for schedule(dynamic, 1)
     for (int i = 0; i < length; ++i) sample(i);
 }
 
