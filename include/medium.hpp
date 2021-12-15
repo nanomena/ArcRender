@@ -6,7 +6,7 @@ public:
     virtual Spectrum evaluate(double t) const {
         throw invalid_argument("NotImplementedError");
     }
-    virtual shared_ptr<Shape> sample(double &t) const {
+    virtual shared_ptr<Shape> sample(double &t, Sampler &RNG) const {
         throw invalid_argument("NotImplementedError");
     }
 

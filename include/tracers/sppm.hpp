@@ -8,11 +8,11 @@ class StochasticProgressivePhotonMapping : public Tracer {
 public:
     void initGraph(int preCnt) override;
     void buildGraph() override;
-    void preSample(int idx) override;
-    void sample(int idx) override;
+    void preSample(int idx, Sampler &RNG) override;
+    void sample(int idx, Sampler &RNG) override;
 
-    void revTrace(const int &idx, const Ray &lB, const shared_ptr<Medium> &medium, int traceDepth, Spectrum traceMul);
-    Spectrum trace(const int &idx, const Ray &v, const shared_ptr<Medium> &medium, int traceDepth, Spectrum traceMul);
+    void revTrace(const int &idx, const Ray &lB, const shared_ptr<Medium> &medium, int traceDepth, Spectrum traceMul, Sampler &RNG);
+    Spectrum trace(const int &idx, const Ray &v, const shared_ptr<Medium> &medium, int traceDepth, Spectrum traceMul, Sampler &RNG);
 
     StochasticProgressivePhotonMapping(
         int width, int height, const shared_ptr<Scene> &scene, int traceLimit = 8, double traceEps = 1e-7
@@ -60,16 +60,16 @@ void StochasticProgressivePhotonMapping::buildGraph() {
     tree = make_shared<KaTenTree>(KaTenTree(photons));
 }
 
-void StochasticProgressivePhotonMapping::preSample(int idx) {
+void StochasticProgressivePhotonMapping::preSample(int idx, Sampler &RNG) {
     Ray lB;
-    Spectrum traceMul = scene->lights[idx % scene->lights.size()]->sample(lB);
-    revTrace(idx, lB, scene->medium, 1, traceMul);
+    Spectrum traceMul = scene->lights[idx % scene->lights.size()]->sample(lB, RNG);
+    revTrace(idx, lB, scene->medium, 1, traceMul, RNG);
 }
 
-void StochasticProgressivePhotonMapping::sample(int idx) {
-    Ray v = sampleCamera(idx);
+void StochasticProgressivePhotonMapping::sample(int idx, Sampler &RNG) {
+    Ray v = sampleCamera(idx, RNG);
     C[idx] -= graphSpectrum[idx] / (pi * squaredRadius[idx]);
-    C[idx] += trace(idx, v, scene->medium, 1, Spectrum(1));
+    C[idx] += trace(idx, v, scene->medium, 1, Spectrum(1), RNG);
 
 //    cerr << C[idx] << " " << graphSpectrum[idx] << endl;
 
@@ -78,7 +78,7 @@ void StochasticProgressivePhotonMapping::sample(int idx) {
 }
 
 void StochasticProgressivePhotonMapping::revTrace(
-    const int &idx, const Ray &lB, const shared_ptr<Medium> &medium, int traceDepth, Spectrum traceMul
+    const int &idx, const Ray &lB, const shared_ptr<Medium> &medium, int traceDepth, Spectrum traceMul, Sampler &RNG
 ) {
     if (traceMul.norm() < traceEPS) return;
     if (traceDepth >= traceLimit) return;
@@ -88,7 +88,7 @@ void StochasticProgressivePhotonMapping::revTrace(
     scene->intersect(lB, object, t);
 
     double tM;
-    shared_ptr<Shape> objectM = medium->sample(tM);
+    shared_ptr<Shape> objectM = medium->sample(tM, RNG);
     if (tM < t) object = objectM, t = tM;
 
     Vec3 intersect = lB.o + t * lB.d;
@@ -96,8 +96,8 @@ void StochasticProgressivePhotonMapping::revTrace(
 
     if (object->glossy(intersect)) {
         Ray vB;
-        Spectrum surfaceMul = object->sample(lB, vB);
-        revTrace(idx, vB, medium, traceDepth, traceMul * mediumMul * surfaceMul);
+        Spectrum surfaceMul = object->sample(lB, vB, RNG);
+        revTrace(idx, vB, medium, traceDepth, traceMul * mediumMul * surfaceMul, RNG);
         return;
     }
 //    if (traceDepth > 1) {
@@ -105,12 +105,12 @@ void StochasticProgressivePhotonMapping::revTrace(
 //    }
 
     Ray vB;
-    Spectrum surfaceMul = object->sample(lB, vB);
-    revTrace(idx, vB, medium, traceDepth + 1, traceMul * mediumMul * surfaceMul);
+    Spectrum surfaceMul = object->sample(lB, vB, RNG);
+    revTrace(idx, vB, medium, traceDepth + 1, traceMul * mediumMul * surfaceMul, RNG);
 }
 
 Spectrum StochasticProgressivePhotonMapping::trace(
-    const int &idx, const Ray &v, const shared_ptr<Medium> &medium, int traceDepth, Spectrum traceMul
+    const int &idx, const Ray &v, const shared_ptr<Medium> &medium, int traceDepth, Spectrum traceMul, Sampler &RNG
 ) {
     if (traceMul.norm() < traceEPS) return Spectrum(0);
     if (traceDepth >= traceLimit) return Spectrum(0);
@@ -120,7 +120,7 @@ Spectrum StochasticProgressivePhotonMapping::trace(
     scene->intersect(v, object, t);
 
     double tM;
-    shared_ptr<Shape> objectM = medium->sample(tM);
+    shared_ptr<Shape> objectM = medium->sample(tM, RNG);
     if (tM < t) object = objectM, t = tM;
 
     Vec3 intersect = v.o + t * v.d;
@@ -130,8 +130,8 @@ Spectrum StochasticProgressivePhotonMapping::trace(
 
     if (object->glossy(intersect)) {
         Ray l;
-        Spectrum surfaceMul = object->sample(v, l);
-        color = color + trace(idx, l, medium, traceDepth, traceMul * mediumMul * surfaceMul) * surfaceMul;
+        Spectrum surfaceMul = object->sample(v, l, RNG);
+        color = color + trace(idx, l, medium, traceDepth, traceMul * mediumMul * surfaceMul, RNG) * surfaceMul;
 
         return color * mediumMul;
     }

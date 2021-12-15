@@ -27,7 +27,7 @@ public:
 
     bool intersect(const Ray &ray, double &t) const override;
     Vec3 normal(const Vec3 &inter) const override;
-    void sample(Vec3 &pos, double &pdf) const override;
+    void sample(Vec3 &pos, double &pdf, Sampler &RNG) const override;
 };
 
 #ifdef ARC_IMPLEMENTATION
@@ -88,11 +88,11 @@ bool Flat::intersect(const Ray &ray, double &t) const {
 Vec3 Flat::normal(const Vec3 &inter) const {
     return norm;
 }
-void Flat::sample(Vec3 &pos, double &pdf) const { // @TODO better locate method
+void Flat::sample(Vec3 &pos, double &pdf, Sampler &RNG) const { // @TODO better locate method
     double area = 0;
     for (int i = 2; i < n; ++i)
         area += ((vertices[i - 1] - vertices[0]) ^ (vertices[i] - vertices[0])).length() / 2;
-    double p = RD.rand();
+    double p = RNG.rand();
     int k = -1;
     for (int i = 2; i < n; ++i) {
         double w = ((vertices[i - 1] - vertices[0]) ^ (vertices[i] - vertices[0])).length() / 2;
@@ -101,7 +101,7 @@ void Flat::sample(Vec3 &pos, double &pdf) const { // @TODO better locate method
             break;
         } else p -= w / area;
     }
-    double a = RD.rand(), b = RD.rand();
+    double a = RNG.rand(), b = RNG.rand();
     if (a + b > 1) a = 1 - a, b = 1 - b;
     pos = (vertices[k - 1] - vertices[0]) * a + (vertices[k] - vertices[0]) * b + vertices[0];
     pdf = 1 / area;

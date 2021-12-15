@@ -8,13 +8,13 @@
 class Light {
 public:
     Spectrum evaluate(const Vec3 &n, const Vec3 &v) const;
-    Spectrum sample(const Vec3 &n, Vec3 &v) const;
+    Spectrum sample(const Vec3 &n, Vec3 &v, Sampler &RNG) const;
 
 private:
     virtual Spectrum evaluate(const Vec3 &vLocal) const {
         throw invalid_argument("NotImplementedError");
     }
-    virtual Spectrum sample(Vec3 &vLocal, double &pdf) const {
+    virtual Spectrum sample(Vec3 &vLocal, double &pdf, Sampler &RNG) const {
         throw invalid_argument("NotImplementedError");
     }
 };
@@ -28,12 +28,12 @@ Spectrum Light::evaluate(const Vec3 &n, const Vec3 &v) const {
     return evaluate(vT);
 }
 
-Spectrum Light::sample(const Vec3 &n, Vec3 &v) const {
+Spectrum Light::sample(const Vec3 &n, Vec3 &v, Sampler &RNG) const {
     Mat3 T, TInv;
     rotateAxis(n, n, T, TInv);
     Vec3 vT;
     double pdf;
-    Spectrum s = sample(vT, pdf);
+    Spectrum s = sample(vT, pdf, RNG);
     v = TInv * vT;
     return s / pdf;
 }

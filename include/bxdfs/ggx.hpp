@@ -12,12 +12,12 @@ public:
 
 private:
     Spectrum evaluate(const Vec3 &vLocal, const Vec3 &lLocal) const override;
-    Spectrum sample(const Vec3 &vLocal, Vec3 &lLocal, double &pdf) const override;
+    Spectrum sample(const Vec3 &vLocal, Vec3 &lLocal, double &pdf, Sampler &RNG) const override;
 
     Spectrum F(const Vec3 &V, const Vec3 &L, const Vec3 &N) const;
     double D(const Vec3 &N) const;
     double G(const Vec3 &V, const Vec3 &L, const Vec3 &N) const;
-    void sampleN(Vec3 &N, double &pdf) const;
+    void sampleN(Vec3 &N, double &pdf, Sampler &RNG) const;
 
     Spectrum F0;
     double rough;
@@ -46,10 +46,10 @@ double GGX::G(const Vec3 &V, const Vec3 &L, const Vec3 &N) const {
     return max(G_v, 0.) * max(G_l, 0.);
 }
 
-void GGX::sampleN(Vec3 &N, double &pdf) const {
+void GGX::sampleN(Vec3 &N, double &pdf, Sampler &RNG) const {
     double alpha = rough * rough;
     double alpha2 = alpha * alpha;
-    double p = RD.rand(), q = RD.rand(-pi, pi);
+    double p = RNG.rand(), q = RNG.rand(-pi, pi);
     double cos_n = sqrt((1 - p) / (p * (alpha2 - 1) + 1));
     double sin_n = sqrt(1 - cos_n * cos_n);
     N = Vec3(cos(q) * sin_n, sin(q) * sin_n, cos_n);
@@ -63,17 +63,17 @@ Spectrum GGX::evaluate(const Vec3 &vLocal, const Vec3 &lLocal) const {
         + F0 * (1 - G(vLocal, lLocal, n)) / pi;
 }
 
-Spectrum GGX::sample(const Vec3 &vLocal, Vec3 &lLocal, double &pdf) const {
+Spectrum GGX::sample(const Vec3 &vLocal, Vec3 &lLocal, double &pdf, Sampler &RNG) const {
     double prob = (3 - rough) / 3;
-    if (RD.rand() < prob) {
+    if (RNG.rand() < prob) {
         Vec3 n;
-        sampleN(n, pdf);
+        sampleN(n, pdf, RNG);
         lLocal = -vLocal + n * (vLocal * n) * 2;
         pdf = pdf / abs(4 * vLocal * n) * prob;
         if (vLocal.z() * lLocal.z() < 0) return Spectrum(0);
         return F(vLocal, lLocal, n) * D(n) * G(vLocal, lLocal, n) / (4 * vLocal.z() * lLocal.z());
     } else {
-        lLocal = RD.hemisphere();
+        lLocal = RNG.hemisphere();
         pdf = 1 / (2 * pi) * (1 - prob);
         Vec3 n = (vLocal + lLocal) / 2;
         return F0 * (1 - G(vLocal, lLocal, n)) / pi;

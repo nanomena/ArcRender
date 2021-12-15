@@ -17,7 +17,7 @@ public:
     Image(int width, int height, const shared_ptr<Camera> &camera);
 
     int epoch() const;
-    Ray sample(int idx) const;
+    Ray sample(int idx, Sampler &RNG) const;
     Spectrum get(int idx) const;
     void draw(int idx, Spectrum c, double w = 1);
     void save(const char *path, double white = 1, double gamma = 2.2) const;
@@ -34,9 +34,9 @@ Image::Image(int width, int height, const shared_ptr<Camera> &camera) : width(wi
 int Image::epoch() const {
     return length;
 }
-Ray Image::sample(int idx) const {
+Ray Image::sample(int idx, Sampler &RNG) const {
     int x = idx % width, y = idx / width;
-    Vec2 v = RD.pixel(Vec2(x, y), width, height);
+    Vec2 v = RNG.pixel(Vec2(x, y), width, height);
     return camera->apply(v);
 }
 void Image::draw(int idx, Spectrum c, double w) {

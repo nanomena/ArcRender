@@ -9,25 +9,28 @@
 #include "counter.hpp"
 #include "scene.hpp"
 
+#define MaxThreads 512
+
 class Tracer {
 public:
     Tracer(int width, int height, const shared_ptr<Scene> &scene, int routine = 1, int pass = 1);
 
     virtual void initGraph(int preCnt);
     virtual void buildGraph();
-    virtual void preSample(int idx);
-    virtual void sample(int idx);
+    virtual void preSample(int idx, Sampler &RNG);
+    virtual void sample(int idx, Sampler &RNG);
     void epoch(double mul);
 
     void savePNG(const char *path, double white = 1, double gamma = 2.2) const;
 
 protected:
-    Ray sampleCamera(int idx) const;
+    Ray sampleCamera(int idx, Sampler &RNG) const;
 
     int width, height, length;
     vector<Spectrum> C;
     vector<double> W;
 
+    vector<Sampler> RNGs;
     shared_ptr<Scene> scene;
 };
 
@@ -45,25 +48,30 @@ void Tracer::initGraph(int preCnt) {}
 
 void Tracer::buildGraph() {}
 
-void Tracer::preSample(int idx) {
+void Tracer::preSample(int idx, Sampler &RNG) {
     throw invalid_argument("NotImplementedError");
 }
-void Tracer::sample(int idx) {
+void Tracer::sample(int idx, Sampler &RNG) {
     throw invalid_argument("NotImplementedError");
 }
 void Tracer::epoch(double mul) {
     int preCnt = max(int(length * mul), 1);
+
+    if (RNGs.empty()) {
+        for (int i = 0; i < MaxThreads; ++ i) RNGs.emplace_back();
+    }
+
     initGraph(preCnt);
-//#pragma omp parallel for schedule(dynamic, 1)
-    for (int i = 0; i < preCnt; ++i) preSample(i);
+#pragma omp parallel for schedule(dynamic, 1)
+    for (int i = 0; i < preCnt; ++i) preSample(i, RNGs[i % MaxThreads]);
     buildGraph();
-//#pragma omp parallel for schedule(dynamic, 1)
-    for (int i = 0; i < length; ++i) sample(i);
+#pragma omp parallel for schedule(dynamic, 1)
+    for (int i = 0; i < length; ++i) sample(i, RNGs[i % MaxThreads]);
 }
 
-Ray Tracer::sampleCamera(int idx) const {
+Ray Tracer::sampleCamera(int idx, Sampler &RNG) const {
     int x = idx % width, y = idx / width;
-    Vec2 v = RD.pixel(Vec2(x, y), width, height);
+    Vec2 v = RNG.pixel(Vec2(x, y), width, height);
     return scene->camera->apply(v);
 }
 
