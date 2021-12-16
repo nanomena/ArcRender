@@ -38,5 +38,6 @@
 #include "lights/uniform.hpp"
 
 #include "mediums/transparent.hpp"
+#include "mediums/scatter.hpp"
 
 #endif /* arc_all_hpp */

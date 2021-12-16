@@ -106,7 +106,7 @@ Spectrum Shape::sampleBxDF(const Ray &v, Ray &l, shared_ptr<Medium> &medium, Sam
     l.o = v.o + v.d * t;
     Vec3 n = normal(l.o);
     Spectrum s = getBxDF(l.o)->sample(n, -v.d, l.d, RNG);
-    if (n * v.d < 0) assert(medium == outside); else assert(medium == inside);
+//    if (n * v.d < 0) assert(medium == outside); else assert(medium == inside);
     medium = getMedium(l);
     return s * abs(l.d * n);
 }
