@@ -43,6 +43,7 @@ Spectrum Transparent::sample(
 ) const {
     double t;
     scene->intersect(v, object, t);
+    intersect = v.o + v.d * t;
     return color ^ t;
 }
 

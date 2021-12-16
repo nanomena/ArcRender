@@ -130,14 +130,14 @@ Spectrum BidirectionalPathTracer::trace(
             const auto &p = photons[rev][idx % photons[rev].size()];
             color += medium->evaluate(
                 scene, v, object, intersect, p.object, p.intersect, [&](const Vec3 &view) {
-                    return p.object->evaluateBxDF(p.lB, {p.intersect, (view - p.intersect).norm()});
+                    return p.color * p.object->evaluateBxDF(p.lB, {p.intersect, (view - p.intersect).norm()});
                 }, RNG
             ) / (traceDepth + 1 + rev);
             shared_ptr<Medium> other = object->otherSide(medium);
             if (other == nullptr) continue;
             color += other->evaluate(
                 scene, v, object, intersect, p.object, p.intersect, [&](const Vec3 &view) {
-                    return p.object->evaluateBxDF(p.lB, {p.intersect, (view - p.intersect).norm()});
+                    return p.color * p.object->evaluateBxDF(p.lB, {p.intersect, (view - p.intersect).norm()});
                 }, RNG
             ) / (traceDepth + 1 + rev);
         }
