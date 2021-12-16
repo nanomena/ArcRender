@@ -30,7 +30,7 @@
 #include "shapes/triangle.hpp"
 
 #include "tracers/bdpt.hpp"
-#include "tracers/sppm.hpp"
+//#include "tracers/sppm.hpp"
 
 #include "cameras/perspective.hpp"
 #include "cameras/actinometer.hpp"

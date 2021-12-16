@@ -4,11 +4,12 @@
 #include "../camera.hpp"
 
 class PerspectiveCamera : public Camera {
-    Vec3 o, x, y, z;
-
 public:
     PerspectiveCamera(Vec3 o, Vec3 x, Vec3 y, double zLength);
-    Ray apply(const Vec2 &t) override;
+    Ray apply(const Vec2 &t) const override;
+
+private:
+    Vec3 o, x, y, z;
 };
 
 #ifdef ARC_IMPLEMENTATION
@@ -16,8 +17,8 @@ public:
 PerspectiveCamera::PerspectiveCamera(Vec3 o, Vec3 x, Vec3 y, double zLength) : o(o), x(x), y(y) {
     z = (x ^ y).norm(zLength);
 }
-Ray PerspectiveCamera::apply(const Vec2 &t) {
-    return Ray(o, (x * t.x() - y * t.y() - z).norm());
+Ray PerspectiveCamera::apply(const Vec2 &t) const {
+    return {o, (x * t.x() - y * t.y() - z).norm()};
 }
 
 #endif

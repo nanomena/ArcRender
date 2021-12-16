@@ -4,6 +4,30 @@
 #include "../shape.hpp"
 
 class Flat : public Shape {
+public:
+    explicit Flat(
+        const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light,
+        const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside,
+        const vector<Vec3> &vertices
+    );
+
+    template<typename... Args>
+    explicit Flat(
+        const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light,
+        const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside,
+        Args... vertices
+    ) : Shape(BxDF, Light, inside, outside) {
+        vector<Vec3> tmp;
+        n = 0;
+        (tmp.push_back(vertices), ...);
+        new(this)Flat(BxDF, Light, inside, outside, tmp);
+    }
+
+    bool intersect(const Ray &ray, double &t) const override;
+    Vec3 normal(const Vec3 &inter) const override;
+    void sample(Vec3 &pos, double &pdf, Sampler &RNG) const override;
+
+private:
     unsigned int n;
     vector<Vec3> vertices, tVert;
     Vec3 *tVertices;
@@ -11,34 +35,19 @@ class Flat : public Shape {
     Mat3 T;
 
     unsigned int onRight(const Vec3 &p1, const Vec3 &p2, const Vec3 &q) const;
-
-public:
-    explicit Flat(
-        const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light, const vector<Vec3> &vertices
-    );
-
-    template<typename... Args>
-    explicit Flat(const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light, Args... vertices) : Shape(BxDF, Light) {
-        vector<Vec3> tmp;
-        n = 0;
-        (tmp.push_back(vertices), ...);
-        new(this)Flat(BxDF, Light, tmp);
-    }
-
-    bool intersect(const Ray &ray, double &t) const override;
-    Vec3 normal(const Vec3 &inter) const override;
-    void sample(Vec3 &pos, double &pdf, Sampler &RNG) const override;
 };
 
 #ifdef ARC_IMPLEMENTATION
 
 Flat::Flat(
-    const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light, const vector<Vec3> &vertices
-) : Shape(BxDF, Light), vertices(vertices) {
+    const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light,
+    const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside,
+    const vector<Vec3> &vertices
+) : Shape(BxDF, Light, inside, outside), vertices(vertices) {
 //    cerr << "S" << endl;
     n = vertices.size();
 
-    for (auto v : vertices) cerr << v << endl;
+    for (auto v: vertices) cerr << v << endl;
     norm = ((vertices[1] - vertices[0]) ^ (vertices[2] - vertices[0])).norm();
     Mat3 TInv;
 //    cerr << (vertices[1] - vertices[0]).norm() << endl;

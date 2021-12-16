@@ -8,7 +8,9 @@ class Triangle : public Shape {
 
 public:
     Triangle(
-        const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light, Vec3 V0, Vec3 V1, Vec3 V2
+        const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light,
+        const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside,
+        Vec3 V0, Vec3 V1, Vec3 V2
     );
 
     bool intersect(const Ray &ray, double &t) const override;
@@ -18,8 +20,10 @@ public:
 #ifdef ARC_IMPLEMENTATION
 
 Triangle::Triangle(
-    const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light, Vec3 V0, Vec3 V1, Vec3 V2
-) : Shape(BxDF, Light), V0(V0), V1(V1), V2(V2) {
+    const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light,
+    const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside,
+    Vec3 V0, Vec3 V1, Vec3 V2
+) : Shape(BxDF, Light, inside, outside), V0(V0), V1(V1), V2(V2) {
     norm = ((V1 - V0) ^ (V2 - V0)).norm();
     box = Box3(V0) + Box3(V1) + Box3(V2);
 }

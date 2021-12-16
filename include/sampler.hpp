@@ -4,25 +4,6 @@
 #include "utils.hpp"
 #include "vecmath.hpp"
 
-template<int base>
-class HaltonSequence {
-    long long key;
-    double now;
-
-public:
-    HaltonSequence() {
-        key = 0;
-        now = 0;
-    }
-    double operator ()() {
-        double q = 1. / base;
-        key += 1;
-        for (long long i = key; i % base == 0; now -= (base - 1) * q, i /= base, q /= base);
-        now += q;
-        return now;
-    }
-};
-
 class Sampler {
 public:
     explicit Sampler();

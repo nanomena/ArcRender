@@ -7,14 +7,12 @@
 class Camera {
 
 public:
-    virtual Ray apply(const Vec2 &t);
+    virtual Ray apply(const Vec2 &t) const {
+        throw invalid_argument("NotImplementedError");
+    }
 };
 
 #ifdef ARC_IMPLEMENTATION
-
-Ray Camera::apply(const Vec2 &t) {
-    throw invalid_argument("NotImplementedError");
-}
 
 #endif
 #endif /* camera_hpp */

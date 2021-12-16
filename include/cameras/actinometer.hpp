@@ -4,17 +4,18 @@
 #include "../camera.hpp"
 
 class Actinometer : public Camera {
-    Vec3 o, d;
-
 public:
     Actinometer(Vec3 o, Vec3 t);
-    Ray apply(const Vec2 &t) override;
+    Ray apply(const Vec2 &t) const override;
+
+private:
+    Vec3 o, d;
 };
 
 #ifdef ARC_IMPLEMENTATION
 
 Actinometer::Actinometer(Vec3 o, Vec3 t) : o(o), d((t - o).norm()) {}
-Ray Actinometer::apply(const Vec2 &t) {
+Ray Actinometer::apply(const Vec2 &t) const {
     return {o, d};
 }
 

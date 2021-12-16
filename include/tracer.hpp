@@ -13,12 +13,12 @@
 
 class Tracer {
 public:
-    Tracer(int width, int height, const shared_ptr<Scene> &scene, int routine = 1, int pass = 1);
+    Tracer(int width, int height, const shared_ptr<Scene> &scene);
 
     virtual void initGraph(int preCnt);
     virtual void buildGraph();
-    virtual void preSample(int idx, Sampler &RNG);
-    virtual void sample(int idx, Sampler &RNG);
+    virtual void preSample(int idx, Sampler &RNG) = 0;
+    virtual void sample(int idx, Sampler &RNG) = 0;
     void epoch(double mul);
 
     void savePNG(const char *path, double white = 1, double gamma = 2.2) const;
@@ -37,7 +37,7 @@ protected:
 #ifdef ARC_IMPLEMENTATION
 
 Tracer::Tracer(
-    int width, int height, const shared_ptr<Scene> &scene, int routine, int pass
+    int width, int height, const shared_ptr<Scene> &scene
 ) : width(width), height(height), scene(scene) {
     length = width * height;
     C.resize(length);
@@ -48,12 +48,6 @@ void Tracer::initGraph(int preCnt) {}
 
 void Tracer::buildGraph() {}
 
-void Tracer::preSample(int idx, Sampler &RNG) {
-    throw invalid_argument("NotImplementedError");
-}
-void Tracer::sample(int idx, Sampler &RNG) {
-    throw invalid_argument("NotImplementedError");
-}
 void Tracer::epoch(double mul) {
     int preCnt = max(int(length * mul), 1);
 

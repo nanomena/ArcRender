@@ -1,12 +1,16 @@
 #ifndef medium_hpp
 #define medium_hpp
 
+#include "shape.hpp"
+
+class Shape;
+
 class Medium {
 public:
     virtual Spectrum evaluate(double t) const {
         throw invalid_argument("NotImplementedError");
     }
-    virtual shared_ptr<Shape> sample(double &t, Sampler &RNG) const {
+    virtual Spectrum sample(double &t, shared_ptr<Shape> &object, Sampler &RNG) const {
         throw invalid_argument("NotImplementedError");
     }
 

@@ -8,7 +8,7 @@ public:
     explicit Transparent(Spectrum color);
 
     Spectrum evaluate(double t) const override;
-    shared_ptr<Shape> sample(double &t, Sampler &RNG) const override;
+    Spectrum sample(double &t, shared_ptr<Shape> &object, Sampler &RNG) const override;
 
     Spectrum color;
 };
@@ -20,9 +20,8 @@ Transparent::Transparent(Spectrum color) : color(color) {}
 Spectrum Transparent::evaluate(double t) const {
     return color ^ t;
 }
-shared_ptr<Shape> Transparent::sample(double &t, Sampler &RNG) const {
-    t = INF;
-    return nullptr;
+Spectrum Transparent::sample(double &t, shared_ptr<Shape> &object, Sampler &RNG) const {
+    return color ^ t;
 }
 
 #endif

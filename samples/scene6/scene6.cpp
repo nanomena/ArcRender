@@ -1,3 +1,4 @@
+#define ARC_IMPLEMENTATION
 #include "arc.hpp"
 #include <bits/stdc++.h>
 using namespace std;
@@ -10,13 +11,16 @@ int main() {
     long long T0 = time(nullptr);
 
 
+    shared_ptr<Medium> medium = make_shared<Transparent>(Spectrum(1, 1, 1));
+
     shared_ptr<Shape> skybox = make_shared<Sphere>(
         make_shared<Lambert>(Spectrum(0)),
-        make_shared<UniformLight>(Spectrum(.53, .80, 0.92)), Vec3(0, 0, 0), INF / 10, true
+        make_shared<UniformLight>(Spectrum(.53, .80, 0.92)),
+        nullptr,medium,
+        Vec3(0, 0, 0), INF / 10, true
     );
     skybox->setIdentifier("skybox");
 
-    shared_ptr<Medium> medium = make_shared<Transparent>(Spectrum(1, 1, 1));
 
 #ifdef DEBUG_FLAG
     shared_ptr<Camera> camera = make_shared<Actinometer>(
@@ -35,9 +39,9 @@ int main() {
 
     scene->addObject(
         make_shared<Sphere>(
-            make_shared<GGX>(rgb256(250, 250, 250), 0.8),
-            nullptr,
-            Vec3(0, -6.9, -10), 3
+            make_shared<BiGGX>(1.05, 0.2), nullptr,
+            make_shared<Transparent>(Spectrum(0.9, 0.9, 1)), medium,
+            Vec3(0, -4.9, -10), 5
         ),
         "ball"
     );
@@ -46,6 +50,7 @@ int main() {
         make_shared<Flat>(
             make_shared<Lambert>(Spectrum(0)),
             make_shared<UniformLight>(Spectrum(5)),
+            medium, medium,
             Vec3(-6, 9.9, -4),
             Vec3(-6, 9.9, -16),
             Vec3(6, 9.9, -16),
@@ -55,8 +60,8 @@ int main() {
 
     scene->addObject(
         make_shared<Flat>(
-            make_shared<Lambert>(rgb256(250, 250, 250)),
-            nullptr,
+            make_shared<Lambert>(rgb256(250, 250, 250)), nullptr,
+            medium, medium,
             Vec3(-10, -10, -20),
             Vec3(-10, -10, 20),
             Vec3(10, -10, 20),
@@ -66,8 +71,8 @@ int main() {
 
     scene->addObject(
         make_shared<Flat>(
-            make_shared<Lambert>(rgb256(250, 250, 250)),
-            nullptr,
+            make_shared<Lambert>(rgb256(250, 250, 250)), nullptr,
+            medium, medium,
             Vec3(-10, 10, 20),
             Vec3(-10, 10, -20),
             Vec3(10, 10, -20),
@@ -77,8 +82,8 @@ int main() {
 
     scene->addObject(
         make_shared<Flat>(
-            make_shared<GGX>(rgb256(250, 170, 170), 0.8),
-            nullptr,
+            make_shared<GGX>(rgb256(250, 170, 170), 0.8), nullptr,
+            medium, medium,
             Vec3(10, -10, -20),
             Vec3(10, -10, 20),
             Vec3(10, 10, 20),
@@ -88,8 +93,8 @@ int main() {
 
     scene->addObject(
         make_shared<Flat>(
-            make_shared<GGX>(rgb256(170, 250, 170), 0.8),
-            nullptr,
+            make_shared<GGX>(rgb256(170, 250, 170), 0.8), nullptr,
+            medium, medium,
             Vec3(-10, -10, 20),
             Vec3(-10, -10, -20),
             Vec3(-10, 10, -20),
@@ -99,8 +104,8 @@ int main() {
 
     scene->addObject(
         make_shared<Flat>(
-            make_shared<GGX>(rgb256(235, 235, 170), 0.15),
-            nullptr,
+            make_shared<GGX>(rgb256(235, 235, 170), 0.15), nullptr,
+            medium, medium,
             Vec3(-10, 10, -20),
             Vec3(-10, -10, -20),
             Vec3(10, -10, -20),
@@ -110,8 +115,8 @@ int main() {
 
     scene->addObject(
         make_shared<Flat>(
-            make_shared<Lambert>(rgb256(250, 250, 250)),
-            nullptr,
+            make_shared<Lambert>(rgb256(250, 250, 250)), nullptr,
+            medium, medium,
             Vec3(-10, -10, 20),
             Vec3(-10, 10, 20),
             Vec3(10, 10, 20),
@@ -130,7 +135,7 @@ int main() {
     shared_ptr<Tracer> tracer = make_shared<BidirectionalPathTracer>(1, 1, scene);
 #else
 //    shared_ptr<Tracer> tracer = make_shared<StochasticProgressivePhotonMapping>(800, 600, scene);
-    shared_ptr<Tracer> tracer = make_shared<BidirectionalPathTracer>(1600, 1200, scene);
+    shared_ptr<Tracer> tracer = make_shared<BidirectionalPathTracer>(400, 300, scene);
 #endif
     char output[100];
     sprintf(output, "result.png");

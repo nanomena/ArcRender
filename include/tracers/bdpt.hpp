@@ -11,10 +11,10 @@ public:
     void sample(int idx, Sampler &RNG) override;
 
     void revTrace(
-        const int &idx, const Ray &lB, const shared_ptr<Medium> &medium, int traceDepth, Spectrum traceMul, Sampler &RNG
+        const int &idx, const Ray &lB, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, Sampler &RNG
     );
     Spectrum trace(
-        const int &idx, const Ray &v, const shared_ptr<Medium> &medium, int traceDepth, Spectrum traceMul, Sampler &RNG
+        const int &idx, const Ray &v, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, Sampler &RNG
     );
 
     BidirectionalPathTracer(
@@ -31,7 +31,7 @@ private:
 
 BidirectionalPathTracer::BidirectionalPathTracer(
     int width, int height, const shared_ptr<Scene> &scene, int traceLimit, double traceEPS
-) : Tracer(width, height, scene, traceLimit, traceLimit), traceLimit(traceLimit), traceEPS(traceEPS) {}
+) : Tracer(width, height, scene), traceLimit(traceLimit), traceEPS(traceEPS) {}
 
 void BidirectionalPathTracer::initGraph(int preCnt) {
     photons.clear();
@@ -40,8 +40,9 @@ void BidirectionalPathTracer::initGraph(int preCnt) {
 
 void BidirectionalPathTracer::preSample(int idx, Sampler &RNG) {
     Ray lB;
-    Spectrum traceMul = scene->lights[idx % scene->lights.size()]->sample(lB, RNG);
-    revTrace(idx, lB, scene->medium, 1, traceMul, RNG);
+    shared_ptr<Medium> medium;
+    Spectrum traceMul = scene->lights[idx % scene->lights.size()]->sampleLight(lB, medium, RNG);
+    revTrace(idx, lB, medium, 1, traceMul, RNG);
 }
 
 void BidirectionalPathTracer::sample(int idx, Sampler &RNG) {
@@ -56,7 +57,7 @@ void BidirectionalPathTracer::sample(int idx, Sampler &RNG) {
 }
 
 void BidirectionalPathTracer::revTrace(
-    const int &idx, const Ray &lB, const shared_ptr<Medium> &medium, int traceDepth, Spectrum traceMul, Sampler &RNG
+    const int &idx, const Ray &lB, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, Sampler &RNG
 ) {
     if (traceMul.norm() < traceEPS) return;
     if (traceDepth >= traceLimit) return;
@@ -65,19 +66,18 @@ void BidirectionalPathTracer::revTrace(
     double t;
     scene->intersect(lB, object, t);
 
-    double tM;
-    shared_ptr<Shape> objectM = medium->sample(tM, RNG);
-    if (tM < t) object = objectM, t = tM;
+    Spectrum mediumMul = medium->sample(t, object, RNG);
 
     Vec3 intersect = lB.o + t * lB.d;
-    Spectrum mediumMul = medium->evaluate(t);
 
     if (object->glossy(intersect)) {
         Ray vB;
-        Spectrum surfaceMul = object->sample(lB, vB, RNG);
+        Spectrum surfaceMul = object->sampleBxDF(lB, vB, medium, RNG);
         revTrace(idx, vB, medium, traceDepth, traceMul * mediumMul * surfaceMul, RNG);
         return;
     }
+
+    if (object == scene->skybox) return;
 
 #pragma omp critical
     {
@@ -85,12 +85,12 @@ void BidirectionalPathTracer::revTrace(
     };
 
     Ray vB;
-    Spectrum surfaceMul = object->sample(lB, vB, RNG);
+    Spectrum surfaceMul = object->sampleBxDF(lB, vB, medium, RNG);
     revTrace(idx, vB, medium, traceDepth + 1, traceMul * mediumMul * surfaceMul, RNG);
 }
 
 Spectrum BidirectionalPathTracer::trace(
-    const int &idx, const Ray &v, const shared_ptr<Medium> &medium, int traceDepth, Spectrum traceMul, Sampler &RNG
+    const int &idx, const Ray &v, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, Sampler &RNG
 ) {
     if (traceMul.norm() < traceEPS) return Spectrum(0);
     if (traceDepth >= traceLimit) return Spectrum(0);
@@ -99,30 +99,29 @@ Spectrum BidirectionalPathTracer::trace(
     double t;
     scene->intersect(v, object, t);
 
-    double tM;
-    shared_ptr<Shape> objectM = medium->sample(tM, RNG);
-    if (tM < t) object = objectM, t = tM;
+    Spectrum mediumMul = medium->sample(t, object, RNG);
 
     Vec3 intersect = v.o + t * v.d;
 
-    Spectrum mediumMul = medium->evaluate(t);
-    Spectrum color = object->evaluate(v) / traceDepth;
+    Spectrum color = object->evaluateLight(v) / traceDepth;
 
     if (object->glossy(intersect)) {
         Ray l;
-        Spectrum surfaceMul = object->sample(v, l, RNG);
+        Spectrum surfaceMul = object->sampleBxDF(v, l, medium, RNG);
         color = color + trace(idx, l, medium, traceDepth, traceMul * mediumMul * surfaceMul, RNG) * surfaceMul;
 
         return color * mediumMul;
     }
 
+    if (object == scene->skybox) return color * mediumMul;
+
     for (const auto &light: scene->lights) {
         Ray l;
         double dis;
 
-        Spectrum baseColor = light->sample(intersect, l, dis, RNG);
+        Spectrum baseColor = light->sampleLight(intersect, l, dis, RNG);
         if (scene->visible(l, light, dis)) {
-            color += baseColor * object->evaluate(v, l) / pow(dis, 2) * medium->evaluate(dis) / (traceDepth + 1);
+            color += baseColor * object->evaluateBxDF(v, l, dis) / (traceDepth + 1);
         }
     }
 
@@ -133,13 +132,13 @@ Spectrum BidirectionalPathTracer::trace(
             Ray l = Ray(intersect, (p.intersect - intersect).norm()),
                 vB = Ray(p.intersect, (intersect - p.intersect).norm());
             if (scene->visible(l, p.object, dis)) {
-                color += p.color * object->evaluate(v, l) * p.object->evaluate(p.lB, vB)
-                    / pow(dis, 2) * medium->evaluate(dis) / (traceDepth + 1 + rev);
+                color += p.color * object->evaluateBxDF(v, l, dis) * p.object->evaluateBxDF(p.lB, vB)
+                    / (traceDepth + 1 + rev);
             }
         }
 
     Ray l;
-    Spectrum surfaceMul = object->sample(v, l, RNG);
+    Spectrum surfaceMul = object->sampleBxDF(v, l, medium, RNG);
     color = color + trace(idx, l, medium, traceDepth + 1, traceMul * mediumMul * surfaceMul, RNG) * surfaceMul;
 
     return color * mediumMul;

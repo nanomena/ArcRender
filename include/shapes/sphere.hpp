@@ -4,23 +4,30 @@
 #include "../shape.hpp"
 
 class Sphere : public Shape {
-    Vec3 o;
-    double r;
-    bool reverse;
-
-
 public:
-    Sphere(const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light, Vec3 o, double r, bool reverse = false);
+    Sphere(
+        const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light,
+        const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside,
+        Vec3 o, double r, bool reverse = false
+    );
 
     bool intersect(const Ray &ray, double &t) const override;
     Vec3 normal(const Vec3 &inter) const override;
+
+private:
+
+    Vec3 o;
+    double r;
+    bool reverse;
 };
 
 #ifdef ARC_IMPLEMENTATION
 
 Sphere::Sphere(
-    const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light, Vec3 o, double r, bool reverse
-) : Shape(BxDF, Light), o(o), r(r), reverse(reverse) {
+    const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light,
+    const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside,
+    Vec3 o, double r, bool reverse
+) : Shape(BxDF, Light, inside, outside), o(o), r(r), reverse(reverse) {
     box = Box3(o - Vec3(r, r, r), o + Vec3(r, r, r));
 }
 
