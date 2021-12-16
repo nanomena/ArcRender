@@ -39,7 +39,7 @@ int main() {
 
     scene->addObject(
         make_shared<Sphere>(
-            make_shared<BiGGX>(1.05, 0.2), nullptr,
+            make_shared<BiGGX>(2.5, 0.2), nullptr,
             make_shared<Transparent>(Spectrum(0.9, 0.9, 1)), medium,
             Vec3(0, -4.9, -10), 5
         ),
@@ -82,7 +82,7 @@ int main() {
 
     scene->addObject(
         make_shared<Flat>(
-            make_shared<GGX>(rgb256(250, 170, 170), 0.8), nullptr,
+            make_shared<GGX>(rgb256(170, 250, 170), 0.8), nullptr,
             medium, medium,
             Vec3(10, -10, -20),
             Vec3(10, -10, 20),
@@ -93,7 +93,7 @@ int main() {
 
     scene->addObject(
         make_shared<Flat>(
-            make_shared<GGX>(rgb256(170, 250, 170), 0.8), nullptr,
+            make_shared<GGX>(rgb256(250, 170, 170), 0.8), nullptr,
             medium, medium,
             Vec3(-10, -10, 20),
             Vec3(-10, -10, -20),
@@ -104,7 +104,7 @@ int main() {
 
     scene->addObject(
         make_shared<Flat>(
-            make_shared<GGX>(rgb256(235, 235, 170), 0.15), nullptr,
+            make_shared<GGX>(rgb256(250, 250, 170), 0.8), nullptr,
             medium, medium,
             Vec3(-10, 10, -20),
             Vec3(-10, -10, -20),
