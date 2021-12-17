@@ -12,7 +12,7 @@
 #include "scene.hpp"
 #include "mapping.hpp"
 #include "image.hpp"
-#include "tree.hpp"
+//#include "tree.hpp"
 #include "sampler.hpp"
 //#include "surface.hpp"
 #include "vecmath.hpp"

@@ -30,7 +30,7 @@ Spectrum UniformLight::sample(Vec3 &vLocal, double &pdf, Sampler &RNG) const {
 }
 
 double UniformLight::evaluatePdf(const Vec3 &vLocal) const {
-    if (vLocal.z() < 0) return 1 / (2 * pi); else return 0;
+    if (vLocal.z() < 0) return 0; else return 1 / (2 * pi);
 }
 #endif
 #endif /* lights_uniform_hpp */

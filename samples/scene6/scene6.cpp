@@ -1,4 +1,4 @@
-// #define ARC_IMPLEMENTATION
+#define ARC_IMPLEMENTATION
 #include "arc.hpp"
 #include <bits/stdc++.h>
 using namespace std;
@@ -147,7 +147,7 @@ int main() {
     shared_ptr<Tracer> tracer = make_shared<BidirectionalPathTracer>(1, 1, scene);
 #else
 //    shared_ptr<Tracer> tracer = make_shared<StochasticProgressivePhotonMapping>(800, 600, scene);
-    shared_ptr<Tracer> tracer = make_shared<BidirectionalPathTracer>(2400, 1800, scene);
+    shared_ptr<Tracer> tracer = make_shared<BidirectionalPathTracer>(400, 300, scene);
 #endif
     char output[100];
     sprintf(output, "result.png");

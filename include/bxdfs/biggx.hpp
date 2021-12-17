@@ -92,7 +92,7 @@ Spectrum BiGGX::sample(const Vec3 &vLocal, Vec3 &lLocal, double &pdf, Sampler &R
     Vec3 n;
     sampleN(n, pdf, RNG);
     lLocal = -vLocal + n * (vLocal * n) * 2;
-    double prob = (0.1 + F(vLocal, lLocal, n).norm() / sqrt(3)) / 1.2;
+    double prob = (rough + F(vLocal, lLocal, n).norm() / sqrt(3)) / (1 + 2 * rough);
     if (RNG.rand() < prob) {
         lLocal = -vLocal + n * (vLocal * n) * 2;
         pdf = pdf / abs(4 * vLocal * n) * prob;
@@ -121,11 +121,11 @@ Spectrum BiGGX::sample(const Vec3 &vLocal, Vec3 &lLocal, double &pdf, Sampler &R
 double BiGGX::evaluatePdf(const Vec3 &vLocal, const Vec3 &lLocal) const {
     if (vLocal.z() * lLocal.z() > 0) {
         Vec3 n = (vLocal + lLocal).norm();
-        double prob = (0.1 + F(vLocal, lLocal, n).norm() / sqrt(3)) / 1.2;
+        double prob = (rough + F(vLocal, lLocal, n).norm() / sqrt(3)) / (1 + 2 * rough);
         return D(n) * prob;
     } else {
         Vec3 n = (lLocal + vLocal * (lLocal.z() > 0 ? ior : 1 / ior)).norm();
-        double prob = (0.1 + F(vLocal, lLocal, n).norm() / sqrt(3)) / 1.2;
+        double prob = (rough + F(vLocal, lLocal, n).norm() / sqrt(3)) / (1 + 2 * rough);
         return D(n) * (1 - prob);
     }
 }

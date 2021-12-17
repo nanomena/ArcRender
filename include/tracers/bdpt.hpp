@@ -4,6 +4,18 @@
 #include "../tracer.hpp"
 #include "../photon.hpp"
 
+struct BiPdf {
+    double last, sum2;
+};
+
+struct Photon {
+    Vec3 intersect;
+    Ray lB;
+    shared_ptr<Shape> object;
+    BiPdf pdf;
+    Spectrum color;
+};
+
 class BidirectionalPathTracer : public Tracer {
 public:
     void initGraph(int preCnt) override;
@@ -11,11 +23,11 @@ public:
     void sample(int idx, Sampler &RNG) override;
 
     void revTrace(
-        const int &idx, const Ray &lB, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, double lastPdf, double pdfSum2,
+        const int &idx, const Ray &lB, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, BiPdf pdf,
         Sampler &RNG
     );
     Spectrum trace(
-        const int &idx, const Ray &v, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, double lastPdf, double pdfSum2,
+        const int &idx, const Ray &v, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, BiPdf pdf,
         Sampler &RNG
     );
 
@@ -45,12 +57,12 @@ void BidirectionalPathTracer::preSample(int idx, Sampler &RNG) {
     shared_ptr<Medium> medium;
     shared_ptr<Shape> light = scene->lights[idx % scene->lights.size()];
     Spectrum traceMul = light->sampleLight(lB, medium, RNG);
-    revTrace(idx, lB, medium, 1, traceMul, light->evaluateLightPdf(lB), 0, RNG);
+    revTrace(idx, lB, medium, 1, traceMul, {light->evaluateLightPdf(lB), 0}, RNG);
 }
 
 void BidirectionalPathTracer::sample(int idx, Sampler &RNG) {
     Ray v = sampleCamera(idx, RNG);
-    Spectrum result = trace(idx, v, scene->medium, 1, Spectrum(1), INF, 0, RNG);
+    Spectrum result = trace(idx, v, scene->medium, 1, Spectrum(1), {INF, 0}, RNG);
 
 #pragma omp critical
     {
@@ -60,7 +72,7 @@ void BidirectionalPathTracer::sample(int idx, Sampler &RNG) {
 }
 
 void BidirectionalPathTracer::revTrace(
-    const int &idx, const Ray &lB, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, double lastPdf, double pdfSum2,
+    const int &idx, const Ray &lB, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, BiPdf pdf,
     Sampler &RNG
 ) {
     if (traceMul.norm() < traceEPS) return;
@@ -74,21 +86,26 @@ void BidirectionalPathTracer::revTrace(
 
 #pragma omp critical
     {
-        photons[traceDepth].push_back(Photon{intersect, lB, object, lastPdf, pdfSum2, traceMul * mediumMul});
+        photons[traceDepth].push_back(Photon{intersect, lB, object, pdf, traceMul * mediumMul});
     };
 
     Ray vB;
     Spectrum surfaceMul = object->sampleBxDF(lB, vB, medium, RNG);
 
-    double pdfSum2b = (pdfSum2 * pow(object->evaluateBxDFPdf({vB.o + vB.d, -vB.d}, {vB.o, -lB.d}), 2)
-        + (vB.o - lB.o).squaredLength()) / pow(lastPdf, 2);
+    double pdfSum2 = (pdf.sum2 * pow(object->evaluateBxDFPdf({vB.o + vB.d, -vB.d}, {vB.o, -lB.d}), 2)
+        + (vB.o - lB.o).squaredLength()) / pow(pdf.last, 2);
+
+//    cerr << " G G " << endl;
+//    cerr << (pdf.sum2 * pow(object->evaluateBxDFPdf({vB.o + vB.d, -vB.d}, {vB.o, -lB.d}), 2)
+//        + (vB.o - lB.o).squaredLength()) << " " << pow(pdf.last, 2) << endl;
+//    cerr << object->evaluateBxDFPdf(lB, vB) << " " << pdfSum2 << endl;
 
     revTrace(idx, vB, medium, traceDepth + 1, traceMul * mediumMul * surfaceMul,
-        object->evaluateBxDFPdf(lB, vB), pdfSum2b, RNG);
+        {object->evaluateBxDFPdf(lB, vB), pdfSum2}, RNG);
 }
 
 Spectrum BidirectionalPathTracer::trace(
-    const int &idx, const Ray &v, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, double lastPdf, double pdfSum2, Sampler &RNG
+    const int &idx, const Ray &v, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, BiPdf pdf, Sampler &RNG
 ) {
     if (traceMul.norm() < traceEPS) return Spectrum(0);
     if (traceDepth >= traceLimit) return Spectrum(0);
@@ -104,19 +121,22 @@ Spectrum BidirectionalPathTracer::trace(
 
     for (const auto &light: scene->lights) {
         Vec3 pos;
-        double pdf;
-        light->sample(pos, pdf, RNG);
+        double posPdf;
+        light->sample(pos, posPdf, RNG);
         double t = (pos - intersect).length();
         Ray l = {intersect, (pos - intersect).norm()},
             vB = {pos, (intersect - pos).norm()};
         shared_ptr<Medium> curMedium = scene->visible(l, light, t);
 
-        double pdfSum2n = (pdfSum2 * pow(object->evaluateBxDFPdf({l.o + l.d, -l.d}, {l.o, -v.d}), 2)
-            + (l.o - v.o).squaredLength()) / pow(t, 2) * pow(light->evaluateLightPdf(vB), 2) / pow(lastPdf, 2);
+        double pdfSum2 = (pdf.sum2 * pow(object->evaluateBxDFPdf({l.o + l.d, -l.d}, {l.o, -v.d}), 2)
+            + (l.o - v.o).squaredLength()) / pow(t, 2) * pow(light->evaluateLightPdf(vB), 2) / pow(pdf.last, 2);
+
+//        cerr << pdfSum2 << endl;
         if (curMedium != nullptr) {
             color += curMedium->evaluate(t) * object->evaluateBxDF(v, l)
-                * light->evaluateLightBack(vB) / pdf / pow(t, 2)
-                / traceDepth;
+                * light->evaluateLightBack(vB) / posPdf / pow(t, 2)
+                / (pdfSum2 + 1);
+//                / traceDepth;
         }
     }
 
@@ -129,25 +149,27 @@ Spectrum BidirectionalPathTracer::trace(
                 vB = {p.intersect, (intersect - p.intersect).norm()};
             shared_ptr<Medium> curMedium = scene->visible(l, p.object, t);
 
-            double pdfSum2n = (pdfSum2 * pow(object->evaluateBxDFPdf({l.o + l.d, -l.d}, {l.o, -v.d}), 2)
-                + (l.o - v.o).squaredLength()) * pow(p.object->evaluateBxDFPdf(p.lB, vB), 2) / pow(t, 2)  / pow(lastPdf, 2);
-            double pdfSum2b = (p.pdfSum2 * pow(p.object->evaluateBxDFPdf({vB.o + vB.d, -vB.d}, {vB.o, -p.lB.d}), 2)
-                + (vB.o - p.lB.d).squaredLength()) * pow(object->evaluateBxDFPdf(v, l), 2) / pow(t, 2) / pow(p.lastPdf, 2);
+            double pdfSum2f = (pdf.sum2 * pow(object->evaluateBxDFPdf({l.o + l.d, -l.d}, {l.o, -v.d}), 2)
+                + (l.o - v.o).squaredLength()) * pow(p.object->evaluateBxDFPdf(p.lB, vB), 2) / pow(t, 2)  / pow(pdf.last, 2);
+            double pdfSum2b = (p.pdf.sum2 * pow(p.object->evaluateBxDFPdf({vB.o + vB.d, -vB.d}, {vB.o, -p.lB.d}), 2)
+                + (vB.o - p.lB.d).squaredLength()) * pow(object->evaluateBxDFPdf(v, l), 2) / pow(t, 2) / pow(p.pdf.last, 2);
+
             if (curMedium != nullptr) {
                 color += curMedium->evaluate(t) * object->evaluateBxDF(v, l) * p.color
                     * p.object->evaluateBxDF(p.lB, vB) / pow(t, 2)
-                    / (traceDepth + rev);
+                    / (pdfSum2f + 1 + pdfSum2b);
+//                    / (traceDepth + rev);
             }
         }
 
     Ray l;
     Spectrum surfaceMul = object->sampleBxDF(v, l, medium, RNG);
 
-    double pdfSum2n = (pdfSum2 * pow(object->evaluateBxDFPdf({l.o + l.d, -l.d}, {l.o, -v.d}), 2)
-        + (l.o - v.o).squaredLength()) / pow(lastPdf, 2);
+    double pdfSum2 = (pdf.sum2 * pow(object->evaluateBxDFPdf({l.o + l.d, -l.d}, {l.o, -v.d}), 2)
+        + (l.o - v.o).squaredLength()) / pow(pdf.last, 2);
 
     color += trace(idx, l, medium, traceDepth + 1, traceMul * mediumMul * surfaceMul,
-        object->evaluateBxDFPdf(v, l), pdfSum2n, RNG) * surfaceMul;
+        {object->evaluateBxDFPdf(v, l), pdfSum2}, RNG) * surfaceMul;
 
     return color * mediumMul;
 }
