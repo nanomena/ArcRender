@@ -22,7 +22,7 @@ include_directories(deps/)
 
 add_library(arc STATIC include/arc.cpp)
 
-#find_package(OpenMP)
-#target_link_libraries(arc PUBLIC OpenMP::OpenMP_CXX)
+find_package(OpenMP)
+target_link_libraries(arc PUBLIC OpenMP::OpenMP_CXX)
 
 add_subdirectory(samples)

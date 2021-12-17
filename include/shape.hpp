@@ -149,8 +149,9 @@ Spectrum Shape::sampleLight(Ray &lB, shared_ptr<Medium> &medium, Sampler &RNG) c
 }
 
 double Shape::evaluateLightPdf(const Ray &lB) const {
+    if (!isLight()) return 0;
     Vec3 n = normal(lB.o);
-    return getLight(lB.o)->evaluatePdf(n, lB.d) * evaluatePdf(lB.o);
+    return getLight(lB.o)->evaluatePdf(n, lB.d);
 }
 
 void Shape::setIdentifier(const string &Name) {

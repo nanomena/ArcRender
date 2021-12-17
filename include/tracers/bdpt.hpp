@@ -57,7 +57,7 @@ void BidirectionalPathTracer::preSample(int idx, Sampler &RNG) {
     shared_ptr<Medium> medium;
     shared_ptr<Shape> light = scene->lights[idx % scene->lights.size()];
     Spectrum traceMul = light->sampleLight(lB, medium, RNG);
-    revTrace(idx, lB, medium, 1, traceMul, {light->evaluateLightPdf(lB), 0}, RNG);
+    revTrace(idx, lB, medium, 1, traceMul, {light->evaluateLightPdf(lB) * light->evaluatePdf(lB.o), 1 / light->evaluatePdf(lB.o)}, RNG);
 }
 
 void BidirectionalPathTracer::sample(int idx, Sampler &RNG) {
@@ -115,6 +115,12 @@ Spectrum BidirectionalPathTracer::trace(
     Spectrum mediumMul = medium->sample(scene, v, object, intersect, RNG);
 
     Spectrum color{0};
+    if (object->isLight())
+    {
+        double pdfSum2f = (pdf.sum2 * pow(object->evaluateLightPdf({intersect, -v.d}), 2) + (intersect - v.o).squaredLength())
+            * pow(object->evaluatePdf(intersect), 2) / pow(pdf.last, 2);
+        color = object->evaluateLight(v) / (pdfSum2f + 1);
+    }
     if (traceDepth == 1) color = object->evaluateLight(v);
 
     if (object == scene->skybox) return color * mediumMul;
@@ -128,15 +134,17 @@ Spectrum BidirectionalPathTracer::trace(
             vB = {pos, (intersect - pos).norm()};
         shared_ptr<Medium> curMedium = scene->visible(l, light, t);
 
-        double pdfSum2 = (pdf.sum2 * pow(object->evaluateBxDFPdf({l.o + l.d, -l.d}, {l.o, -v.d}), 2)
-            + (l.o - v.o).squaredLength()) / pow(t, 2) * pow(light->evaluateLightPdf(vB), 2) / pow(pdf.last, 2);
-
-//        cerr << pdfSum2 << endl;
         if (curMedium != nullptr) {
+            double pdfSum2f = (pdf.sum2 * pow(object->evaluateBxDFPdf({l.o + l.d, -l.d}, {l.o, -v.d}), 2)
+                + (l.o - v.o).squaredLength()) / pow(t, 2) * pow(light->evaluateLightPdf(vB), 2)
+                * pow(light->evaluatePdf(vB.o), 2) / pow(pdf.last, 2);
+            double pdfSub2b = pow(object->evaluateBxDFPdf(v, l), 2) / pow(t, 2) / pow(light->evaluatePdf(pos), 2);
+
+            // cerr << pdfSum2 << endl;
             color += curMedium->evaluate(t) * object->evaluateBxDF(v, l)
                 * light->evaluateLightBack(vB) / posPdf / pow(t, 2)
-                / (pdfSum2 + 1);
-//                / traceDepth;
+                / (pdfSum2f + 1 + pdfSub2b);
+            // / traceDepth;
         }
     }
 
@@ -154,11 +162,12 @@ Spectrum BidirectionalPathTracer::trace(
             double pdfSum2b = (p.pdf.sum2 * pow(p.object->evaluateBxDFPdf({vB.o + vB.d, -vB.d}, {vB.o, -p.lB.d}), 2)
                 + (vB.o - p.lB.d).squaredLength()) * pow(object->evaluateBxDFPdf(v, l), 2) / pow(t, 2) / pow(p.pdf.last, 2);
 
+            // cerr << pdfSum2f << " " << pdfSum2b << endl;
             if (curMedium != nullptr) {
                 color += curMedium->evaluate(t) * object->evaluateBxDF(v, l) * p.color
                     * p.object->evaluateBxDF(p.lB, vB) / pow(t, 2)
                     / (pdfSum2f + 1 + pdfSum2b);
-//                    / (traceDepth + rev);
+                // / (traceDepth + rev);
             }
         }
 
