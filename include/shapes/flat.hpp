@@ -26,6 +26,7 @@ public:
     bool intersect(const Ray &ray, double &t) const override;
     Vec3 normal(const Vec3 &inter) const override;
     void sample(Vec3 &pos, double &pdf, Sampler &RNG) const override;
+    double evaluatePdf(const Vec3 &pos) const override;
 
 private:
     unsigned int n;
@@ -115,6 +116,11 @@ void Flat::sample(Vec3 &pos, double &pdf, Sampler &RNG) const { // @TODO better 
     pos = (vertices[k - 1] - vertices[0]) * a + (vertices[k] - vertices[0]) * b + vertices[0];
     pdf = 1 / area;
 }
-
+double Flat::evaluatePdf(const Vec3 &pos) const {
+    double area = 0;
+    for (int i = 2; i < n; ++i)
+        area += ((vertices[i - 1] - vertices[0]) ^ (vertices[i] - vertices[0])).length() / 2;
+    return 1 / area;
+}
 #endif
 #endif /* shapes_flat_hpp */

@@ -25,15 +25,21 @@ public:
     virtual void sample(Vec3 &pos, double &pdf, Sampler &RNG) const {
         throw invalid_argument("NotImplementedError");
     }
+    virtual double evaluatePdf(const Vec3 &pos) const {
+        throw invalid_argument("NotImplementedError");
+    }
     shared_ptr<Medium> getMedium(const Ray &test) const;
     shared_ptr<Medium> otherSide(const shared_ptr<Medium> &test) const;
 
     Spectrum evaluateBxDF(const Ray &v, const Ray &l) const;
     Spectrum sampleBxDF(const Ray &v, Ray &l, shared_ptr<Medium> &medium, Sampler &RNG) const;
+    double evaluateBxDFPdf(const Ray &v, const Ray &l) const;
 
     Spectrum evaluateLight(const Ray &v) const;
     Spectrum evaluateLightBack(const Ray &vB) const;
-    Spectrum sampleLight(Ray &vB, shared_ptr<Medium> &medium, Sampler &RNG) const;
+    Spectrum sampleLight(Ray &lB, shared_ptr<Medium> &medium, Sampler &RNG) const;
+    double evaluateLightPdf(const Ray &lB) const;
+
     bool glossy(const Vec3 &pos) const;
 
     virtual Box3 outline() const;
@@ -98,6 +104,11 @@ Spectrum Shape::evaluateBxDF(const Ray &v, const Ray &l) const {
     return getBxDF(l.o)->evaluate(n, -v.d, l.d) * abs(l.d * n);
 }
 
+double Shape::evaluateBxDFPdf(const Ray &v, const Ray &l) const {
+    Vec3 n = normal(l.o);
+    return getBxDF(l.o)->evaluatePdf(n, -v.d, l.d);
+}
+
 Spectrum Shape::sampleBxDF(const Ray &v, Ray &l, shared_ptr<Medium> &medium, Sampler &RNG) const {
     assert(abs(1 - v.d.length()) < EPS);
     double t;
@@ -127,14 +138,19 @@ Spectrum Shape::evaluateLightBack(const Ray &vB) const {
     return getLight(vB.o)->evaluate(n, vB.d) * abs(vB.d * n);
 }
 
-Spectrum Shape::sampleLight(Ray &vB, shared_ptr<Medium> &medium, Sampler &RNG) const {
+Spectrum Shape::sampleLight(Ray &lB, shared_ptr<Medium> &medium, Sampler &RNG) const {
     if (!isLight()) return Spectrum(0);
     double pdf;
-    sample(vB.o, pdf, RNG);
-    Vec3 n = normal(vB.o);
-    Spectrum s = getLight(vB.o)->sample(n, vB.d, RNG) / pdf;
-    medium = getMedium(vB);
-    return s * abs(vB.d * n);
+    sample(lB.o, pdf, RNG);
+    Vec3 n = normal(lB.o);
+    Spectrum s = getLight(lB.o)->sample(n, lB.d, RNG) / pdf;
+    medium = getMedium(lB);
+    return s * abs(lB.d * n);
+}
+
+double Shape::evaluateLightPdf(const Ray &lB) const {
+    Vec3 n = normal(lB.o);
+    return getLight(lB.o)->evaluatePdf(n, lB.d) * evaluatePdf(lB.o);
 }
 
 void Shape::setIdentifier(const string &Name) {

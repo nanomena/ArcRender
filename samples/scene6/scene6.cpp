@@ -37,15 +37,15 @@ int main() {
 #endif
     shared_ptr<Scene> scene = make_shared<Scene>(camera, skybox, medium);
 
-    scene->addObject(
-        make_shared<Sphere>(
-            make_shared<BiGGX>(1.05, 0.2), nullptr,
-            make_shared<Scatter>(1, Spectrum(0.8, 1, 0.8), 8),
-            medium,
-            Vec3(-5, -6.9, -30), 3
-        ),
-        "ball1"
-    );
+//    scene->addObject(
+//        make_shared<Sphere>(
+//            make_shared<BiGGX>(1.05, 0.2), nullptr,
+//            make_shared<Scatter>(1, Spectrum(0.8, 1, 0.8), 8),
+//            medium,
+//            Vec3(-5, -6.9, -30), 3
+//        ),
+//        "ball1"
+//    );
 
     scene->addObject(
         make_shared<Sphere>(

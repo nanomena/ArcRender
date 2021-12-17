@@ -13,6 +13,7 @@ public:
 private:
     Spectrum evaluate(const Vec3 &vLocal, const Vec3 &lLocal) const override;
     Spectrum sample(const Vec3 &vLocal, Vec3 &lLocal, double &pdf, Sampler &RNG) const override;
+    double evaluatePdf(const Vec3 &vLocal, const Vec3 &lLocal) const override;
 
     Spectrum F(const Vec3 &V, const Vec3 &L, const Vec3 &N) const;
     double D(const Vec3 &N) const;
@@ -114,6 +115,18 @@ Spectrum BiGGX::sample(const Vec3 &vLocal, Vec3 &lLocal, double &pdf, Sampler &R
         pdf = pdf * abs(lLocal * n) / (lLocal + vLocal * (vLocal.z() < 0 ? ior : 1 / ior)).squaredLength() * (1 - prob);
         if (lLocal.z() * vLocal.z() > 0) return Spectrum(0);
         else return evaluate(vLocal, lLocal);
+    }
+}
+
+double BiGGX::evaluatePdf(const Vec3 &vLocal, const Vec3 &lLocal) const {
+    if (vLocal.z() * lLocal.z() > 0) {
+        Vec3 n = (vLocal + lLocal).norm();
+        double prob = (0.1 + F(vLocal, lLocal, n).norm() / sqrt(3)) / 1.2;
+        return D(n) * prob;
+    } else {
+        Vec3 n = (lLocal + vLocal * (lLocal.z() > 0 ? ior : 1 / ior)).norm();
+        double prob = (0.1 + F(vLocal, lLocal, n).norm() / sqrt(3)) / 1.2;
+        return D(n) * (1 - prob);
     }
 }
 

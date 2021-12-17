@@ -17,6 +17,7 @@ public:
     void addObjects(const vector<shared_ptr<Shape>> &object, const string &name = "");
 
     void intersect(const Ray &ray, shared_ptr<Shape> &object, double &t) const;
+    shared_ptr<Medium> visible(const Ray &test, const shared_ptr<Shape> &object, double dis) const;
 
     Box3 box() const;
 private:
@@ -60,6 +61,15 @@ Box3 Scene::box() const {
         b = b + graph->box();
     return b;
 }
+
+shared_ptr<Medium> Scene::visible(const Ray &ray, const shared_ptr<Shape> &object, double t) const {
+    double tTrue;
+    shared_ptr<Shape> objectTrue;
+    intersect(ray, objectTrue, tTrue);
+    if ((objectTrue != object) || abs(tTrue - t) > EPS) return nullptr;
+    return object->getMedium({ray.o + ray.d * t, -ray.d});
+}
+
 
 #endif
 #endif /* scene_hpp */
