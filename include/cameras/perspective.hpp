@@ -9,7 +9,7 @@ public:
 
     Ray evaluate(const Vec3 &pos, Vec2 &t) const override;
     Ray sample(const Vec2 &t, double &pdf, Sampler &RNG) const override;
-    double evaluatePdf(const Vec3 &pos) const override;
+    double evaluateImportance(const Vec3 &pos) const override;
 
 private:
     Vec3 o, x, y, z;
@@ -32,7 +32,7 @@ Ray PerspectiveCamera::sample(const Vec2 &t, double &pdf, Sampler &RNG) const {
     pdf = 1.;
     return {o, (x * t.x() - y * t.y() - z).norm()};
 }
-double PerspectiveCamera::evaluatePdf(const Vec3 &pos) const {
+double PerspectiveCamera::evaluateImportance(const Vec3 &pos) const {
     return 1.;
 }
 

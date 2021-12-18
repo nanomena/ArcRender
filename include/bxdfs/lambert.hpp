@@ -13,7 +13,7 @@ public:
 private:
     Spectrum evaluate(const Vec3 &vLocal, const Vec3 &lLocal) const override;
     Spectrum sample(const Vec3 &vLocal, Vec3 &lLocal, double &pdf, Sampler &RNG) const override;
-    double evaluatePdf(const Vec3 &vLocal, const Vec3 &lLocal) const override;
+    double evaluateImportance(const Vec3 &vLocal, const Vec3 &lLocal) const override;
 
     Spectrum color;
 };
@@ -33,7 +33,7 @@ Spectrum Lambert::sample(const Vec3 &vLocal, Vec3 &lLocal, double &pdf, Sampler 
     return color / pi;
 }
 
-double Lambert::evaluatePdf(const Vec3 &vLocal, const Vec3 &lLocal) const {
+double Lambert::evaluateImportance(const Vec3 &vLocal, const Vec3 &lLocal) const {
     if (vLocal.z() * lLocal.z() > 0) {
         return 1 / (2 * pi);
     } else {

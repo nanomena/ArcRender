@@ -22,10 +22,10 @@ public:
     virtual Vec3 normal(const Vec3 &inter) const {
         throw invalid_argument("NotImplementedError");
     } // norm should be unitary
-    virtual void sample(Vec3 &pos, double &pdf, Sampler &RNG) const {
+    virtual void sampleSurface(Vec3 &pos, double &pdf, Sampler &RNG) const {
         throw invalid_argument("NotImplementedError");
     }
-    virtual double evaluatePdf(const Vec3 &pos) const {
+    virtual double evaluateSurfaceImportance(const Vec3 &pos) const {
         throw invalid_argument("NotImplementedError");
     }
     shared_ptr<Medium> getMedium(const Ray &test) const;
@@ -33,12 +33,12 @@ public:
 
     Spectrum evaluateBxDF(const Ray &v, const Ray &l) const;
     Spectrum sampleBxDF(const Ray &v, Ray &l, shared_ptr<Medium> &medium, Sampler &RNG) const;
-    double evaluateBxDFPdf(const Ray &v, const Ray &l) const;
+    double evaluateBxDFImportance(const Ray &v, const Ray &l) const;
 
     Spectrum evaluateLight(const Ray &v) const;
     Spectrum evaluateLightBack(const Ray &vB) const;
     Spectrum sampleLight(Ray &lB, shared_ptr<Medium> &medium, Sampler &RNG) const;
-    double evaluateLightPdf(const Ray &lB) const;
+    double evaluateLightImportance(const Ray &lB) const;
 
     bool glossy(const Vec3 &pos) const;
 
@@ -104,9 +104,9 @@ Spectrum Shape::evaluateBxDF(const Ray &v, const Ray &l) const {
     return getBxDF(l.o)->evaluate(n, -v.d, l.d) * abs(l.d * n);
 }
 
-double Shape::evaluateBxDFPdf(const Ray &v, const Ray &l) const {
+double Shape::evaluateBxDFImportance(const Ray &v, const Ray &l) const {
     Vec3 n = normal(l.o);
-    return getBxDF(l.o)->evaluatePdf(n, -v.d, l.d);
+    return getBxDF(l.o)->evaluateImportance(n, -v.d, l.d);
 }
 
 Spectrum Shape::sampleBxDF(const Ray &v, Ray &l, shared_ptr<Medium> &medium, Sampler &RNG) const {
@@ -141,17 +141,17 @@ Spectrum Shape::evaluateLightBack(const Ray &vB) const {
 Spectrum Shape::sampleLight(Ray &lB, shared_ptr<Medium> &medium, Sampler &RNG) const {
     if (!isLight()) return Spectrum(0);
     double pdf;
-    sample(lB.o, pdf, RNG);
+    sampleSurface(lB.o, pdf, RNG);
     Vec3 n = normal(lB.o);
     Spectrum s = getLight(lB.o)->sample(n, lB.d, RNG) / pdf;
     medium = getMedium(lB);
     return s * abs(lB.d * n);
 }
 
-double Shape::evaluateLightPdf(const Ray &lB) const {
+double Shape::evaluateLightImportance(const Ray &lB) const {
     if (!isLight()) return 0;
     Vec3 n = normal(lB.o);
-    return getLight(lB.o)->evaluatePdf(n, lB.d);
+    return getLight(lB.o)->evaluateImportance(n, lB.d);
 }
 
 void Shape::setIdentifier(const string &Name) {

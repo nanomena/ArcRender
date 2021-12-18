@@ -13,7 +13,7 @@ public:
 private:
     Spectrum evaluate(const Vec3 &vLocal, const Vec3 &lLocal) const override;
     Spectrum sample(const Vec3 &vLocal, Vec3 &lLocal, double &pdf, Sampler &RNG) const override;
-    double evaluatePdf(const Vec3 &vLocal, const Vec3 &lLocal) const override;
+    double evaluateImportance(const Vec3 &vLocal, const Vec3 &lLocal) const override;
 
     Spectrum F(const Vec3 &V, const Vec3 &L, const Vec3 &N) const;
     double D(const Vec3 &N) const;
@@ -118,7 +118,7 @@ Spectrum BiGGX::sample(const Vec3 &vLocal, Vec3 &lLocal, double &pdf, Sampler &R
     }
 }
 
-double BiGGX::evaluatePdf(const Vec3 &vLocal, const Vec3 &lLocal) const {
+double BiGGX::evaluateImportance(const Vec3 &vLocal, const Vec3 &lLocal) const {
     if (vLocal.z() * lLocal.z() > 0) {
         Vec3 n = (vLocal + lLocal).norm();
         double prob = (rough + F(vLocal, lLocal, n).norm() / sqrt(3)) / (1 + 2 * rough);

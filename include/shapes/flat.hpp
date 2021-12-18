@@ -25,8 +25,8 @@ public:
 
     bool intersect(const Ray &ray, double &t) const override;
     Vec3 normal(const Vec3 &inter) const override;
-    void sample(Vec3 &pos, double &pdf, Sampler &RNG) const override;
-    double evaluatePdf(const Vec3 &pos) const override;
+    void sampleSurface(Vec3 &pos, double &pdf, Sampler &RNG) const override;
+    double evaluateSurfaceImportance(const Vec3 &pos) const override;
 
 private:
     unsigned int n;
@@ -98,7 +98,7 @@ bool Flat::intersect(const Ray &ray, double &t) const {
 Vec3 Flat::normal(const Vec3 &inter) const {
     return norm;
 }
-void Flat::sample(Vec3 &pos, double &pdf, Sampler &RNG) const { // @TODO better locate method
+void Flat::sampleSurface(Vec3 &pos, double &pdf, Sampler &RNG) const { // @TODO better locate method
     double area = 0;
     for (int i = 2; i < n; ++i)
         area += ((vertices[i - 1] - vertices[0]) ^ (vertices[i] - vertices[0])).length() / 2;
@@ -116,7 +116,7 @@ void Flat::sample(Vec3 &pos, double &pdf, Sampler &RNG) const { // @TODO better 
     pos = (vertices[k - 1] - vertices[0]) * a + (vertices[k] - vertices[0]) * b + vertices[0];
     pdf = 1 / area;
 }
-double Flat::evaluatePdf(const Vec3 &pos) const {
+double Flat::evaluateSurfaceImportance(const Vec3 &pos) const {
     double area = 0;
     for (int i = 2; i < n; ++i)
         area += ((vertices[i - 1] - vertices[0]) ^ (vertices[i] - vertices[0])).length() / 2;

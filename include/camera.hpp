@@ -12,7 +12,7 @@ public:
     virtual Ray sample(const Vec2 &t, double &pdf, Sampler &RNG) const {
         throw invalid_argument("NotImplementedError");
     }
-    virtual double evaluatePdf(const Vec3 &pos) const {
+    virtual double evaluateImportance(const Vec3 &pos) const {
         throw invalid_argument("NotImplementedError");
     }
 };

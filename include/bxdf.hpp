@@ -9,7 +9,7 @@ class BxDF {
 public:
     Spectrum evaluate(const Vec3 &n, const Vec3 &v, const Vec3 &l) const;
     Spectrum sample(const Vec3 &n, const Vec3 &v, Vec3 &l, Sampler &RNG) const;
-    double evaluatePdf(const Vec3 &n, const Vec3 &v, const Vec3 &l) const;
+    double evaluateImportance(const Vec3 &n, const Vec3 &v, const Vec3 &l) const;
     virtual bool glossy() const {
         throw invalid_argument("NotImplementedError");
     }
@@ -21,7 +21,7 @@ private:
     virtual Spectrum sample(const Vec3 &vLocal, Vec3 &lLocal, double &pdf, Sampler &RNG) const {
         throw invalid_argument("NotImplementedError");
     }
-    virtual double evaluatePdf(const Vec3 &vLocal, const Vec3 &lLocal) const {
+    virtual double evaluateImportance(const Vec3 &vLocal, const Vec3 &lLocal) const {
         throw invalid_argument("NotImplementedError");
     }
 };
@@ -45,11 +45,11 @@ Spectrum BxDF::sample(const Vec3 &n, const Vec3 &v, Vec3 &l, Sampler &RNG) const
     return s / pdf;
 }
 
-double BxDF::evaluatePdf(const Vec3 &n, const Vec3 &v, const Vec3 &l) const {
+double BxDF::evaluateImportance(const Vec3 &n, const Vec3 &v, const Vec3 &l) const {
     Mat3 T, TInv;
     rotateAxis(n, v, T, TInv);
     Vec3 vT = T * v, lT = T * l;
-    return evaluatePdf(vT, lT);
+    return evaluateImportance(vT, lT);
 }
 
 #endif

@@ -8,7 +8,7 @@ public:
     explicit UniformLight(Spectrum color);
     Spectrum evaluate(const Vec3 &vLocal) const override;
     Spectrum sample(Vec3 &vLocal, double &pdf, Sampler &RNG) const override;
-    double evaluatePdf(const Vec3 &vLocal) const;
+    double evaluateImportance(const Vec3 &vLocal) const;
 
 private:
     Spectrum color;
@@ -29,7 +29,7 @@ Spectrum UniformLight::sample(Vec3 &vLocal, double &pdf, Sampler &RNG) const {
     return color;
 }
 
-double UniformLight::evaluatePdf(const Vec3 &vLocal) const {
+double UniformLight::evaluateImportance(const Vec3 &vLocal) const {
     if (vLocal.z() < 0) return 0; else return 1 / (2 * pi);
 }
 #endif
