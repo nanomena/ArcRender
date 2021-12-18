@@ -155,7 +155,7 @@ int main() {
 
     cerr << "[T + " << time(nullptr) - T0 << "] | target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++i) {
-        tracer->epoch(0.33);
+        tracer->epoch(0.27);
 //        tracer->epoch(1);
 #ifdef DEBUG_FLAG
         if (i % 10000 == 0) {

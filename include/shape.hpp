@@ -106,7 +106,7 @@ Spectrum Shape::evaluateBxDF(const Ray &v, const Ray &l) const {
 
 double Shape::evaluateBxDFImportance(const Ray &v, const Ray &l) const {
     Vec3 n = normal(l.o);
-    return getBxDF(l.o)->evaluateImportance(n, -v.d, l.d);
+    return getBxDF(l.o)->evaluateImportance(n, -v.d, l.d) * abs(l.d * n);
 }
 
 Spectrum Shape::sampleBxDF(const Ray &v, Ray &l, shared_ptr<Medium> &medium, Sampler &RNG) const {
