@@ -11,7 +11,7 @@
 #include "tracer.hpp"
 #include "scene.hpp"
 #include "mapping.hpp"
-#include "image.hpp"
+//#include "image.hpp"
 //#include "tree.hpp"
 #include "sampler.hpp"
 //#include "surface.hpp"
@@ -33,7 +33,7 @@
 //#include "tracers/sppm.hpp"
 
 #include "cameras/perspective.hpp"
-#include "cameras/actinometer.hpp"
+//#include "cameras/actinometer.hpp"
 
 #include "lights/uniform.hpp"
 

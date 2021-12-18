@@ -2,11 +2,8 @@ cmake_minimum_required(VERSION 3.16)
 project(ARCrender)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_C_STANDARD 17)
-
 
 if (CMAKE_BUILD_TYPE EQUAL Release)
-    add_compile_options(-fopenmp)
     add_compile_options(-Ofast)
 elseif (CMAKE_BUILD_TYPE EQUAL Debug)
     add_compile_options(-g)

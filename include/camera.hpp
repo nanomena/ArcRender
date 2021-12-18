@@ -5,14 +5,16 @@
 #include "vecmath.hpp"
 
 class Camera {
-
 public:
-    virtual Ray apply(const Vec2 &t) const {
+    virtual Ray evaluate(const Vec3 &pos, Vec2 &t) const {
+        throw invalid_argument("NotImplementedError");
+    }
+    virtual Ray sample(const Vec2 &t, double &pdf, Sampler &RNG) const {
+        throw invalid_argument("NotImplementedError");
+    }
+    virtual double evaluatePdf(const Vec3 &pos) const {
         throw invalid_argument("NotImplementedError");
     }
 };
 
-#ifdef ARC_IMPLEMENTATION
-
-#endif
 #endif /* camera_hpp */

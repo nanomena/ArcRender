@@ -1,11 +1,9 @@
 #ifndef ARC
 #define ARC
 
-// #pragma GCC optimize("inline", "Ofast")
 #pragma GCC target("sse3", "sse2", "sse")
 #pragma GCC target("avx", "sse4", "sse4.1", "sse4.2", "ssse3")
 #pragma GCC target("f16c")
-#pragma GCC optimize("fast-math", "unroll-loops", "no-stack-protector", "unroll-loops")
 
 #ifdef ebug
 #define DEBUG 1

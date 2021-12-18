@@ -15,8 +15,8 @@ int main() {
     // shared_ptr<Medium> medium = make_shared<Scatter>(0.02, Spectrum(1, 1, 1), 4, 1);
     shared_ptr<Shape> skybox = make_shared<Sphere>(
         make_shared<Lambert>(Spectrum(0)),
-        make_shared<UniformLight>(Spectrum(.53, .80, 0.92)),
-        nullptr,medium,
+        nullptr,
+        nullptr, medium,
         Vec3(0, 0, 0), INF / 10, true
     );
     skybox->setIdentifier("skybox");
@@ -146,7 +146,7 @@ int main() {
     shared_ptr<Tracer> tracer = make_shared<BidirectionalPathTracer>(1, 1, scene);
 #else
 //    shared_ptr<Tracer> tracer = make_shared<StochasticProgressivePhotonMapping>(800, 600, scene);
-    shared_ptr<Tracer> tracer = make_shared<BidirectionalPathTracer>(800, 600, scene);
+    shared_ptr<Tracer> tracer = make_shared<BidirectionalPathTracer>(2400, 1800, scene);
 #endif
     char output[100];
     sprintf(output, "result.png");
@@ -155,7 +155,7 @@ int main() {
 
     cerr << "[T + " << time(nullptr) - T0 << "] | target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++i) {
-        tracer->epoch(0.013);
+        tracer->epoch(0.33);
 //        tracer->epoch(1);
 #ifdef DEBUG_FLAG
         if (i % 10000 == 0) {

@@ -17,14 +17,15 @@ public:
 
     virtual void initGraph(int preCnt);
     virtual void buildGraph();
-    virtual void preSample(int idx, Sampler &RNG) = 0;
+    virtual void preSample(int idx, double mul, Sampler &RNG) = 0;
     virtual void sample(int idx, Sampler &RNG) = 0;
     void epoch(double mul);
 
     void savePNG(const char *path, double white = 1, double gamma = 2.2) const;
 
 protected:
-    Ray sampleCamera(int idx, Sampler &RNG) const;
+    Ray sampleCamera(int idx, double &pdf, Sampler &RNG) const;
+    int getCameraIdx(const Vec2 &t) const;
 
     int width, height, length;
     vector<Spectrum> C;
@@ -57,16 +58,21 @@ void Tracer::epoch(double mul) {
 
     initGraph(preCnt);
 #pragma omp parallel for schedule(dynamic, 1)
-    for (int i = 0; i < preCnt; ++i) preSample(i, RNGs[i % MaxThreads]);
+    for (int i = 0; i < preCnt; ++i) preSample(i, mul, RNGs[i % MaxThreads]);
     buildGraph();
 #pragma omp parallel for schedule(dynamic, 1)
     for (int i = 0; i < length; ++i) sample(i, RNGs[i % MaxThreads]);
 }
 
-Ray Tracer::sampleCamera(int idx, Sampler &RNG) const {
+Ray Tracer::sampleCamera(int idx, double &pdf, Sampler &RNG) const {
     int x = idx % width, y = idx / width;
-    Vec2 v = RNG.pixel(Vec2(x, y), width, height);
-    return scene->camera->apply(v);
+    Vec2 t = RNG.pixel(Vec2(x, y), width, height);
+    return scene->camera->sample(t, pdf, RNG);
+}
+int Tracer::getCameraIdx(const Vec2 &t) const {;
+    int x = int(round((t.x() + .5) * width)), y = int(round((t.y() + .5) * height));
+    if ((x < 0) || (x >= width) || (y < 0) || (y >= height)) return -1;
+    return x + y * width;
 }
 
 void Tracer::savePNG(const char *path, double white, double gamma) const {

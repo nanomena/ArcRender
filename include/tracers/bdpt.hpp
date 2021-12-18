@@ -19,11 +19,11 @@ struct Photon {
 class BidirectionalPathTracer : public Tracer {
 public:
     void initGraph(int preCnt) override;
-    void preSample(int idx, Sampler &RNG) override;
+    void preSample(int idx, double mul, Sampler &RNG) override;
     void sample(int idx, Sampler &RNG) override;
 
     void revTrace(
-        const int &idx, const Ray &lB, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, BiPdf pdf,
+        const int &idx, double mul, const Ray &lB, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, BiPdf pdf,
         Sampler &RNG
     );
     Spectrum trace(
@@ -37,7 +37,7 @@ public:
 
 private:
     vector<vector<Photon>> photons;
-    int traceLimit;
+    int traceLimit, curPreCnt;
     double traceEPS;
 };
 
@@ -50,19 +50,21 @@ BidirectionalPathTracer::BidirectionalPathTracer(
 void BidirectionalPathTracer::initGraph(int preCnt) {
     photons.clear();
     photons.resize(traceLimit);
+    curPreCnt = preCnt;
 }
 
-void BidirectionalPathTracer::preSample(int idx, Sampler &RNG) {
+void BidirectionalPathTracer::preSample(int idx, double mul, Sampler &RNG) {
     Ray lB;
     shared_ptr<Medium> medium;
     shared_ptr<Shape> light = scene->lights[idx % scene->lights.size()];
     Spectrum traceMul = light->sampleLight(lB, medium, RNG);
-    revTrace(idx, lB, medium, 1, traceMul, {light->evaluateLightPdf(lB) * light->evaluatePdf(lB.o), 1 / light->evaluatePdf(lB.o)}, RNG);
+    revTrace(idx, mul, lB, medium, 1, traceMul, {light->evaluateLightPdf(lB) * light->evaluatePdf(lB.o), 1 / light->evaluatePdf(lB.o)}, RNG);
 }
 
 void BidirectionalPathTracer::sample(int idx, Sampler &RNG) {
-    Ray v = sampleCamera(idx, RNG);
-    Spectrum result = trace(idx, v, scene->medium, 1, Spectrum(1), {INF, 0}, RNG);
+    double pdf;
+    Ray v = sampleCamera(idx, pdf, RNG);
+    Spectrum result = trace(idx, v, scene->medium, 1, Spectrum(1), {pdf, 0}, RNG);
 
 #pragma omp critical
     {
@@ -72,7 +74,7 @@ void BidirectionalPathTracer::sample(int idx, Sampler &RNG) {
 }
 
 void BidirectionalPathTracer::revTrace(
-    const int &idx, const Ray &lB, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, BiPdf pdf,
+    const int &idx, double mul, const Ray &lB, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, BiPdf pdf,
     Sampler &RNG
 ) {
     if (traceMul.norm() < traceEPS) return;
@@ -89,6 +91,26 @@ void BidirectionalPathTracer::revTrace(
         photons[traceDepth].push_back(Photon{intersect, lB, object, pdf, traceMul * mediumMul});
     };
 
+    {
+        Vec2 cameraV2;
+        Ray v = scene->camera->evaluate(intersect, cameraV2);
+        int cameraIdx = getCameraIdx(cameraV2);
+        double t = (v.o - intersect).length();
+        Ray vB = {intersect, (v.o - intersect).norm()};
+
+        shared_ptr<Medium> curMedium = scene->visible(v, object, t);
+        if (cameraIdx != -1 && curMedium != nullptr) {
+            double pdfSum2b = (pdf.sum2 * pow(object->evaluateBxDFPdf({vB.o + vB.d, -vB.d}, {vB.o, -lB.d}), 2)
+                + (vB.o - lB.d).squaredLength()) * pow(scene->camera->evaluatePdf(intersect), 2) / pow(t, 2) / pow(pdf.last, 2);
+
+#pragma omp critical
+            {
+                C[cameraIdx] += curMedium->evaluate(t) * object->evaluateBxDF(lB, vB) * (traceMul * mediumMul)
+                    / pow(t, 2) / (1 + pdfSum2b) / mul;
+            };
+        }
+    }
+
     Ray vB;
     Spectrum surfaceMul = object->sampleBxDF(lB, vB, medium, RNG);
 
@@ -100,7 +122,7 @@ void BidirectionalPathTracer::revTrace(
 //        + (vB.o - lB.o).squaredLength()) << " " << pow(pdf.last, 2) << endl;
 //    cerr << object->evaluateBxDFPdf(lB, vB) << " " << pdfSum2 << endl;
 
-    revTrace(idx, vB, medium, traceDepth + 1, traceMul * mediumMul * surfaceMul,
+    revTrace(idx, mul, vB, medium, traceDepth + 1, traceMul * mediumMul * surfaceMul,
         {object->evaluateBxDFPdf(lB, vB), pdfSum2}, RNG);
 }
 
