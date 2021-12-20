@@ -107,7 +107,7 @@ void BidirectionalPathTracer::revTrace(
         if (cameraIdx != -1 && curMedium != nullptr) {
             double pdfSum2b = (pdf.sum2 * pow(object->evaluateBxDFImportance(
                     {vB.o + vB.d, -vB.d},
-                    {vB.o, -lB.d}), 2) + (vB.o - lB.d).squaredLength())
+                    {vB.o, -lB.d}), 2) + (vB.o - lB.o).squaredLength())
                 * pow(scene->camera->evaluateImportance(intersect) / t / pdf.last / curMul, 2);
 
 #pragma omp critical
