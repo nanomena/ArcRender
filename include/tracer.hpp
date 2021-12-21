@@ -15,11 +15,11 @@ class Tracer {
 public:
     Tracer(int width, int height, const shared_ptr<Scene> &scene);
 
-    virtual void initGraph(int preCnt, double mul);
+    virtual void initGraph();
     virtual void buildGraph();
     virtual void preSample(int idx, Sampler &RNG) = 0;
     virtual void sample(int idx, Sampler &RNG) = 0;
-    void epoch(double mul);
+    void epoch();
 
     void savePNG(const char *path, double white = 1, double gamma = 2.2) const;
 
@@ -45,20 +45,18 @@ Tracer::Tracer(
     W.resize(length);
 }
 
-void Tracer::initGraph(int preCnt, double mul) {}
+void Tracer::initGraph() {}
 
 void Tracer::buildGraph() {}
 
-void Tracer::epoch(double mul) {
-    int preCnt = max(int(length * mul), 1);
-
+void Tracer::epoch() {
     if (RNGs.empty()) {
         for (int i = 0; i < MaxThreads; ++ i) RNGs.emplace_back();
     }
 
-    initGraph(preCnt, mul);
+    initGraph();
 #pragma omp parallel for schedule(dynamic, 1)
-    for (int i = 0; i < preCnt; ++i) preSample(i, RNGs[i % MaxThreads]);
+    for (int i = 0; i < length; ++i) preSample(i, RNGs[i % MaxThreads]);
     buildGraph();
 #pragma omp parallel for schedule(dynamic, 1)
     for (int i = 0; i < length; ++i) sample(i, RNGs[i % MaxThreads]);
