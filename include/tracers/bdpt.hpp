@@ -192,17 +192,17 @@ Spectrum BidirectionalPathTracer::trace(
             vB = {p.intersect, (intersect - p.intersect).norm()};
         shared_ptr<Medium> curMedium = scene->visible(l, p.object, t);
 
-        double pdfSum2f = (pdf.sum2 * pow(object->evaluateBxDFImportance(
-                {l.o + l.d, -l.d},
-                {l.o, -v.d}), 2)
-            + (l.o - v.o).squaredLength()) * pow(p.object->evaluateBxDFImportance(p.lB, vB) / t / pdf.last, 2);
-        double pdfSum2b = (p.pdf.sum2 * pow(p.object->evaluateBxDFImportance(
-                {vB.o + vB.d, -vB.d},
-                {vB.o, -p.lB.d}), 2)
-            + (vB.o - p.lB.d).squaredLength()) * pow(object->evaluateBxDFImportance(v, l) / t / p.pdf.last, 2);
+        if (curMedium != nullptr) {
+            double pdfSum2f = (pdf.sum2 * pow(object->evaluateBxDFImportance(
+                    {l.o + l.d, -l.d},
+                    {l.o, -v.d}), 2)
+                + (l.o - v.o).squaredLength()) * pow(p.object->evaluateBxDFImportance(p.lB, vB) / t / pdf.last, 2);
+            double pdfSum2b = (p.pdf.sum2 * pow(p.object->evaluateBxDFImportance(
+                    {vB.o + vB.d, -vB.d},
+                    {vB.o, -p.lB.d}), 2)
+                + (vB.o - p.lB.d).squaredLength()) * pow(object->evaluateBxDFImportance(v, l) / t / p.pdf.last, 2);
 
         // cerr << pdfSum2f << " " << pdfSum2b << endl;
-        if (curMedium != nullptr) {
             color += curMedium->evaluate(t) * object->evaluateBxDF(v, l) * p.color
                 * p.object->evaluateBxDF(p.lB, vB) / pow(t, 2)
                 / (pdfSum2f + 1 + pdfSum2b);
