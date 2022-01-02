@@ -111,9 +111,8 @@ ostream &operator <<(ostream &o, const Mat3 &v) {
 }
 
 Mat3 makeAxisInv(const Vec3 &x, const Vec3 &y, const Vec3 &z) {
-    assert(abs(1 - x.length()) < EPS);
-    assert(abs(1 - y.length()) < EPS);
-    assert(abs(1 - z.length()) < EPS);
+    assert(abs(x.length() - y.length()) < EPS);
+    assert(abs(x.length() - z.length()) < EPS);
     assert(abs(x * y) < EPS);
     assert(abs(x * z) < EPS);
     return {x[0], y[0], z[0], x[1], y[1], z[1], x[2], y[2], z[2]};

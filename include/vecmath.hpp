@@ -7,5 +7,6 @@
 #include "vecmath/mat3.hpp"
 #include "vecmath/ray.hpp"
 #include "vecmath/box3.hpp"
+#include "vecmath/trans3.hpp"
 
 #endif //ARC_INCLUDE_VECMATH_HPP

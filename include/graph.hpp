@@ -110,15 +110,17 @@ KaDanTreeNode *KaDanTree::acquire() { return &tree[cnt++]; }
 
 void KaDanTree::intersect(const Ray &ray, shared_ptr<Shape> &object, double &t) const {
     KaDanVisit = 0;
-//    root->intersect(ray, object, t);
-    for (const auto& node : tree) {
-        double t_cur;
-        if (node.cen->intersect(ray, t_cur))
-            if (t_cur < t) {
-                t = t_cur;
-                object = node.cen;
-            }
-    }
+    root->intersect(ray, object, t);
+//#pragma omp critical
+//    cerr << KaDanVisit << endl;
+//    for (const auto& node : tree) {
+//        double t_cur;
+//        if (node.cen->intersect(ray, t_cur))
+//            if (t_cur < t) {
+//                t = t_cur;
+//                object = node.cen;
+//            }
+//    }
 }
 
 Box3 KaDanTree::box() const {

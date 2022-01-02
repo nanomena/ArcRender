@@ -1,140 +1,171 @@
+#define ARC_IMPLEMENTATION
 #include "arc.hpp"
 #include <bits/stdc++.h>
 using namespace std;
 
-int main()
-{
-    ios::sync_with_stdio(0);
+//#define DEBUG_FLAG
+int main() {
+    ios::sync_with_stdio(false);
 
-    shared_ptr<Object> skybox = make_shared<Object>(
-        make_shared<Sphere>(Vec3(0, 0, 0), INF / 10),
-        make_shared<Surface>(),
-        "skybox"
+
+    long long T0 = time(nullptr);
+
+
+//    shared_ptr<Medium> medium = make_shared<Transparent>(Spectrum(1, 1, 1));
+    shared_ptr<Medium> medium = make_shared<Scatter>(0.3, Spectrum(1, 1, 1));
+    shared_ptr<Shape> skybox = make_shared<Sphere>(
+        make_shared<Lambert>(Spectrum(0)),
+        nullptr,
+        nullptr, medium,
+        Vec3(0, 0, 0), INF / 10, true
     );
+    skybox->setIdentifier("skybox");
 
-    shared_ptr<Scene> scene = make_shared<Scene>(skybox);
 
-    scene->add_object(
-        make_shared<Object>(
-            make_shared<Flat>(
-                Vec3(-0.3, 0.99, -0.7),
-                Vec3(-0.3, 0.99, -1.3),
-                Vec3(0.3, 0.99, -1.3),
-                Vec3(0.3, 0.99, -0.7)
-            ),
-            make_light(make_shared<UniformLight>(), Spectrum(1)),
-            "light"
-        )
+#ifdef DEBUG_FLAG
+    shared_ptr<Camera> camera = make_shared<Actinometer>(
+        Vec3(0, 0, 15),
+        Vec3(3, 0, -10)
     );
-
-    scene->add_object(
-        make_shared<Object>(
-            make_shared<Flat>(
-                Vec3(-1, -1, -2),
-                Vec3(-1, -1, 2),
-                Vec3(1, -1, 2),
-                Vec3(1, -1, -2)
-            ),
-            make_bxdf(make_shared<Lambert>(), rgb256(255, 255, 255)),
-            "down"
-        )
-    );
-
-    scene->add_object(
-        make_shared<Object>(
-            make_shared<Flat>(
-                Vec3(1, -1, -2),
-                Vec3(1, -1, 2),
-                Vec3(1, 1, 2),
-                Vec3(1, 1, -2)
-            ),
-            make_bxdf(make_shared<Lambert>(), rgb256(255, 175, 175)),
-            "right"
-        )
-    );
-
-    scene->add_object(
-        make_shared<Object>(
-            make_shared<Flat>(
-                Vec3(-1, -1, 2),
-                Vec3(-1, -1, -2),
-                Vec3(-1, 1, -2),
-                Vec3(-1, 1, 2)
-            ),
-            make_bxdf(make_shared<Lambert>(), rgb256(175, 175, 255)),
-            "left"
-        )
-    );
-
-    scene->add_object(
-        make_shared<Object>(
-            make_shared<Flat>(
-                Vec3(-1, 1, 2),
-                Vec3(-1, 1, -2),
-                Vec3(1, 1, -2),
-                Vec3(1, 1, 2)
-            ),
-            make_bxdf(make_shared<Lambert>(), rgb256(255, 255, 255)),
-            "up"
-        )
-    );
-
-    scene->add_object(
-        make_shared<Object>(
-            make_shared<Flat>(
-                Vec3(-1, 1, -2),
-                Vec3(-1, -1, -2),
-                Vec3(1, -1, -2),
-                Vec3(1, 1, -2)
-            ),
-            make_bxdf(make_shared<Lambert>(), rgb256(255, 255, 255)),
-            "back"
-        )
-    );
-
-    scene->add_object(
-        make_shared<Object>(
-            make_shared<Flat>(
-                Vec3(-1, -1, 2),
-                Vec3(-1, 1, 2),
-                Vec3(1, 1, 2),
-                Vec3(1, -1, 2)
-            ),
-            make_bxdf(make_shared<Lambert>(), rgb256(255, 255, 255)),
-            "front"
-        )
-    );
-
-    scene->add_object(
-        make_shared<Object>(
-            make_shared<Sphere>(
-                Vec3(0, 0, -1), 0.5
-            ),
-            make_bxdf(make_shared<Lambert>(), rgb256(255, 255, 255)),
-            "ball"
-        )
-    );
-
+#else
     shared_ptr<Camera> camera = make_shared<PerspectiveCamera>(
         Vec3(0, 0, 1.5),
         Vec3(0.8, 0, 0),
         Vec3(0, 0.6, 0),
         0.6
     );
+#endif
+    shared_ptr<Scene> scene = make_shared<Scene>(camera, skybox, medium);
 
-    shared_ptr<Image> image = make_shared<Image>(800, 600, camera);
-    shared_ptr<Render> render = make_shared<BidirectionalPathTracer>(image, scene);
+    scene->addObject(
+        make_shared<Sphere>(
+            make_shared<BiGGX>(2.5, 0.2), nullptr,
+            make_shared<Transparent>(Spectrum(0.2, 1, 0.2)),
+            medium,
+            Vec3(-.5, -.69, -1), .3
+        ),
+        "ball1"
+    );
 
+    scene->addObject(
+        make_shared<Sphere>(
+            make_shared<BiGGX>(1.05, 0.2), nullptr,
+            make_shared<Transparent>(Spectrum(0.2, 1, 0.2)),
+            medium,
+            Vec3(.5, -.69, -1), .3
+        ),
+        "ball2"
+    );
+
+    scene->addObject(
+        make_shared<Flat>(
+            make_shared<Lambert>(Spectrum(0)),
+            make_shared<UniformLight>(Spectrum(15)),
+            medium, medium,
+            Vec3(-0.3, 0.99, -0.7),
+            Vec3(-0.3, 0.99, -1.3),
+            Vec3(0.3, 0.99, -1.3),
+            Vec3(0.3, 0.99, -0.7)
+        ), "light"
+    );
+
+    scene->addObject(
+        make_shared<Flat>(
+            make_shared<GGX>(rgb256(250, 250, 250), 0.8), nullptr,
+            medium, medium,
+            Vec3(-1, -1, -2),
+            Vec3(-1, -1, 2),
+            Vec3(1, -1, 2),
+            Vec3(1, -1, -2)
+        ), "down"
+    );
+
+    scene->addObject(
+        make_shared<Flat>(
+            make_shared<GGX>(rgb256(250, 250, 250), 0.8), nullptr,
+            medium, medium,
+            Vec3(-1, 1, 2),
+            Vec3(-1, 1, -2),
+            Vec3(1, 1, -2),
+            Vec3(1, 1, 2)
+        ), "up"
+    );
+
+    scene->addObject(
+        make_shared<Flat>(
+            make_shared<GGX>(rgb256(170, 170, 250), 0.8), nullptr,
+            medium, medium,
+            Vec3(1, -1, -2),
+            Vec3(1, -1, 2),
+            Vec3(1, 1, 2),
+            Vec3(1, 1, -2)
+        ), "right"
+    );
+
+    scene->addObject(
+        make_shared<Flat>(
+            make_shared<GGX>(rgb256(250, 170, 170), 0.8), nullptr,
+            medium, medium,
+            Vec3(-1, -1, 2),
+            Vec3(-1, -1, -2),
+            Vec3(-1, 1, -2),
+            Vec3(-1, 1, 2)
+        ), "left"
+    );
+
+    scene->addObject(
+        make_shared<Flat>(
+            make_shared<Lambert>(rgb256(250, 250, 250)), nullptr,
+            medium, medium,
+            Vec3(-1, 1, -2),
+            Vec3(-1, -1, -2),
+            Vec3(1, -1, -2),
+            Vec3(1, 1, -2)
+        ), "back"
+    );
+
+    scene->addObject(
+        make_shared<Flat>(
+            make_shared<Lambert>(rgb256(250, 250, 250)), nullptr,
+            medium, medium,
+            Vec3(-1, -1, 2),
+            Vec3(-1, 1, 2),
+            Vec3(1, 1, 2),
+            Vec3(1, -1, 2)
+        ),
+        "front"
+    );
+//
+//
+//
+//    shared_ptr<Image> image = make_shared<Image>(800, 600, camera);
+//    shared_ptr<Render> render = make_shared<LightSampledPathTracer>(image, scene);
+//
+
+#ifdef DEBUG_FLAG
+    shared_ptr<Tracer> tracer = make_shared<BidirectionalPathTracer>(1, 1, scene);
+#else
+//    shared_ptr<Tracer> tracer = make_shared<StochasticProgressivePhotonMapping>(800, 600, scene);
+    shared_ptr<Tracer> tracer = make_shared<BidirectionalPathTracer>(2400, 1800, scene);
+#endif
     char output[100];
-    sprintf(output, "result.png");
+    sprintf(output, "samples/scene7/result.png");
 
-    int epoch = 3000, cluster = 1;
-    cerr << "[T + " << (clock() / (double)CLOCKS_PER_SEC) << "] | target : " << epoch << endl;
-    for (int i = 1; i <= epoch; ++i)
-    {
-        render->epoch(cluster);
-        cerr << "[T + " << (clock() / (double)CLOCKS_PER_SEC) << "] | epoch " << i << endl;
-        if (i % 5 == 0)
-            image->save(output, 0.35);
+    int epoch = 1000;
+
+    cerr << "[T + " << time(nullptr) - T0 << "] | target : " << epoch << endl;
+    for (int i = 1; i <= epoch; ++i) {
+        tracer->epoch();
+#ifdef DEBUG_FLAG
+        if (i % 10000 == 0) {
+            cerr << "[T + " << ((double)clock() / CLOCKS_PER_SEC) << "] | epoch " << i << endl;
+            tracer->color(0, true);
+        }
+#else
+        if (i % 1 == 0) {
+            cerr << "[T + " << time(nullptr) - T0 << "] | epoch " << i << endl;
+            tracer->savePNG(output, 1);
+        }
+#endif
     }
 }
