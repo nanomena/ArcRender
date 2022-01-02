@@ -9,7 +9,7 @@ public:
 
     Spectrum evaluate(double t) const override;
     Spectrum sample(
-        const shared_ptr<Scene> &scene, const Ray &v, shared_ptr<Shape> &object, Vec3 &intersect, Sampler &RNG
+        const shared_ptr<Scene> &scene, const Ray &v, shared_ptr<Object> &object, Vec3 &intersect, Sampler &RNG
     ) const override;
 
 private:
@@ -25,10 +25,12 @@ Spectrum Transparent::evaluate(double t) const {
 }
 
 Spectrum Transparent::sample(
-    const shared_ptr<Scene> &scene, const Ray &v, shared_ptr<Shape> &object, Vec3 &intersect, Sampler &RNG
+    const shared_ptr<Scene> &scene, const Ray &v, shared_ptr<Object> &object, Vec3 &intersect, Sampler &RNG
 ) const {
     double t;
-    scene->intersect(v, object, t);
+    shared_ptr<Shape> shape;
+    scene->intersect(v, shape, t);
+    object = shape;
     intersect = v.o + v.d * t;
     return spectrum ^ t;
 }

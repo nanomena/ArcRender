@@ -14,7 +14,7 @@ struct BiPdf {
 struct Photon {
     Vec3 intersect;
     Ray lB;
-    shared_ptr<Shape> object;
+    shared_ptr<Object> object;
     BiPdf pdf;
     Spectrum color;
 };
@@ -36,7 +36,7 @@ public:
     );
 
     BidirectionalPathTracer(
-        int width, int height, const shared_ptr<Scene> &scene, int traceLimit = 6, double traceEps = 1e-7
+        int width, int height, const shared_ptr<Scene> &scene, int traceLimit = 9, double traceEps = 1e-7
     );
 
 private:
@@ -89,7 +89,7 @@ void BidirectionalPathTracer::revTrace(
     if (traceMul.norm() < traceEPS) return;
     if (traceDepth >= traceLimit) return;
 
-    shared_ptr<Shape> object;
+    shared_ptr<Object> object;
     Vec3 intersect;
     Spectrum mediumMul = medium->sample(scene, lB, object, intersect, RNG);
 
@@ -122,7 +122,7 @@ void BidirectionalPathTracer::revTrace(
     }
 
     Ray vB;
-    Spectrum surfaceMul = object->sampleBxDF(lB, vB, medium, RNG);
+    Spectrum surfaceMul = object->sampleBxDF(lB, intersect, vB, medium, RNG);
 
     double pdfSum2 = (pdf.sum2 * pow(object->evaluateBxDFImportance(
             {vB.o + vB.d, -vB.d},
@@ -144,7 +144,7 @@ Spectrum BidirectionalPathTracer::trace(
     if (traceMul.norm() < traceEPS) return Spectrum(0);
     if (traceDepth >= traceLimit) return Spectrum(0);
 
-    shared_ptr<Shape> object;
+    shared_ptr<Object> object;
     Vec3 intersect;
     Spectrum mediumMul = medium->sample(scene, v, object, intersect, RNG);
 
@@ -153,9 +153,9 @@ Spectrum BidirectionalPathTracer::trace(
         double pdfSum2f = (pdf.sum2 * pow(object->evaluateLightImportance(
                 {intersect, -v.d}), 2) + (intersect - v.o).squaredLength())
             * pow(object->evaluateSurfaceImportance(intersect) / pdf.last, 2);
-        color = object->evaluateLight(v) / (pdfSum2f + 1);
+        if (traceDepth == 1) pdfSum2f = 0;
+        color = object->evaluateLight(v, intersect) / (pdfSum2f + 1);
     }
-    if (traceDepth == 1) color = object->evaluateLight(v);
 
     if (object == scene->skybox) return color * mediumMul;
 
@@ -211,7 +211,7 @@ Spectrum BidirectionalPathTracer::trace(
     }
 
     Ray l;
-    Spectrum surfaceMul = object->sampleBxDF(v, l, medium, RNG);
+    Spectrum surfaceMul = object->sampleBxDF(v, intersect, l, medium, RNG);
 
     double pdfSum2 = (pdf.sum2 * pow(object->evaluateBxDFImportance(
             {l.o + l.d, -l.d},

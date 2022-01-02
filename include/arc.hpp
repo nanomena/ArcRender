@@ -5,7 +5,8 @@
 #include "graph.hpp"
 #include "shape.hpp"
 #include "camera.hpp"
-//#include "object.hpp"
+#include "object.hpp"
+#include "particle.hpp"
 //#include "render.hpp"
 #include "medium.hpp"
 #include "tracer.hpp"
@@ -36,8 +37,9 @@
 //#include "cameras/actinometer.hpp"
 
 #include "lights/uniform.hpp"
+#include "lights/spot.hpp"
 
 #include "mediums/transparent.hpp"
-//#include "mediums/scatter.hpp"
+#include "mediums/scatter.hpp"
 
 #endif /* arc_all_hpp */

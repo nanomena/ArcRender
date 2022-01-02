@@ -6,9 +6,6 @@
 class BiGGX : public BxDF {
 public:
     BiGGX(double ior, double rough);
-    bool glossy() const override {
-        return true;
-    }
 
 private:
     Spectrum evaluate(const Vec3 &vLocal, const Vec3 &lLocal) const override;

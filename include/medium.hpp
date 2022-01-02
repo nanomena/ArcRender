@@ -1,9 +1,9 @@
 #ifndef medium_hpp
 #define medium_hpp
 
-#include "shape.hpp"
+#include "object.hpp"
 
-class Shape;
+class Object;
 class Scene;
 
 class Medium {
@@ -12,12 +12,10 @@ public:
         throw invalid_argument("NotImplementedError");
     }
     virtual Spectrum sample(
-        const shared_ptr<Scene> &scene, const Ray &v, shared_ptr<Shape> &object, Vec3 &intersect, Sampler &RNG
+        const shared_ptr<Scene> &scene, const Ray &v, shared_ptr<Object> &object, Vec3 &intersect, Sampler &RNG
     ) const {
         throw invalid_argument("NotImplementedError");
     }
-
-    string identifier;
 };
 
 #ifdef ARC_IMPLEMENTATION

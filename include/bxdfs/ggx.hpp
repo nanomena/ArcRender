@@ -6,9 +6,6 @@
 class GGX : public BxDF {
 public:
     GGX(Spectrum F0, double rough);
-    bool glossy() const override {
-        return rough < 0.2;
-    }
 
 private:
     Spectrum evaluate(const Vec3 &vLocal, const Vec3 &lLocal) const override;

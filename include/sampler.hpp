@@ -41,6 +41,7 @@ Vec2 Sampler::pixel(Vec2 t, double width, double height) {
     double dx = (t.x() + _x) / width - 0.5, dy = (t.y() + _y) / height - 0.5;
     return {dx, dy};
 }
+
 Vec3 Sampler::hemisphere() {
     auto v = make_pair(sample(), sample());
     double z = v.first, phi = v.second * (2 * pi) - pi;

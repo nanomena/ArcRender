@@ -33,7 +33,8 @@ Ray PerspectiveCamera::sample(const Vec2 &t, double &pdf, Sampler &RNG) const {
     return {o, (x * t.x() - y * t.y() - z).norm()};
 }
 double PerspectiveCamera::evaluateImportance(const Vec3 &pos) const {
-    return 1.;
+    Vec2 t;
+    if (evaluate(pos, t).d * -z < 0) return INF; else return 1.;
 }
 
 #endif

@@ -6,15 +6,16 @@
 #include "bxdf.hpp"
 #include "light.hpp"
 #include "medium.hpp"
+#include "object.hpp"
 
-class Shape {
+class Shape : public Object {
 public:
     Shape(
         const shared_ptr<BxDF> &bxdf, const shared_ptr<Light> &light,
         const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside
     );
 
-    virtual bool isLight() const;
+    bool isLight() const override;
 
     virtual bool intersect(const Ray &ray, double &t) const {
         throw invalid_argument("NotImplementedError");
@@ -22,30 +23,24 @@ public:
     virtual Vec3 normal(const Vec3 &inter) const {
         throw invalid_argument("NotImplementedError");
     } // norm should be unitary
-    virtual void sampleSurface(Vec3 &pos, double &pdf, Sampler &RNG) const {
+    void sampleSurface(Vec3 &pos, double &pdf, Sampler &RNG) const override {
         throw invalid_argument("NotImplementedError");
     }
-    virtual double evaluateSurfaceImportance(const Vec3 &pos) const {
+    double evaluateSurfaceImportance(const Vec3 &pos) const override {
         throw invalid_argument("NotImplementedError");
     }
     shared_ptr<Medium> getMedium(const Ray &test) const;
-    shared_ptr<Medium> otherSide(const shared_ptr<Medium> &test) const;
 
-    Spectrum evaluateBxDF(const Ray &v, const Ray &l) const;
-    Spectrum sampleBxDF(const Ray &v, Ray &l, shared_ptr<Medium> &medium, Sampler &RNG) const;
-    double evaluateBxDFImportance(const Ray &v, const Ray &l) const;
+    Spectrum evaluateBxDF(const Ray &v, const Ray &l) const override;
+    Spectrum sampleBxDF(const Ray &v, const Vec3 &pos, Ray &l, shared_ptr<Medium> &medium, Sampler &RNG) const override;
+    double evaluateBxDFImportance(const Ray &v, const Ray &l) const override;
 
-    Spectrum evaluateLight(const Ray &v) const;
-    Spectrum evaluateLightBack(const Ray &vB) const;
-    Spectrum sampleLight(Ray &lB, shared_ptr<Medium> &medium, Sampler &RNG) const;
-    double evaluateLightImportance(const Ray &lB) const;
-
-    bool glossy(const Vec3 &pos) const;
+    Spectrum evaluateLight(const Ray &v, const Vec3 &pos) const override;
+    Spectrum evaluateLightBack(const Ray &vB) const override;
+    Spectrum sampleLight(Ray &lB, shared_ptr<Medium> &medium, Sampler &RNG) const override;
+    double evaluateLightImportance(const Ray &lB) const override;
 
     virtual Box3 outline() const;
-
-    void setIdentifier(const string &Name);
-    string name;
 
 protected:
     virtual shared_ptr<BxDF> getBxDF(const Vec3 &pos) const;
@@ -77,25 +72,10 @@ Box3 Shape::outline() const {
     return box;
 }
 
-bool Shape::glossy(const Vec3 &pos) const {
-    return getBxDF(pos)->glossy();
-}
-
 shared_ptr<Medium> Shape::getMedium(const Ray &test) const {
     Vec3 n = normal(test.o);
     return (n * test.d > 0 ? outside : inside);
 }
-
-shared_ptr<Medium> Shape::otherSide(const shared_ptr<Medium> &test) const {
-    if (test == inside) {
-        if (test != outside) return outside;
-        else return nullptr;
-    } else {
-        assert(test == outside);
-        return inside;
-    }
-}
-
 
 Spectrum Shape::evaluateBxDF(const Ray &v, const Ray &l) const {
     assert(abs(1 - v.d.length()) < EPS);
@@ -109,12 +89,9 @@ double Shape::evaluateBxDFImportance(const Ray &v, const Ray &l) const {
     return getBxDF(l.o)->evaluateImportance(n, -v.d, l.d) * abs(l.d * n);
 }
 
-Spectrum Shape::sampleBxDF(const Ray &v, Ray &l, shared_ptr<Medium> &medium, Sampler &RNG) const {
+Spectrum Shape::sampleBxDF(const Ray &v, const Vec3 &pos, Ray &l, shared_ptr<Medium> &medium, Sampler &RNG) const {
     assert(abs(1 - v.d.length()) < EPS);
-    double t;
-    bool f = intersect(v, t);
-    assert(f);
-    l.o = v.o + v.d * t;
+    l.o = pos;
     Vec3 n = normal(l.o);
     Spectrum s = getBxDF(l.o)->sample(n, -v.d, l.d, RNG);
 //    if (n * v.d < 0) assert(medium == outside); else assert(medium == inside);
@@ -122,13 +99,9 @@ Spectrum Shape::sampleBxDF(const Ray &v, Ray &l, shared_ptr<Medium> &medium, Sam
     return s * abs(l.d * n);
 }
 
-Spectrum Shape::evaluateLight(const Ray &v) const {
+Spectrum Shape::evaluateLight(const Ray &v, const Vec3 &pos) const {
     if (!isLight()) return Spectrum(0);
     assert(abs(1 - v.d.length()) < EPS);
-    double t;
-    bool f = intersect(v, t);
-    assert(f);
-    Vec3 pos = v.o + v.d * t;
     Vec3 n = normal(pos);
     return getLight(pos)->evaluate(n, -v.d);
 }
@@ -154,8 +127,5 @@ double Shape::evaluateLightImportance(const Ray &lB) const {
     return getLight(lB.o)->evaluateImportance(n, lB.d);
 }
 
-void Shape::setIdentifier(const string &Name) {
-    this->name = Name;
-}
 #endif
 #endif /* shape_hpp */

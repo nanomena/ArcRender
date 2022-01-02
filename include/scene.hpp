@@ -17,7 +17,7 @@ public:
     void addObjects(const vector<shared_ptr<Shape>> &object, const string &name = "");
 
     void intersect(const Ray &ray, shared_ptr<Shape> &object, double &t) const;
-    shared_ptr<Medium> visible(const Ray &test, const shared_ptr<Shape> &object, double dis) const;
+    shared_ptr<Medium> visible(const Ray &ray, const shared_ptr<Object> &object, double t) const;
 
     Box3 box() const;
 private:
@@ -62,12 +62,13 @@ Box3 Scene::box() const {
     return b;
 }
 
-shared_ptr<Medium> Scene::visible(const Ray &ray, const shared_ptr<Shape> &object, double t) const {
+shared_ptr<Medium> Scene::visible(const Ray &ray, const shared_ptr<Object> &object, double t) const {
     double tTrue;
     shared_ptr<Shape> objectTrue;
     intersect(ray, objectTrue, tTrue);
-    if ((objectTrue != object) || abs(tTrue - t) > EPS) return nullptr;
-    return object->getMedium({ray.o + ray.d * t, -ray.d});
+    if (tTrue > t + EPS) return objectTrue->getMedium({ray.o + ray.d * tTrue, -ray.d});
+    if ((objectTrue != object) || tTrue < t - EPS) return nullptr;
+    return objectTrue->getMedium({ray.o + ray.d * tTrue, -ray.d});
 }
 
 
