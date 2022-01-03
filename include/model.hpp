@@ -11,7 +11,7 @@
 #include "shapes/triangle.hpp"
 #include "lights/uniform.hpp"
 
-bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, const shared_ptr<Medium> &medium, vector<shared_ptr<Shape>> &objects);
+bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, const shared_ptr<Medium> &medium, const shared_ptr<Scene> &scene);
 
 struct mtlMaterial {
     Spectrum diffuse, specular;
@@ -21,7 +21,7 @@ struct mtlMaterial {
 
 #ifdef ARC_IMPLEMENTATION
 
-bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, const shared_ptr<Medium> &medium, vector<shared_ptr<Shape>> &objects) {
+bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, const shared_ptr<Medium> &medium, const shared_ptr<Scene> &scene) {
     cerr << filename << ":" << endl;
     tinyobj::attrib_t attrib;
     vector<tinyobj::shape_t> mtlShapes;
@@ -30,7 +30,7 @@ bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, co
     string warn, err;
     bool ret = tinyobj::LoadObj(&attrib, &mtlShapes, &mtlMaterials, &warn, &err, filename.c_str(), mtlDir.c_str());
     if (!warn.empty()) std::cerr << warn << std::endl;
-    if (!err.empty()) { std::cout << err << std::endl; return false; }
+    if (!err.empty()) { std::cout << "Error: " << err << std::endl; return false; }
     if (!ret) { std::cout << ret << std::endl; return false; }
     cerr << "shapes : " << mtlShapes.size() << endl;
 
@@ -39,7 +39,7 @@ bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, co
     for (const auto &material: mtlMaterials) {
         Spectrum diffuse = rgb(material.diffuse[0], material.diffuse[1], material.diffuse[2]);
         Spectrum specular = rgb(material.specular[0], material.specular[1], material.specular[2]);
-        double ior = material.ior, dissolve = material.dissolve, roughness = material.roughness;
+        double ior = material.ior, dissolve = material.dissolve, roughness = 1 - atan(material.shininess);
         shared_ptr<Texture> diffuseTex, specularTex;
 
         if (!material.diffuse_texname.empty()) {
@@ -59,6 +59,7 @@ bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, co
     }
 
     for (const auto &s: mtlShapes) {
+        vector<shared_ptr<Shape>> objects;
         int index_offset = 0;
         for (int f = 0; f < s.mesh.num_face_vertices.size(); ++f) {
             int fv = s.mesh.num_face_vertices[f];
@@ -103,6 +104,7 @@ bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, co
                 T * vertices[0], T * vertices[1], T * vertices[2]
             ));
         }
+        scene->addObjects(objects);
     }
     cerr << "Read Done" << endl;
     return true;

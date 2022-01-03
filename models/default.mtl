@@ -3,24 +3,17 @@
 #
 # http://graphics.cs.williams.edu/data
 
-# newmtl default
-#   Ns 10.0000
-#   Ni 1.5000
-#   d 1.0000
-#   Tf 1 1 1
-#   illum 2
-#   Kd 1 1 1
-#   Ks 1 1 1
-#   Ke 0 0 0
-#   map_Kd default.png
-
-
-
 newmtl default
-  Pr 0.3
-  Ni 1.5
-  d 1
+  Ns 100.0000
+#   Ns 10.0000
+  Ni 1.5000
+  d 1.0000
   Tf 1 1 1
+  illum 2
   Kd 1 1 1
   Ks 0.2 0.2 0.2
+#   Ks 1 1 1
+#   Ke 0 0 0
   map_Kd default.png
+
+

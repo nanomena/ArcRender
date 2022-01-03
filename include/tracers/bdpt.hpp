@@ -54,7 +54,7 @@ void BidirectionalPathTracer::epoch() {
     Photon photonBuffers[MaxThreads][traceLimit];
     pair<int, Spectrum> spectrumBuffers[MaxThreads][traceLimit];
 
-#pragma omp parallel for schedule(dynamic, 32) default(none) shared(spectrum, number, RNGs, photonBuffers, spectrumBuffers)
+#pragma omp parallel for schedule(dynamic, width) default(none) shared(spectrum, number, RNGs, photonBuffers, spectrumBuffers)
     for (int idx = 0; idx < length; idx++) {
         int thd = omp_get_thread_num();
         auto &RNG = RNGs[thd];

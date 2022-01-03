@@ -45,8 +45,7 @@ int main() {
         Vec3(0.012, 0, 0),
         Vec3(0, 0.012, 0),
         Vec3(0, 0, 0.012)
-    ), medium, objects)) return -1;
-    scene->addObjects(objects, "teapot");
+    ), medium, scene)) return -1;
 
     scene->addObject(
         make_shared<Flat>(

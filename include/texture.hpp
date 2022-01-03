@@ -33,15 +33,15 @@ private:
 Texture::Texture(const string &filename) {
     int n;
     unsigned char *data = stbi_load(filename.c_str(), &width, &height, &n, 0);
+    cerr << width << " " << height << endl;
     spectrum.resize(width * height);
     for (int i = 0; i < spectrum.size(); ++i) {
         switch (n) {
         case 1:spectrum[i] = rgb256(data[i * n + 0]);
             break;
         case 2: throw invalid_argument("NotImplementedError");
-        case 3: spectrum[i] = rgb256(data[i * n + 0], data[i * n + 1], data[i * n + 2]);
+        case 3: case 4: spectrum[i] = rgb256(data[i * n + 0], data[i * n + 1], data[i * n + 2]);
             break;
-        case 4:
         default: throw invalid_argument("NotImplementedError");
         }
     }

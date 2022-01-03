@@ -90,6 +90,7 @@ Spectrum MtlGGX::sample(const Vec3 &pos, const Vec3 &i, Vec3 &o, double &pdf, Sa
         else return Spectrum(0);
     } else if (RNG.rand() < dissolve) {
         o = RNG.hemisphere();
+        if (i.z() * o.z() < 0) o[2] *= -1;
         pdf = 1 / (2 * pi) * (1 - prob) * dissolve;
         return diffuse[pos] / pi;
     } else {

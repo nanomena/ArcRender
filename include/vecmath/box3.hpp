@@ -10,6 +10,7 @@ public:
     Vec3 L() const;
     Vec3 U() const;
 
+    double volume() const;
     bool intersect(const Ray &ray, double &t) const;
     bool intersectCheck(const Vec3 &o, double r) const; // may report true when false
 
@@ -46,6 +47,13 @@ bool Box3::intersectCheck(const Vec3 &o, double r) const {
         if ((o[i] + r < l[i]) || (o[i] - r > u[i])) return false;
     }
     return true;
+}
+
+double Box3::volume() const {
+    double v = 1;
+    for (int i = 0; i < 3; ++ i)
+        v *= max(0., u[i] - l[i]);
+    return v;
 }
 
 Box3 operator +(const Box3 &b0, const Box3 &b1) {
