@@ -11,7 +11,7 @@
 #include "medium.hpp"
 #include "tracer.hpp"
 #include "scene.hpp"
-#include "mapping.hpp"
+#include "texture.hpp"
 //#include "image.hpp"
 //#include "tree.hpp"
 #include "sampler.hpp"

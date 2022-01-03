@@ -13,6 +13,12 @@
 
 bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, const shared_ptr<Medium> &medium, vector<shared_ptr<Shape>> &objects);
 
+struct mtlMaterial {
+    Spectrum diffuse, specular;
+    shared_ptr<Texture> diffuseTex, specularTex;
+    double roughness{}, ior{}, dissolve{};
+};
+
 #ifdef ARC_IMPLEMENTATION
 
 bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, const shared_ptr<Medium> &medium, vector<shared_ptr<Shape>> &objects) {
@@ -28,15 +34,28 @@ bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, co
     if (!ret) { std::cout << ret << std::endl; return false; }
     cerr << "shapes : " << mtlShapes.size() << endl;
 
-    vector<shared_ptr<BxDF>> BxDFs;
+    vector<mtlMaterial> mtlList;
 
     for (const auto &material: mtlMaterials) {
         Spectrum diffuse = rgb(material.diffuse[0], material.diffuse[1], material.diffuse[2]);
         Spectrum specular = rgb(material.specular[0], material.specular[1], material.specular[2]);
-//        Spectrum emission = rgb(material.emission[0], material.emission[1], material.emission[2]);
-        double ior = material.ior, dissolve = material.dissolve, rough = material.roughness;
+        double ior = material.ior, dissolve = material.dissolve, roughness = material.roughness;
+        shared_ptr<Texture> diffuseTex, specularTex;
 
-        BxDFs.push_back(make_shared<MtlGGX>(diffuse, specular, rough, ior, dissolve));
+        if (!material.diffuse_texname.empty()) {
+            string texture = mtlDir + material.diffuse_texname;
+            cerr << "Diffuse Texture: " << texture << endl;
+            diffuseTex = make_shared<Texture>(texture.c_str());
+        }
+        if (!material.specular_texname.empty()) {
+            string texture = mtlDir + material.specular_texname;
+            cerr << "Specular Texture: " << texture << endl;
+            specularTex = make_shared<Texture>(texture.c_str());
+        }
+
+        mtlList.push_back({
+            diffuse, specular, diffuseTex, specularTex, roughness, ior, dissolve
+        });
     }
 
     for (const auto &s: mtlShapes) {
@@ -44,8 +63,7 @@ bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, co
         for (int f = 0; f < s.mesh.num_face_vertices.size(); ++f) {
             int fv = s.mesh.num_face_vertices[f];
             assert(fv == 3);
-            vector<Vec3> vertices, normals;
-            vector<Vec2> textures;
+            vector<Vec3> vertices, normals, textures;
             for (int v = 0; v < fv; ++v) {
                 tinyobj::index_t idx = s.mesh.indices[index_offset + v];
                 vertices.emplace_back(
@@ -58,15 +76,29 @@ bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, co
 //                    attrib.normals[3 * idx.vertex_index + 1],
 //                    attrib.normals[3 * idx.vertex_index + 2]
 //                );
-//                textures.emplace_back(
-//                    attrib.texcoords[2 * idx.texcoord_index + 0],
-//                    attrib.texcoords[2 * idx.texcoord_index + 1]
-//                );
+                textures.emplace_back(
+                    attrib.texcoords[2 * idx.texcoord_index + 0],
+                    attrib.texcoords[2 * idx.texcoord_index + 1],
+                    0
+                );
             }
             index_offset += fv;
 
+            auto &material = mtlList[s.mesh.material_ids[f]];
+            Trans3 texT = Trans3(
+                T * vertices[0], T * vertices[1], T * vertices[2],
+                textures[0], textures[1], textures[2]
+                );
+            TextureMap diffuse = (material.diffuseTex != nullptr)
+                ? TextureMap(material.diffuseTex, texT)
+                : TextureMap(material.diffuse),
+                specular = (material.specularTex != nullptr)
+                ? TextureMap(material.specularTex, texT)
+                : TextureMap(material.specular);
+
             objects.push_back(make_shared<Triangle>(
-                BxDFs[s.mesh.material_ids[f]], nullptr,
+                make_shared<MtlGGX>(diffuse, specular, material.roughness, material.ior, material.dissolve),
+                nullptr,
                 medium, medium,
                 T * vertices[0], T * vertices[1], T * vertices[2]
             ));

@@ -2,7 +2,6 @@
 #define spectrum_hpp
 
 #include "utils.hpp"
-#include "mapping.hpp"
 
 struct Spectrum {
     double r, g, b;
@@ -30,7 +29,6 @@ Spectrum rgb256(double l = 0, double gamma = 2.2);
 Spectrum rgb256(double r, double g, double b, double gamma = 2.2);
 Spectrum rgb(double l, double gamma = 2.2);
 Spectrum rgb(double r, double g, double b, double gamma = 2.2);
-Spectrum rgb(const Pixel &t, double gamma = 2.2);
 
 #ifdef ARC_IMPLEMENTATION
 
@@ -93,9 +91,6 @@ Spectrum rgb(double l, double gamma) {
 }
 Spectrum rgb(double r, double g, double b, double gamma) {
     return {pow(r, gamma), pow(g, gamma), pow(b, gamma)};
-}
-Spectrum rgb(const Pixel &t, double gamma) {
-    return {pow(t.r, gamma), pow(t.g, gamma), pow(t.b, gamma)};
 }
 
 #endif

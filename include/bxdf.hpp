@@ -7,49 +7,46 @@
 
 class BxDF {
 public:
-    Spectrum evaluate(const Vec3 &n, const Vec3 &v, const Vec3 &l) const;
-    Spectrum sample(const Vec3 &n, const Vec3 &v, Vec3 &l, Sampler &RNG) const;
-    double evaluateImportance(const Vec3 &n, const Vec3 &v, const Vec3 &l) const;
-    virtual bool glossy() const {
-        throw invalid_argument("NotImplementedError");
-    }
+    Spectrum evaluate(const Vec3 &pos, const Vec3 &n, const Vec3 &gI, const Vec3 &gO) const;
+    Spectrum sample(const Vec3 &pos, const Vec3 &n, const Vec3 &gI, Vec3 &gO, Sampler &RNG) const;
+    double evaluateImportance(const Vec3 &pos, const Vec3 &n, const Vec3 &gI, const Vec3 &gO) const;
 
 private:
-    virtual Spectrum evaluate(const Vec3 &vLocal, const Vec3 &lLocal) const {
+    virtual Spectrum evaluate(const Vec3 &pos, const Vec3 &i, const Vec3 &o) const {
         throw invalid_argument("NotImplementedError");
     }
-    virtual Spectrum sample(const Vec3 &vLocal, Vec3 &lLocal, double &pdf, Sampler &RNG) const {
+    virtual Spectrum sample(const Vec3 &pos, const Vec3 &i, Vec3 &o, double &pdf, Sampler &RNG) const {
         throw invalid_argument("NotImplementedError");
     }
-    virtual double evaluateImportance(const Vec3 &vLocal, const Vec3 &lLocal) const {
+    virtual double evaluateImportance(const Vec3 &pos, const Vec3 &i, const Vec3 &o) const {
         throw invalid_argument("NotImplementedError");
     }
 };
 
 #ifdef ARC_IMPLEMENTATION
 
-Spectrum BxDF::evaluate(const Vec3 &n, const Vec3 &v, const Vec3 &l) const {
+Spectrum BxDF::evaluate(const Vec3 &pos, const Vec3 &n, const Vec3 &gI, const Vec3 &gO) const {
     Mat3 T, TInv;
-    rotateAxis(n, v, T, TInv);
-    Vec3 vT = T * v, lT = T * l;
-    return evaluate(vT, lT);
+    rotateAxis(n, gI, T, TInv);
+    Vec3 vT = T * gI, lT = T * gO;
+    return evaluate(pos, vT, lT);
 }
 
-Spectrum BxDF::sample(const Vec3 &n, const Vec3 &v, Vec3 &l, Sampler &RNG) const {
+Spectrum BxDF::sample(const Vec3 &pos, const Vec3 &n, const Vec3 &gI, Vec3 &gO, Sampler &RNG) const {
     Mat3 T, TInv;
-    rotateAxis(n, v, T, TInv);
-    Vec3 vT = T * v, lT;
+    rotateAxis(n, gI, T, TInv);
+    Vec3 vT = T * gI, lT;
     double pdf;
-    Spectrum s = sample(vT, lT, pdf, RNG);
-    l = TInv * lT;
+    Spectrum s = sample(pos, vT, lT, pdf, RNG);
+    gO = TInv * lT;
     return s / pdf;
 }
 
-double BxDF::evaluateImportance(const Vec3 &n, const Vec3 &v, const Vec3 &l) const {
+double BxDF::evaluateImportance(const Vec3 &pos, const Vec3 &n, const Vec3 &gI, const Vec3 &gO) const {
     Mat3 T, TInv;
-    rotateAxis(n, v, T, TInv);
-    Vec3 vT = T * v, lT = T * l;
-    return evaluateImportance(vT, lT);
+    rotateAxis(n, gI, T, TInv);
+    Vec3 vT = T * gI, lT = T * gO;
+    return evaluateImportance(pos, vT, lT);
 }
 
 #endif

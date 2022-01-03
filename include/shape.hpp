@@ -43,7 +43,6 @@ public:
     virtual Box3 outline() const;
 
 protected:
-    virtual shared_ptr<BxDF> getBxDF(const Vec3 &pos) const;
     virtual shared_ptr<Light> getLight(const Vec3 &pos) const;
 
     shared_ptr<BxDF> bxdf;
@@ -59,9 +58,6 @@ Shape::Shape(
     const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside
 ) : bxdf(bxdf), light(light), inside(inside), outside(outside) {}
 
-shared_ptr<BxDF> Shape::getBxDF(const Vec3 &pos) const {
-    return bxdf;
-}
 shared_ptr<Light> Shape::getLight(const Vec3 &pos) const {
     return light;
 }
@@ -81,19 +77,19 @@ Spectrum Shape::evaluateBxDF(const Ray &v, const Ray &l) const {
     assert(abs(1 - v.d.length()) < EPS);
     assert(abs(1 - l.d.length()) < EPS);
     Vec3 n = normal(l.o);
-    return getBxDF(l.o)->evaluate(n, -v.d, l.d) * abs(l.d * n);
+    return bxdf->evaluate(l.o, n, -v.d, l.d) * abs(l.d * n);
 }
 
 double Shape::evaluateBxDFImportance(const Ray &v, const Ray &l) const {
     Vec3 n = normal(l.o);
-    return getBxDF(l.o)->evaluateImportance(n, -v.d, l.d) * abs(l.d * n);
+    return bxdf->evaluateImportance(l.o, n, -v.d, l.d) * abs(l.d * n);
 }
 
 Spectrum Shape::sampleBxDF(const Ray &v, const Vec3 &pos, Ray &l, shared_ptr<Medium> &medium, Sampler &RNG) const {
     assert(abs(1 - v.d.length()) < EPS);
     l.o = pos;
     Vec3 n = normal(l.o);
-    Spectrum s = getBxDF(l.o)->sample(n, -v.d, l.d, RNG);
+    Spectrum s = bxdf->sample(l.o, n, -v.d, l.d, RNG);
 //    if (n * v.d < 0) assert(medium == outside); else assert(medium == inside);
     medium = getMedium(l);
     return s * abs(l.d * n);
@@ -103,12 +99,12 @@ Spectrum Shape::evaluateLight(const Ray &v, const Vec3 &pos) const {
     if (!isLight()) return Spectrum(0);
     assert(abs(1 - v.d.length()) < EPS);
     Vec3 n = normal(pos);
-    return getLight(pos)->evaluate(n, -v.d);
+    return light->evaluate(pos, n, -v.d);
 }
 
 Spectrum Shape::evaluateLightBack(const Ray &vB) const {
     Vec3 n = normal(vB.o);
-    return getLight(vB.o)->evaluate(n, vB.d) * abs(vB.d * n);
+    return light->evaluate(vB.o, n, vB.d) * abs(vB.d * n);
 }
 
 Spectrum Shape::sampleLight(Ray &lB, shared_ptr<Medium> &medium, Sampler &RNG) const {
@@ -116,7 +112,7 @@ Spectrum Shape::sampleLight(Ray &lB, shared_ptr<Medium> &medium, Sampler &RNG) c
     double pdf;
     sampleSurface(lB.o, pdf, RNG);
     Vec3 n = normal(lB.o);
-    Spectrum s = getLight(lB.o)->sample(n, lB.d, RNG) / pdf;
+    Spectrum s = light->sample(lB.o, n, lB.d, RNG) / pdf;
     medium = getMedium(lB);
     return s * abs(lB.d * n);
 }
@@ -124,7 +120,7 @@ Spectrum Shape::sampleLight(Ray &lB, shared_ptr<Medium> &medium, Sampler &RNG) c
 double Shape::evaluateLightImportance(const Ray &lB) const {
     if (!isLight()) return 0;
     Vec3 n = normal(lB.o);
-    return getLight(lB.o)->evaluateImportance(n, lB.d);
+    return light->evaluateImportance(lB.o, n, lB.d);
 }
 
 #endif
