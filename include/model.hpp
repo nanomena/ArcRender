@@ -58,13 +58,13 @@ bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, co
         });
     }
 
+    vector<shared_ptr<Shape>> objects;
     for (const auto &s: mtlShapes) {
         if (attrib.normals.empty()) {
             cerr << "Missing normal!" << endl;
         }
 
 
-        vector<shared_ptr<Shape>> objects;
         int index_offset = 0;
         for (int f = 0; f < s.mesh.num_face_vertices.size(); ++f) {
             int fv = s.mesh.num_face_vertices[f];
@@ -101,10 +101,10 @@ bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, co
                 textures[0], textures[1], textures[2]
                 );
             TextureMap diffuse = (material.diffuseTex != nullptr)
-                ? TextureMap(material.diffuseTex, texT)
+                ? TextureMap(material.diffuseTex, material.diffuse, texT)
                 : TextureMap(material.diffuse),
                 specular = (material.specularTex != nullptr)
-                ? TextureMap(material.specularTex, texT)
+                ? TextureMap(material.specularTex, material.specular, texT)
                 : TextureMap(material.specular);
 
             objects.push_back(make_shared<Triangle>(
@@ -115,8 +115,8 @@ bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, co
                 (T.t * normals[0]).norm(), (T.t * normals[1]).norm(), (T.t * normals[2]).norm()
             ));
         }
-        scene->addObjects(objects);
     }
+    scene->addObjects(objects);
     cerr << "Read Done" << endl;
     return true;
 }

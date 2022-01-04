@@ -28,7 +28,7 @@
 
 #include "shapes/sphere.hpp"
 #include "shapes/flat.hpp"
-//#include "shapes/disc.hpp"
+#include "shapes/disc.hpp"
 #include "shapes/triangle.hpp"
 
 #include "tracers/bdpt.hpp"

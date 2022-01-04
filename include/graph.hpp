@@ -65,7 +65,7 @@ void KaDanTreeNode::intersect(const Ray &ray, shared_ptr<Shape> &object, double 
     if (!box.intersect(ray, t_cur)) return;
     if (t_cur >= t) return;
 
-    KaDanVisit++;
+//    KaDanVisit++;
 
     // $ << "ray " << ray << " " << cen->outline() << " " << is_inter << endl;
     if (cen->intersect(ray, t_cur))
@@ -104,12 +104,13 @@ KaDanTree::KaDanTree(vector<shared_ptr<Shape>> objects) {
     tree.resize(objects.size());
     root = acquire();
     root->load(&(objects.front()), objects.size(), [this] { return this->acquire(); }, 0);
+    cerr << "faces : " << root->box.L() << " " << root->box.U() << endl;
 }
 
 KaDanTreeNode *KaDanTree::acquire() { return &tree[cnt++]; }
 
 void KaDanTree::intersect(const Ray &ray, shared_ptr<Shape> &object, double &t) const {
-    KaDanVisit = 0;
+//    KaDanVisit = 0;
     root->intersect(ray, object, t);
 //#pragma omp critical
 //    cerr << KaDanVisit << endl;

@@ -34,7 +34,7 @@ public:
     );
 
     BidirectionalPathTracer(
-        int width, int height, const shared_ptr<Scene> &scene, int traceLimit = 9, double traceEps = 1e-7
+        int width, int height, const shared_ptr<Scene> &scene, int traceLimit = 20, double traceEps = 1e-7
     );
 
 private:
@@ -54,7 +54,7 @@ void BidirectionalPathTracer::epoch() {
     Photon photonBuffers[MaxThreads][traceLimit];
     pair<int, Spectrum> spectrumBuffers[MaxThreads][traceLimit];
 
-#pragma omp parallel for schedule(dynamic, width) default(none) shared(spectrum, number, RNGs, photonBuffers, spectrumBuffers)
+#pragma omp parallel for schedule(dynamic, width) default(none) shared(spectrum, number) firstprivate(RNGs, photonBuffers, spectrumBuffers)
     for (int idx = 0; idx < length; idx++) {
         int thd = omp_get_thread_num();
         auto &RNG = RNGs[thd];
@@ -69,7 +69,7 @@ void BidirectionalPathTracer::epoch() {
             Ray lB;
             shared_ptr<Medium> medium;
             shared_ptr<Shape> light = scene->lights[idx % scene->lights.size()];
-            Spectrum traceMul = light->sampleLight(lB, medium, RNG);
+            Spectrum traceMul = light->sampleLight(lB, medium, RNG) * scene->lights.size();
             revTrace(
                 photonBuffer, lB, medium, 1, traceMul, {
                     light->evaluateLightImportance(lB) * light->evaluateSurfaceImportance(lB.o),
@@ -117,7 +117,7 @@ void BidirectionalPathTracer::epoch() {
             if (result.r != result.r) {
                 exit(-1);
             }
-#pragma omp critical
+//#pragma omp critical
             {
                 number[idx] += 1;
                 spectrum[idx] += result;
@@ -133,7 +133,7 @@ void BidirectionalPathTracer::revTrace(
     Photon photonBuffer[], const Ray &lB, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, BiPdf pdf,
     Sampler &RNG
 ) {
-    if (traceMul.norm() < .1) {
+    if (traceMul.norm() < .05) {
         if (RNG.sample() < traceMul.norm() * 10) traceMul *= 1 / (10 * traceMul.norm());
         else return;
     }
@@ -168,7 +168,7 @@ Spectrum BidirectionalPathTracer::trace(
     Photon photonBuffer[], const Ray &v, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, BiPdf pdf, Sampler &RNG
 ) {
     Spectrum extraMul(1);
-    if (traceMul.norm() < .1) {
+    if (traceMul.norm() < .05) {
         if (RNG.sample() < traceMul.norm() * 10) extraMul = Spectrum(1 / (10 * traceMul.norm()));
         else return Spectrum(0);
     }
@@ -178,6 +178,8 @@ Spectrum BidirectionalPathTracer::trace(
     Vec3 intersect;
     Spectrum mediumMul = medium->sample(scene, v, object, intersect, RNG);
 
+    if (object == scene->skybox) return scene->skyboxColor * mediumMul * extraMul;
+
     Spectrum color{0};
     if (object->isLight()) {
         double pdfSum2f = (pdf.sum2 * pow(object->evaluateLightImportance(
@@ -186,8 +188,6 @@ Spectrum BidirectionalPathTracer::trace(
         if (traceDepth == 1) pdfSum2f = 0;
         color = object->evaluateLight(v, intersect) / (pdfSum2f + 1);
     }
-
-    if (object == scene->skybox) return color * mediumMul * extraMul;
 
     for (const auto &light: scene->lights) {
         Vec3 pos;

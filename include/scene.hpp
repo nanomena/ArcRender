@@ -3,15 +3,17 @@
 
 #include "utils.hpp"
 #include "graph.hpp"
+#include "shapes/sphere.hpp"
 
 class Scene {
 public:
     shared_ptr<Shape> skybox;
     shared_ptr<Camera> camera;
     shared_ptr<Medium> medium; // global medium
+    Spectrum skyboxColor;
     vector<shared_ptr<Shape>> lights;
 
-    Scene(const shared_ptr<Camera> &camera, const shared_ptr<Shape> &skybox, const shared_ptr<Medium> &medium);
+    Scene(const shared_ptr<Camera> &camera, const Spectrum &skyboxColor, const shared_ptr<Medium> &medium);
 
     void addObject(const shared_ptr<Shape> &object, const string &name = "");
     void addObjects(const vector<shared_ptr<Shape>> &object, const string &name = "");
@@ -26,8 +28,15 @@ private:
 
 #ifdef ARC_IMPLEMENTATION
 
-Scene::Scene(const shared_ptr<Camera> &camera, const shared_ptr<Shape> &skybox, const shared_ptr<Medium> &medium)
-    : camera(camera), skybox(skybox), medium(medium) {}
+Scene::Scene(const shared_ptr<Camera> &camera, const Spectrum &skyboxColor, const shared_ptr<Medium> &medium)
+    : camera(camera), skyboxColor(skyboxColor), medium(medium) {
+    skybox = make_shared<Sphere>(
+        nullptr, nullptr,
+        nullptr, medium,
+        Vec3(0, 0, 0), INF / 10, true
+    );
+    skybox->setIdentifier("skybox");
+}
 
 void Scene::addObject(const shared_ptr<Shape> &object, const string &name) {
     vector<shared_ptr<Shape>> objects{object};
