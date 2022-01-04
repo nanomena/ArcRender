@@ -8,22 +8,22 @@ static int KaDanVisit;
 
 struct KaDanTreeNode {
     Box3 box;
-    shared_ptr<Shape> cen;
-    KaDanTreeNode *left, *right;
+    const Shape *cen{};
+    KaDanTreeNode *left{}, *right{};
 
     void load(
-        shared_ptr<Shape> objects[], unsigned int size, const function<KaDanTreeNode *()> &acquire, int d
+        const Shape *objects[], unsigned int size, const function<KaDanTreeNode *()> &acquire, int d
     );
-    void intersect(const Ray &ray, shared_ptr<Shape> &object, double &t) const;
+    void intersect(const Ray &ray, const Shape *&object, double &t) const;
 };
 
 class KaDanTree {
 public:
-    explicit KaDanTree(vector<shared_ptr<Shape>> objects);
+    explicit KaDanTree(vector<const Shape *> objects);
 
     KaDanTreeNode *acquire();
 
-    void intersect(const Ray &ray, shared_ptr<Shape> &object, double &t) const;
+    void intersect(const Ray &ray, const Shape *&object, double &t) const;
     Box3 box() const;
 
 private:
@@ -35,12 +35,12 @@ private:
 #ifdef ARC_IMPLEMENTATION
 
 void KaDanTreeNode::load(
-    shared_ptr<Shape> objects[], unsigned int size, const function<KaDanTreeNode *()> &acquire, int d
+    const Shape *objects[], unsigned int size, const function<KaDanTreeNode *()> &acquire, int d
 ) {
     unsigned int mid = size / 2;
     nth_element(
         objects, objects + mid, objects + size,
-        [&](const shared_ptr<Shape> &a, const shared_ptr<Shape> &b) {
+        [&](const Shape *a, const Shape *b) {
             Box3 _a = a->outline(), _b = b->outline();
             return (_a.L()[d] + _a.U()[d]) < (_b.L()[d] + _b.U()[d]);
         }
@@ -59,7 +59,7 @@ void KaDanTreeNode::load(
     if (right != nullptr) box = box + right->box;
 }
 
-void KaDanTreeNode::intersect(const Ray &ray, shared_ptr<Shape> &object, double &t) const {
+void KaDanTreeNode::intersect(const Ray &ray, const Shape *&object, double &t) const {
     int is_inter;
     double t_cur;
     if (!box.intersect(ray, t_cur)) return;
@@ -98,7 +98,7 @@ void KaDanTreeNode::intersect(const Ray &ray, shared_ptr<Shape> &object, double 
     }
 }
 
-KaDanTree::KaDanTree(vector<shared_ptr<Shape>> objects) {
+KaDanTree::KaDanTree(vector<const Shape *> objects) {
     cerr << "faces : " << objects.size() << endl;
     cnt = 0;
     tree.resize(objects.size());
@@ -109,7 +109,7 @@ KaDanTree::KaDanTree(vector<shared_ptr<Shape>> objects) {
 
 KaDanTreeNode *KaDanTree::acquire() { return &tree[cnt++]; }
 
-void KaDanTree::intersect(const Ray &ray, shared_ptr<Shape> &object, double &t) const {
+void KaDanTree::intersect(const Ray &ray, const Shape *&object, double &t) const {
 //    KaDanVisit = 0;
     root->intersect(ray, object, t);
 //#pragma omp critical

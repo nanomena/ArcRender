@@ -19,11 +19,11 @@ private:
 class TextureMap {
 public:
     explicit TextureMap(const Spectrum &color);
-    TextureMap(const shared_ptr<Texture> &texture, const Spectrum &color, Trans3 T);
+    TextureMap(const Texture *texture, const Spectrum &color, Trans3 T);
     Spectrum operator [](const Vec3 &v) const;
 
 private:
-    shared_ptr<Texture> texture;
+    const Texture *texture;
     Trans3 T;
     Spectrum color;
 };
@@ -59,7 +59,7 @@ Spectrum Texture::get(int x, int y) const {
 }
 
 TextureMap::TextureMap(const Spectrum &color) : texture(nullptr), color(color) {}
-TextureMap::TextureMap(const shared_ptr<Texture> &texture, const Spectrum &color, Trans3 T)
+TextureMap::TextureMap(const Texture *texture, const Spectrum &color, Trans3 T)
     : texture(texture), color(color), T(T) {}
 
 Spectrum TextureMap::operator [](const Vec3 &v) const {

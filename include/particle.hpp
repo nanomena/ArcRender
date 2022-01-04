@@ -22,12 +22,12 @@ public:
     }
 
     Spectrum evaluateBxDF(const Ray &v, const Ray &l) const override;
-    Spectrum sampleBxDF(const Ray &v, const Vec3 &pos, Ray &l, shared_ptr<Medium> &medium, Sampler &RNG) const override;
+    Spectrum sampleBxDF(const Ray &v, const Vec3 &pos, Ray &l, const Medium *&medium, Sampler &RNG) const override;
     double evaluateBxDFImportance(const Ray &v, const Ray &l) const override;
 
     Spectrum evaluateLight(const Ray &v, const Vec3 &pos) const override;
     Spectrum evaluateLightBack(const Ray &vB) const override;
-    Spectrum sampleLight(Ray &lB, shared_ptr<Medium> &medium, Sampler &RNG) const override;
+    Spectrum sampleLight(Ray &lB, const Medium *&medium, Sampler &RNG) const override;
     double evaluateLightImportance(const Ray &lB) const override;
 
 protected:
@@ -54,7 +54,7 @@ double Particle::evaluateBxDFImportance(const Ray &v, const Ray &l) const {
     return (1 / (2 * pi)) * abs(l.d * n);
 }
 
-Spectrum Particle::sampleBxDF(const Ray &v, const Vec3 &pos, Ray &l, shared_ptr<Medium> &medium, Sampler &RNG) const {
+Spectrum Particle::sampleBxDF(const Ray &v, const Vec3 &pos, Ray &l, const Medium *&medium, Sampler &RNG) const {
     assert(abs(1 - v.d.length()) < EPS);
     l.o = pos;
     l.d = RNG.sphere();
@@ -71,7 +71,7 @@ Spectrum Particle::evaluateLightBack(const Ray &vB) const {
     return Spectrum(0);
 }
 
-Spectrum Particle::sampleLight(Ray &lB, shared_ptr<Medium> &medium, Sampler &RNG) const {
+Spectrum Particle::sampleLight(Ray &lB, const Medium *&medium, Sampler &RNG) const {
     return Spectrum(0);
 }
 

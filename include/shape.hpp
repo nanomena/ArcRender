@@ -11,8 +11,8 @@
 class Shape : public Object {
 public:
     Shape(
-        const shared_ptr<BxDF> &bxdf, const shared_ptr<Light> &light,
-        const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside
+        const BxDF *bxdf, const Light *light,
+        const Medium *inside, const Medium *outside
     );
 
     bool isLight() const override;
@@ -29,38 +29,34 @@ public:
     double evaluateSurfaceImportance(const Vec3 &pos) const override {
         throw invalid_argument("NotImplementedError");
     }
-    shared_ptr<Medium> getMedium(const Ray &test) const;
+    const Medium *getMedium(const Ray &test) const;
 
     Spectrum evaluateBxDF(const Ray &v, const Ray &l) const override;
-    Spectrum sampleBxDF(const Ray &v, const Vec3 &pos, Ray &l, shared_ptr<Medium> &medium, Sampler &RNG) const override;
+    Spectrum sampleBxDF(const Ray &v, const Vec3 &pos, Ray &l, const Medium *&medium, Sampler &RNG) const override;
     double evaluateBxDFImportance(const Ray &v, const Ray &l) const override;
 
     Spectrum evaluateLight(const Ray &v, const Vec3 &pos) const override;
     Spectrum evaluateLightBack(const Ray &vB) const override;
-    Spectrum sampleLight(Ray &lB, shared_ptr<Medium> &medium, Sampler &RNG) const override;
+    Spectrum sampleLight(Ray &lB, const Medium *&medium, Sampler &RNG) const override;
     double evaluateLightImportance(const Ray &lB) const override;
 
     virtual Box3 outline() const;
 
 protected:
-    virtual shared_ptr<Light> getLight(const Vec3 &pos) const;
 
-    shared_ptr<BxDF> bxdf;
-    shared_ptr<Light> light;
-    shared_ptr<Medium> inside, outside;
+    const BxDF *bxdf;
+    const Light *light;
+    const Medium *inside, *outside;
     Box3 box;
 };
 
 #ifdef ARC_IMPLEMENTATION
 
 Shape::Shape(
-    const shared_ptr<BxDF> &bxdf, const shared_ptr<Light> &light,
-    const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside
+    const BxDF *bxdf, const Light *light,
+    const Medium *inside, const Medium *outside
 ) : bxdf(bxdf), light(light), inside(inside), outside(outside) {}
 
-shared_ptr<Light> Shape::getLight(const Vec3 &pos) const {
-    return light;
-}
 bool Shape::isLight() const {
     return light != nullptr;
 }
@@ -68,7 +64,7 @@ Box3 Shape::outline() const {
     return box;
 }
 
-shared_ptr<Medium> Shape::getMedium(const Ray &test) const {
+const Medium *Shape::getMedium(const Ray &test) const {
     Vec3 n = normal(test.o);
     return (n * test.d > 0 ? outside : inside);
 }
@@ -85,7 +81,7 @@ double Shape::evaluateBxDFImportance(const Ray &v, const Ray &l) const {
     return bxdf->evaluateImportance(l.o, n, -v.d, l.d) * abs(l.d * n);
 }
 
-Spectrum Shape::sampleBxDF(const Ray &v, const Vec3 &pos, Ray &l, shared_ptr<Medium> &medium, Sampler &RNG) const {
+Spectrum Shape::sampleBxDF(const Ray &v, const Vec3 &pos, Ray &l, const Medium *&medium, Sampler &RNG) const {
     assert(abs(1 - v.d.length()) < EPS);
     l.o = pos;
     Vec3 n = normal(l.o);
@@ -107,7 +103,7 @@ Spectrum Shape::evaluateLightBack(const Ray &vB) const {
     return light->evaluate(vB.o, n, vB.d) * abs(vB.d * n);
 }
 
-Spectrum Shape::sampleLight(Ray &lB, shared_ptr<Medium> &medium, Sampler &RNG) const {
+Spectrum Shape::sampleLight(Ray &lB, const Medium *&medium, Sampler &RNG) const {
     if (!isLight()) return Spectrum(0);
     double pdf;
     sampleSurface(lB.o, pdf, RNG);

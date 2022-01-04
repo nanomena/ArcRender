@@ -11,29 +11,28 @@ int main() {
     long long T0 = time(nullptr);
 
 
-    shared_ptr<Medium> medium = make_shared<Transparent>(Spectrum(1, 1, 1));
+    auto medium = new Transparent(Spectrum(1, 1, 1));
 
-    shared_ptr<Camera> camera = make_shared<PerspectiveCamera>(
+    auto camera = new PerspectiveCamera(
         Vec3(0, 0, 1.5),
         Vec3(0.8, 0, 0),
         Vec3(0, 0.6, 0),
         0.6
     );
-    shared_ptr<Scene> scene = make_shared<Scene>(camera, Spectrum(0), medium);
+    auto scene = new Scene(camera, Spectrum(0), medium);
 
-
-    vector<shared_ptr<Shape>> objects;
-    if (!LoadModel("models/teapot.obj", "models/", Trans3(
+    Model model("models/teapot.obj", "models/", Trans3(
         Vec3(0, -.9, -1),
         Vec3(0.24, 0, 0),
         Vec3(0, 0.24, 0),
         Vec3(0, 0, 0.24)
-    ), medium, scene)) return -1;
+    ), medium);
+    scene->addObjects(model.get());
 
     scene->addObject(
-        make_shared<Flat>(
-            make_shared<Lambert>(Spectrum(0)),
-            make_shared<UniformLight>(Spectrum(10)),
+        new Flat(
+            new Lambert(Spectrum(0)),
+            new UniformLight(Spectrum(10)),
             medium, medium,
             Vec3(-0.3, 0.99, -0.7),
             Vec3(-0.3, 0.99, -1.3),
@@ -43,8 +42,8 @@ int main() {
     );
 
     scene->addObject(
-        make_shared<Flat>(
-            make_shared<GGX>(rgb256(250, 250, 250), 0.8), nullptr,
+        new Flat(
+            new GGX(rgb256(250, 250, 250), 0.8), nullptr,
             medium, medium,
             Vec3(-1, -1, -2),
             Vec3(-1, -1, 2),
@@ -54,8 +53,8 @@ int main() {
     );
 
     scene->addObject(
-        make_shared<Flat>(
-            make_shared<GGX>(rgb256(250, 250, 250), 0.8), nullptr,
+        new Flat(
+            new GGX(rgb256(250, 250, 250), 0.8), nullptr,
             medium, medium,
             Vec3(-1, 1, 2),
             Vec3(-1, 1, -2),
@@ -65,8 +64,8 @@ int main() {
     );
 
     scene->addObject(
-        make_shared<Flat>(
-            make_shared<GGX>(rgb256(170, 170, 250), 0.8), nullptr,
+        new Flat(
+            new GGX(rgb256(170, 170, 250), 0.8), nullptr,
             medium, medium,
             Vec3(1, -1, -2),
             Vec3(1, -1, 2),
@@ -76,8 +75,8 @@ int main() {
     );
 
     scene->addObject(
-        make_shared<Flat>(
-            make_shared<GGX>(rgb256(250, 170, 170), 0.8), nullptr,
+        new Flat(
+            new GGX(rgb256(250, 170, 170), 0.8), nullptr,
             medium, medium,
             Vec3(-1, -1, 2),
             Vec3(-1, -1, -2),
@@ -87,8 +86,8 @@ int main() {
     );
 
     scene->addObject(
-        make_shared<Flat>(
-            make_shared<Lambert>(rgb256(250, 250, 250)), nullptr,
+        new Flat(
+            new Lambert(rgb256(250, 250, 250)), nullptr,
             medium, medium,
             Vec3(-1, 1, -2),
             Vec3(-1, -1, -2),
@@ -98,8 +97,8 @@ int main() {
     );
 
     scene->addObject(
-        make_shared<Flat>(
-            make_shared<Lambert>(rgb256(250, 250, 250)), nullptr,
+        new Flat(
+            new Lambert(rgb256(250, 250, 250)), nullptr,
             medium, medium,
             Vec3(-1, -1, 2),
             Vec3(-1, 1, 2),
@@ -109,7 +108,7 @@ int main() {
         "front"
     );
 
-    shared_ptr<Tracer> tracer = make_shared<BidirectionalPathTracer>(1600, 1200, scene);
+    auto tracer = new BidirectionalPathTracer(1600, 1200, scene);
 
     char output[100];
     sprintf(output, "samples/scene8/result.png");

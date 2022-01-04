@@ -6,30 +6,32 @@
 class Scatter : public Medium {
 public:
     explicit Scatter(double lambda, Spectrum color);
+    ~Scatter();
 
     Spectrum evaluate(double t) const override;
     Spectrum sample(
-        const shared_ptr<Scene> &scene, const Ray &v, shared_ptr<Object> &object, Vec3 &intersect, Sampler &RNG
+        const Scene *scene, const Ray &v, const Object *&object, Vec3 &intersect, Sampler &RNG
     ) const override;
 
 private:
     double lambda;
-    shared_ptr<Particle> particle;
+    const Particle *particle;
 };
 
 #ifdef ARC_IMPLEMENTATION
 
-Scatter::Scatter(double lambda, Spectrum color) : lambda(lambda), particle(make_shared<Particle>(color)) {}
+Scatter::Scatter(double lambda, Spectrum color) : lambda(lambda), particle(new Particle(color)) {}
+Scatter::~Scatter() {delete particle;}
 
 Spectrum Scatter::evaluate(double t) const {
     return Spectrum(1) * exp(-lambda * t);
 }
 
 Spectrum Scatter::sample(
-    const shared_ptr<Scene> &scene, const Ray &v, shared_ptr<Object> &object, Vec3 &intersect, Sampler &RNG
+    const Scene *scene, const Ray &v, const Object *&object, Vec3 &intersect, Sampler &RNG
 ) const {
     double t;
-    shared_ptr<Shape> shape;
+    const Shape *shape;
     scene->intersect(v, shape, t);
     double tCur = log(1 - RNG.rand()) / (-lambda);
     if (tCur > t) {

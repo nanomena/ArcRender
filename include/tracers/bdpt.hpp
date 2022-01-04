@@ -2,7 +2,6 @@
 #define ARCRENDER_INCLUDE_TRACERS_BDPT_HPP
 
 #include "../tracer.hpp"
-#include "../photon.hpp"
 
 struct BiPdf {
     double last, sum2;
@@ -14,7 +13,7 @@ struct BiPdf {
 struct Photon {
     Vec3 intersect;
     Ray lB;
-    shared_ptr<Object> object;
+    const Object *object;
     BiPdf pdf;
     Spectrum color;
 };
@@ -24,17 +23,17 @@ public:
     void epoch() override;
 
     void revTrace(
-        Photon photonBuffer[], const Ray &lB, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul,
+        Photon photonBuffer[], const Ray &lB, const Medium *medium, int traceDepth, Spectrum traceMul,
         BiPdf pdf,
         Sampler &RNG
     );
     Spectrum trace(
-        Photon photonBuffer[], const Ray &v, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, BiPdf pdf,
+        Photon photonBuffer[], const Ray &v, const Medium *medium, int traceDepth, Spectrum traceMul, BiPdf pdf,
         Sampler &RNG
     );
 
     BidirectionalPathTracer(
-        int width, int height, const shared_ptr<Scene> &scene, int traceLimit = 20, double traceEps = 1e-7
+        int width, int height, const Scene *scene, int traceLimit = 20, double traceEps = 1e-7
     );
 
 private:
@@ -45,7 +44,7 @@ private:
 #ifdef ARC_IMPLEMENTATION
 
 BidirectionalPathTracer::BidirectionalPathTracer(
-    int width, int height, const shared_ptr<Scene> &scene, int traceLimit, double traceEPS
+    int width, int height, const Scene *scene, int traceLimit, double traceEPS
 ) : Tracer(width, height, scene), traceLimit(traceLimit), traceEPS(traceEPS) {}
 
 
@@ -67,8 +66,8 @@ void BidirectionalPathTracer::epoch() {
         }
         {
             Ray lB;
-            shared_ptr<Medium> medium;
-            shared_ptr<Shape> light = scene->lights[idx % scene->lights.size()];
+            const Medium *medium;
+            const Shape *light = scene->lights[idx % scene->lights.size()];
             Spectrum traceMul = light->sampleLight(lB, medium, RNG) * scene->lights.size();
             revTrace(
                 photonBuffer, lB, medium, 1, traceMul, {
@@ -91,7 +90,7 @@ void BidirectionalPathTracer::epoch() {
             double t = (v.o - intersect).length();
             Ray vB = {intersect, (v.o - intersect).norm()};
 
-            shared_ptr<Medium> curMedium = scene->visible(v, object, t);
+            const Medium *curMedium = scene->visible(v, object, t);
             if (cameraIdx != -1 && curMedium != nullptr) {
                 double pdfSum2b = (
                     pdf.sum2 * pow(
@@ -130,7 +129,7 @@ void BidirectionalPathTracer::epoch() {
 }
 
 void BidirectionalPathTracer::revTrace(
-    Photon photonBuffer[], const Ray &lB, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, BiPdf pdf,
+    Photon photonBuffer[], const Ray &lB, const Medium *medium, int traceDepth, Spectrum traceMul, BiPdf pdf,
     Sampler &RNG
 ) {
     if (traceMul.norm() < .05) {
@@ -139,7 +138,7 @@ void BidirectionalPathTracer::revTrace(
     }
     if (traceDepth >= traceLimit) return;
 
-    shared_ptr<Object> object;
+    const Object *object;
     Vec3 intersect;
     Spectrum mediumMul = medium->sample(scene, lB, object, intersect, RNG);
 
@@ -165,7 +164,7 @@ void BidirectionalPathTracer::revTrace(
 }
 
 Spectrum BidirectionalPathTracer::trace(
-    Photon photonBuffer[], const Ray &v, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, BiPdf pdf, Sampler &RNG
+    Photon photonBuffer[], const Ray &v, const Medium *medium, int traceDepth, Spectrum traceMul, BiPdf pdf, Sampler &RNG
 ) {
     Spectrum extraMul(1);
     if (traceMul.norm() < .05) {
@@ -174,7 +173,7 @@ Spectrum BidirectionalPathTracer::trace(
     }
     if (traceDepth >= traceLimit) return Spectrum(0);
 
-    shared_ptr<Object> object;
+    const Object *object;
     Vec3 intersect;
     Spectrum mediumMul = medium->sample(scene, v, object, intersect, RNG);
 
@@ -196,7 +195,7 @@ Spectrum BidirectionalPathTracer::trace(
         double t = (pos - intersect).length();
         Ray l = {intersect, (pos - intersect).norm()},
             vB = {pos, (intersect - pos).norm()};
-        shared_ptr<Medium> curMedium = scene->visible(l, light, t);
+        const Medium *curMedium = scene->visible(l, light, t);
 
         if (curMedium != nullptr) {
             double pdfSum2f = (pdf.sum2 * pow(object->evaluateBxDFImportance(
@@ -220,7 +219,7 @@ Spectrum BidirectionalPathTracer::trace(
         double t = (p.intersect - intersect).length();
         Ray l = {intersect, (p.intersect - intersect).norm()},
             vB = {p.intersect, (intersect - p.intersect).norm()};
-        shared_ptr<Medium> curMedium = scene->visible(l, p.object, t);
+        const Medium *curMedium = scene->visible(l, p.object, t);
 
         if (curMedium != nullptr) {
             double pdfSum2f = (pdf.sum2 * pow(object->evaluateBxDFImportance(

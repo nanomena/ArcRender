@@ -7,51 +7,61 @@
 
 class Scene {
 public:
-    shared_ptr<Shape> skybox;
-    shared_ptr<Camera> camera;
-    shared_ptr<Medium> medium; // global medium
+    const Shape *skybox;
+    const Camera *camera;
+    const Medium *medium; // global medium
     Spectrum skyboxColor;
-    vector<shared_ptr<Shape>> lights;
+    vector<const Shape*> lights;
 
-    Scene(const shared_ptr<Camera> &camera, const Spectrum &skyboxColor, const shared_ptr<Medium> &medium);
+    Scene(const Camera *camera, const Spectrum &skyboxColor, const Medium *medium);
+    ~Scene();
 
-    void addObject(const shared_ptr<Shape> &object, const string &name = "");
-    void addObjects(const vector<shared_ptr<Shape>> &object, const string &name = "");
 
-    void intersect(const Ray &ray, shared_ptr<Shape> &object, double &t) const;
-    shared_ptr<Medium> visible(const Ray &ray, const shared_ptr<Object> &object, double t) const;
+    void addObject(const Shape *object, const string &name = "");
+    void addObjects(const vector<const Shape *> &object, const string &name = "");
+    void clear();
+
+    void intersect(const Ray &ray, const Shape *&object, double &t) const;
+    const Medium *visible(const Ray &ray, const Object *object, double t) const;
 
     Box3 box() const;
 private:
-    vector<shared_ptr<KaDanTree>> graphs;
+    vector<KaDanTree *> graphs;
 };
 
 #ifdef ARC_IMPLEMENTATION
 
-Scene::Scene(const shared_ptr<Camera> &camera, const Spectrum &skyboxColor, const shared_ptr<Medium> &medium)
+Scene::Scene(const Camera *camera, const Spectrum &skyboxColor, const Medium *medium)
     : camera(camera), skyboxColor(skyboxColor), medium(medium) {
-    skybox = make_shared<Sphere>(
+    skybox = new Sphere(
         nullptr, nullptr,
         nullptr, medium,
         Vec3(0, 0, 0), INF / 10, true
     );
-    skybox->setIdentifier("skybox");
+}
+Scene::~Scene() {
+    clear();
+    delete skybox;
 }
 
-void Scene::addObject(const shared_ptr<Shape> &object, const string &name) {
-    vector<shared_ptr<Shape>> objects{object};
+void Scene::addObject(const Shape *object, const string &name) {
+    vector<const Shape *> objects{object};
     addObjects(objects, name);
 }
-void Scene::addObjects(const vector<shared_ptr<Shape>> &objects, const string &name) {
+void Scene::addObjects(const vector<const Shape *> &objects, const string &name) {
     for (const auto &object: objects) {
-        object->setIdentifier(name);
         if (object->isLight())
             lights.push_back(object);
     }
-    graphs.push_back(make_shared<KaDanTree>(objects));
+    graphs.push_back(new KaDanTree(objects));
+}
+void Scene::clear() {
+    for (auto &object: graphs)
+        delete object;
+    graphs.clear();
 }
 
-void Scene::intersect(const Ray &ray, shared_ptr<Shape> &object, double &t) const {
+void Scene::intersect(const Ray &ray, const Shape *&object, double &t) const {
 //    cerr << "intersect checking: " << ray.o << " " << ray.d << endl;
 
     Ray rayX = ray;
@@ -71,9 +81,9 @@ Box3 Scene::box() const {
     return b;
 }
 
-shared_ptr<Medium> Scene::visible(const Ray &ray, const shared_ptr<Object> &object, double t) const {
+const Medium *Scene::visible(const Ray &ray, const Object *object, double t) const {
     double tTrue;
-    shared_ptr<Shape> objectTrue;
+    const Shape *objectTrue;
     intersect(ray, objectTrue, tTrue);
     if (tTrue > t + EPS) return objectTrue->getMedium({ray.o + ray.d * tTrue, -ray.d});
     if ((objectTrue != object) || tTrue < t - EPS) return nullptr;

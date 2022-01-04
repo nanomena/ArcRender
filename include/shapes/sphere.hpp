@@ -6,8 +6,8 @@
 class Sphere : public Shape {
 public:
     Sphere(
-        const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light,
-        const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside,
+        const BxDF *bxdf, const Light *light,
+        const Medium *inside, const Medium *outside,
         Vec3 o, double r, bool reverse = false
     );
 
@@ -24,10 +24,10 @@ private:
 #ifdef ARC_IMPLEMENTATION
 
 Sphere::Sphere(
-    const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light,
-    const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside,
+    const BxDF *bxdf, const Light *light,
+    const Medium *inside, const Medium *outside,
     Vec3 o, double r, bool reverse
-) : Shape(BxDF, Light, inside, outside), o(o), r(r), reverse(reverse) {
+) : Shape(bxdf, light, inside, outside), o(o), r(r), reverse(reverse) {
     box = Box3(o - Vec3(r, r, r), o + Vec3(r, r, r));
 }
 

@@ -12,7 +12,7 @@ public:
         throw invalid_argument("NotImplementedError");
     }
     virtual Spectrum sample(
-        const shared_ptr<Scene> &scene, const Ray &v, shared_ptr<Object> &object, Vec3 &intersect, Sampler &RNG
+        const Scene *scene, const Ray &v, const Object *&object, Vec3 &intersect, Sampler &RNG
     ) const {
         throw invalid_argument("NotImplementedError");
     }

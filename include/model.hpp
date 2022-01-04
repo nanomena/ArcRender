@@ -11,17 +11,36 @@
 #include "shapes/triangle.hpp"
 #include "lights/uniform.hpp"
 
-bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, const shared_ptr<Medium> &medium, const shared_ptr<Scene> &scene);
-
-struct mtlMaterial {
+struct MtlMaterial {
     Spectrum diffuse, specular;
-    shared_ptr<Texture> diffuseTex, specularTex;
+    const Texture *diffuseTex, *specularTex;
     double roughness{}, ior{}, dissolve{};
+};
+
+class Model {
+public:
+    Model (const string &filename, const string &mtlDir, const Trans3 &T, const Medium *medium);
+    ~Model();
+
+    vector<const Shape *> get() const;
+
+private:
+    vector<MtlMaterial> materials;
+    vector<const Shape *> objects;
 };
 
 #ifdef ARC_IMPLEMENTATION
 
-bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, const shared_ptr<Medium> &medium, const shared_ptr<Scene> &scene) {
+Model::~Model() {
+    for (auto &object : objects)
+        delete object;
+    for (auto &material : materials) {
+        delete material.diffuseTex;
+        delete material.specularTex;
+    }
+}
+
+Model::Model(const string &filename, const string &mtlDir, const Trans3 &T, const Medium *medium) {
     cerr << filename << ":" << endl;
     tinyobj::attrib_t attrib;
     vector<tinyobj::shape_t> mtlShapes;
@@ -30,35 +49,32 @@ bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, co
     string warn, err;
     bool ret = tinyobj::LoadObj(&attrib, &mtlShapes, &mtlMaterials, &warn, &err, filename.c_str(), mtlDir.c_str());
     if (!warn.empty()) std::cerr << warn << std::endl;
-    if (!err.empty()) { std::cout << "Error: " << err << std::endl; return false; }
-    if (!ret) { std::cout << ret << std::endl; return false; }
+    if (!err.empty()) { std::cout << "Error: " << err << std::endl; return; }
+    if (!ret) { std::cout << ret << std::endl; return; }
     cerr << "shapes : " << mtlShapes.size() << endl;
-
-    vector<mtlMaterial> mtlList;
 
     for (const auto &material: mtlMaterials) {
         Spectrum diffuse = rgb(material.diffuse[0], material.diffuse[1], material.diffuse[2]);
         Spectrum specular = rgb(material.specular[0], material.specular[1], material.specular[2]);
         double ior = material.ior, dissolve = material.dissolve, roughness = 1 - atan(material.shininess);
-        shared_ptr<Texture> diffuseTex, specularTex;
+        const Texture *diffuseTex = nullptr, *specularTex = nullptr;
 
         if (!material.diffuse_texname.empty()) {
             string texture = mtlDir + material.diffuse_texname;
             cerr << "Diffuse Texture: " << texture << endl;
-            diffuseTex = make_shared<Texture>(texture.c_str());
+            diffuseTex = new Texture (texture);
         }
         if (!material.specular_texname.empty()) {
             string texture = mtlDir + material.specular_texname;
             cerr << "Specular Texture: " << texture << endl;
-            specularTex = make_shared<Texture>(texture.c_str());
+            specularTex = new Texture(texture);
         }
 
-        mtlList.push_back({
+        materials.push_back({
             diffuse, specular, diffuseTex, specularTex, roughness, ior, dissolve
         });
     }
 
-    vector<shared_ptr<Shape>> objects;
     for (const auto &s: mtlShapes) {
         if (attrib.normals.empty()) {
             cerr << "Missing normal!" << endl;
@@ -95,7 +111,7 @@ bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, co
             }
             index_offset += fv;
 
-            auto &material = mtlList[s.mesh.material_ids[f]];
+            auto &material = materials[s.mesh.material_ids[f]];
             Trans3 texT = Trans3(
                 T * vertices[0], T * vertices[1], T * vertices[2],
                 textures[0], textures[1], textures[2]
@@ -107,8 +123,8 @@ bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, co
                 ? TextureMap(material.specularTex, material.specular, texT)
                 : TextureMap(material.specular);
 
-            objects.push_back(make_shared<Triangle>(
-                make_shared<MtlGGX>(diffuse, specular, material.roughness, material.ior, material.dissolve),
+            objects.push_back(new Triangle(
+                new MtlGGX(diffuse, specular, material.roughness, material.ior, material.dissolve),
                 nullptr,
                 medium, medium,
                 T * vertices[0], T * vertices[1], T * vertices[2],
@@ -116,9 +132,11 @@ bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, co
             ));
         }
     }
-    scene->addObjects(objects);
     cerr << "Read Done" << endl;
-    return true;
+}
+
+vector<const Shape *> Model::get() const {
+    return objects;
 }
 
 #endif

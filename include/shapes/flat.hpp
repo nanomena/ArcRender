@@ -6,21 +6,21 @@
 class Flat : public Shape {
 public:
     explicit Flat(
-        const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light,
-        const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside,
+        const BxDF *bxdf, const Light *light,
+        const Medium *inside, const Medium *outside,
         const vector<Vec3> &vertices
     );
 
     template<typename... Args>
     explicit Flat(
-        const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light,
-        const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside,
+        const BxDF *bxdf, const Light *light,
+        const Medium *inside, const Medium *outside,
         Args... vertices
-    ) : Shape(BxDF, Light, inside, outside) {
+    ) : Shape(bxdf, light, inside, outside) {
         vector<Vec3> tmp;
         n = 0;
         (tmp.push_back(vertices), ...);
-        new(this)Flat(BxDF, Light, inside, outside, tmp);
+        new(this)Flat(bxdf, light, inside, outside, tmp);
     }
 
     bool intersect(const Ray &ray, double &t) const override;
@@ -41,10 +41,10 @@ private:
 #ifdef ARC_IMPLEMENTATION
 
 Flat::Flat(
-    const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light,
-    const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside,
+    const BxDF *bxdf, const Light *light,
+    const Medium *inside, const Medium *outside,
     const vector<Vec3> &vertices
-) : Shape(BxDF, Light, inside, outside), vertices(vertices) {
+) : Shape(bxdf, light, inside, outside), vertices(vertices) {
 //    cerr << "S" << endl;
     n = vertices.size();
 

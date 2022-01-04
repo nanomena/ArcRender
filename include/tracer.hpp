@@ -13,7 +13,7 @@
 
 class Tracer {
 public:
-    Tracer(int width, int height, const shared_ptr<Scene> &scene);
+    Tracer(int width, int height, const Scene *scene);
     ~Tracer();
 
     virtual void epoch() = 0;
@@ -28,13 +28,13 @@ protected:
     Spectrum *spectrum;
     double *number;
 
-    shared_ptr<Scene> scene;
+    const Scene *scene;
 };
 
 #ifdef ARC_IMPLEMENTATION
 
 Tracer::Tracer(
-    int width, int height, const shared_ptr<Scene> &scene
+    int width, int height, const Scene *scene
 ) : width(width), height(height), scene(scene), length(width * height) {
     spectrum = new Spectrum[length];
     for (int i = 0; i < length; ++i) spectrum[i] = Spectrum(0);

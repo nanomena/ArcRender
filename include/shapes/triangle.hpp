@@ -8,13 +8,13 @@ class Triangle : public Shape {
 
 public:
     Triangle(
-        const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light,
-        const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside,
+        const BxDF *bxdf, const Light *light,
+        const Medium *inside, const Medium *outside,
         Vec3 v0, Vec3 v1, Vec3 v2
     );
     Triangle(
-        const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light,
-        const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside,
+        const BxDF *bxdf, const Light *light,
+        const Medium *inside, const Medium *outside,
         Vec3 v0, Vec3 v1, Vec3 v2,
         Vec3 vn0, Vec3 vn1, Vec3 vn2
     );
@@ -26,20 +26,20 @@ public:
 #ifdef ARC_IMPLEMENTATION
 
 Triangle::Triangle(
-    const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light,
-    const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside,
+    const BxDF *bxdf, const Light *light,
+    const Medium *inside, const Medium *outside,
     Vec3 v0, Vec3 v1, Vec3 v2
-) : Shape(BxDF, Light, inside, outside), v0(v0), v1(v1), v2(v2) {
+) : Shape(bxdf, light, inside, outside), v0(v0), v1(v1), v2(v2) {
     vn0 = vn1 = vn2 = ((v1 - v0) ^ (v2 - v0)).norm();
     box = Box3(v0) + Box3(v1) + Box3(v2);
 }
 
 Triangle::Triangle(
-    const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light,
-    const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside,
+    const BxDF *bxdf, const Light *light,
+    const Medium *inside, const Medium *outside,
     Vec3 v0, Vec3 v1, Vec3 v2,
     Vec3 vn0, Vec3 vn1, Vec3 vn2
-) : Shape(BxDF, Light, inside, outside), v0(v0), v1(v1), v2(v2), vn0(vn0), vn1(vn1), vn2(vn2) {
+) : Shape(bxdf, light, inside, outside), v0(v0), v1(v1), v2(v2), vn0(vn0), vn1(vn1), vn2(vn2) {
     box = Box3(v0) + Box3(v1) + Box3(v2);
 }
 

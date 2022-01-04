@@ -6,8 +6,8 @@
 class Disc : public Shape {
 public:
     Disc(
-        const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light,
-        const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside,
+        const BxDF *bxdf, const Light *light,
+        const Medium *inside, const Medium *outside,
         Ray v, double r
     );
 
@@ -25,10 +25,10 @@ private:
 #ifdef ARC_IMPLEMENTATION
 
 Disc::Disc(
-    const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light,
-    const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside,
+    const BxDF *bxdf, const Light *light,
+    const Medium *inside, const Medium *outside,
     Ray v, double r
-) : Shape(BxDF, Light, inside, outside), v(v), r(r) {
+) : Shape(bxdf, light, inside, outside), v(v), r(r) {
     box = Box3(v.o - Vec3(r, r, r), v.o + Vec3(r, r, r));
     rotateAxis(v.d, v.d, T, TInv);
 }

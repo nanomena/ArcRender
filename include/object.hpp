@@ -19,12 +19,12 @@ public:
     virtual double evaluateSurfaceImportance(const Vec3 &pos) const = 0;
 
     virtual Spectrum evaluateBxDF(const Ray &v, const Ray &l) const = 0;
-    virtual Spectrum sampleBxDF(const Ray &v, const Vec3 &pos, Ray &l, shared_ptr<Medium> &medium, Sampler &RNG) const = 0;
+    virtual Spectrum sampleBxDF(const Ray &v, const Vec3 &pos, Ray &l, const Medium *&medium, Sampler &RNG) const = 0;
     virtual double evaluateBxDFImportance(const Ray &v, const Ray &l) const = 0;
 
     virtual Spectrum evaluateLight(const Ray &v, const Vec3 &pos) const = 0;
     virtual Spectrum evaluateLightBack(const Ray &vB) const = 0;
-    virtual Spectrum sampleLight(Ray &lB, shared_ptr<Medium> &medium, Sampler &RNG) const = 0;
+    virtual Spectrum sampleLight(Ray &lB, const Medium *&medium, Sampler &RNG) const = 0;
     virtual double evaluateLightImportance(const Ray &lB) const = 0;
 
     void setIdentifier(const string &Name);
