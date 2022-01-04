@@ -4,13 +4,19 @@
 #include "../shape.hpp"
 
 class Triangle : public Shape {
-    Vec3 V0, V1, V2, norm;
+    Vec3 v0, v1, v2, vn0, vn1, vn2;
 
 public:
     Triangle(
         const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light,
         const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside,
-        Vec3 V0, Vec3 V1, Vec3 V2
+        Vec3 v0, Vec3 v1, Vec3 v2
+    );
+    Triangle(
+        const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light,
+        const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside,
+        Vec3 v0, Vec3 v1, Vec3 v2,
+        Vec3 vn0, Vec3 vn1, Vec3 vn2
     );
 
     bool intersect(const Ray &ray, double &t) const override;
@@ -22,39 +28,45 @@ public:
 Triangle::Triangle(
     const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light,
     const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside,
-    Vec3 V0, Vec3 V1, Vec3 V2
-) : Shape(BxDF, Light, inside, outside), V0(V0), V1(V1), V2(V2) {
-    norm = ((V1 - V0) ^ (V2 - V0)).norm();
-    box = Box3(V0) + Box3(V1) + Box3(V2);
+    Vec3 v0, Vec3 v1, Vec3 v2
+) : Shape(BxDF, Light, inside, outside), v0(v0), v1(v1), v2(v2) {
+    vn0 = vn1 = vn2 = ((v1 - v0) ^ (v2 - v0)).norm();
+    box = Box3(v0) + Box3(v1) + Box3(v2);
 }
 
+Triangle::Triangle(
+    const shared_ptr<BxDF> &BxDF, const shared_ptr<Light> &Light,
+    const shared_ptr<Medium> &inside, const shared_ptr<Medium> &outside,
+    Vec3 v0, Vec3 v1, Vec3 v2,
+    Vec3 vn0, Vec3 vn1, Vec3 vn2
+) : Shape(BxDF, Light, inside, outside), v0(v0), v1(v1), v2(v2), vn0(vn0), vn1(vn1), vn2(vn2) {
+    box = Box3(v0) + Box3(v1) + Box3(v2);
+}
+
+
 bool Triangle::intersect(const Ray &ray, double &t) const {
-    Vec3 E1 = V1 - V0, E2 = V2 - V0, T = ray.o - V0;
-    Vec3 P = (ray.d ^ E2);
-    double det = P * E1;
+    Vec3 e1 = v1 - v0, e2 = v2 - v0, T = ray.o - v0;
+    Vec3 p = (ray.d ^ e2);
+    double det = p * e1;
     if (det < 0) det = -det, T = -T;
     if (det < EPS) return false;
-    double u = P * T;
+    double u = p * T;
     if (u < 0 || u > det) return false;
-    Vec3 Q = (T ^ E1);
-    t = Q * E2 / det;
+    Vec3 q = (T ^ e1);
+    t = q * e2 / det;
     if (t < EPS) return false;
-    double v = Q * ray.d;
+    double v = q * ray.d;
     if (v < 0 || u + v > det) return false;
     return true;
 }
 
-Vec3 Triangle::normal(const Vec3 &inter) const {
-    return norm;
+Vec3 Triangle::normal(const Vec3 &inter) const
+{
+    double S = ((v1 - v0) ^ (v2 - v0)).length();
+    double k1 = ((inter - v0) ^ (inter - v2)).length() / S;
+    double k2 = ((inter - v0) ^ (inter - v1)).length() / S;
+    return (vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2).norm();
 }
-
-//Vec3 Triangle::normal(const Vec3 &inter) const
-//{
-//    double S = ((V1 - V0) ^ (V2 - V0)).norm();
-//    double k1 = ((inter - V0) ^ (inter - V2)).norm() / S;
-//    double k2 = ((inter - V0) ^ (inter - V1)).norm() / S;
-//    return (Vn0 * (1 - k1 - k2) + Vn1 * k1 + Vn2 * k2).scale(1);
-//}
 
 #endif
 #endif /* shapes_triangle_hpp */

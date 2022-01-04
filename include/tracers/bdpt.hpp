@@ -104,7 +104,9 @@ void BidirectionalPathTracer::epoch() {
 
                 Spectrum result = curMedium->evaluate(t) * object->evaluateBxDF(lB, vB) * color
                     / pow(t, 2) / (1 + pdfSum2b);
-
+                if (result.r != result.r) {
+                    exit(-1);
+                }
                 spectrumBuffer[rev] = make_pair(cameraIdx, result);
             }
         }
@@ -112,6 +114,9 @@ void BidirectionalPathTracer::epoch() {
             double pdf;
             Ray v = sampleCamera(idx, pdf, RNG);
             Spectrum result = trace(photonBuffer, v, scene->medium, 1, Spectrum(1), {pdf, 0}, RNG);
+            if (result.r != result.r) {
+                exit(-1);
+            }
 #pragma omp critical
             {
                 number[idx] += 1;
@@ -128,7 +133,10 @@ void BidirectionalPathTracer::revTrace(
     Photon photonBuffer[], const Ray &lB, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, BiPdf pdf,
     Sampler &RNG
 ) {
-    if (traceMul.norm() < traceEPS) return;
+    if (traceMul.norm() < .1) {
+        if (RNG.sample() < traceMul.norm() * 10) traceMul *= 1 / (10 * traceMul.norm());
+        else return;
+    }
     if (traceDepth >= traceLimit) return;
 
     shared_ptr<Object> object;
@@ -159,7 +167,11 @@ void BidirectionalPathTracer::revTrace(
 Spectrum BidirectionalPathTracer::trace(
     Photon photonBuffer[], const Ray &v, shared_ptr<Medium> medium, int traceDepth, Spectrum traceMul, BiPdf pdf, Sampler &RNG
 ) {
-    if (traceMul.norm() < traceEPS) return Spectrum(0);
+    Spectrum extraMul(1);
+    if (traceMul.norm() < .1) {
+        if (RNG.sample() < traceMul.norm() * 10) extraMul = Spectrum(1 / (10 * traceMul.norm()));
+        else return Spectrum(0);
+    }
     if (traceDepth >= traceLimit) return Spectrum(0);
 
     shared_ptr<Object> object;
@@ -175,7 +187,7 @@ Spectrum BidirectionalPathTracer::trace(
         color = object->evaluateLight(v, intersect) / (pdfSum2f + 1);
     }
 
-    if (object == scene->skybox) return color * mediumMul;
+    if (object == scene->skybox) return color * mediumMul * extraMul;
 
     for (const auto &light: scene->lights) {
         Vec3 pos;
@@ -201,7 +213,7 @@ Spectrum BidirectionalPathTracer::trace(
         }
     }
 
-    for (int rev = 1; rev < traceLimit; ++rev) {
+    for (int rev = 1; rev + traceDepth < traceLimit; ++rev) if (RNG.sample() < 1. / (rev + traceDepth)) {
         const auto &p = photonBuffer[rev];
 
         if (p.color.norm() < traceEPS) continue;
@@ -223,7 +235,8 @@ Spectrum BidirectionalPathTracer::trace(
         // cerr << pdfSum2f << " " << pdfSum2b << endl;
             color += curMedium->evaluate(t) * object->evaluateBxDF(v, l) * p.color
                 * p.object->evaluateBxDF(p.lB, vB) / pow(t, 2)
-                / (pdfSum2f + 1 + pdfSum2b);
+                / (pdfSum2f + 1 + pdfSum2b)
+                * (rev + traceDepth);
             // / (traceDepth + rev);
         }
     }
@@ -239,7 +252,7 @@ Spectrum BidirectionalPathTracer::trace(
     color += trace(photonBuffer, l, medium, traceDepth + 1, traceMul * mediumMul * surfaceMul,
         {object->evaluateBxDFImportance(v, l), pdfSum2}, RNG) * surfaceMul;
 
-    return color * mediumMul;
+    return color * mediumMul * extraMul;
 }
 
 #endif

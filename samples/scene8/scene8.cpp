@@ -42,9 +42,9 @@ int main() {
     vector<shared_ptr<Shape>> objects;
     if (!LoadModel("models/teapot.obj", "models/", Trans3(
         Vec3(0, -.9, -1),
-        Vec3(0.012, 0, 0),
-        Vec3(0, 0.012, 0),
-        Vec3(0, 0, 0.012)
+        Vec3(0.24, 0, 0),
+        Vec3(0, 0.24, 0),
+        Vec3(0, 0, 0.24)
     ), medium, scene)) return -1;
 
     scene->addObject(

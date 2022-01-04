@@ -10,8 +10,8 @@ newmtl default
   d 1.0000
   Tf 1 1 1
   illum 2
-  Kd 1 1 1
-  Ks 0.2 0.2 0.2
+  Kd 0.2 0.2 0.2
+  Ks 1 1 1
 #   Ks 1 1 1
 #   Ke 0 0 0
   map_Kd default.png

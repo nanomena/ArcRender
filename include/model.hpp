@@ -59,6 +59,11 @@ bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, co
     }
 
     for (const auto &s: mtlShapes) {
+        if (attrib.normals.empty()) {
+            cerr << "Missing normal!" << endl;
+        }
+
+
         vector<shared_ptr<Shape>> objects;
         int index_offset = 0;
         for (int f = 0; f < s.mesh.num_face_vertices.size(); ++f) {
@@ -72,16 +77,21 @@ bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, co
                     attrib.vertices[3 * idx.vertex_index + 1],
                     attrib.vertices[3 * idx.vertex_index + 2]
                 );
-//                normals.emplace_back(
-//                    attrib.normals[3 * idx.vertex_index + 0],
-//                    attrib.normals[3 * idx.vertex_index + 1],
-//                    attrib.normals[3 * idx.vertex_index + 2]
-//                );
+                if (!attrib.normals.empty())
+                    normals.emplace_back(
+                        attrib.normals[3 * idx.normal_index + 0],
+                        attrib.normals[3 * idx.normal_index + 1],
+                        attrib.normals[3 * idx.normal_index + 2]
+                    );
                 textures.emplace_back(
                     attrib.texcoords[2 * idx.texcoord_index + 0],
                     attrib.texcoords[2 * idx.texcoord_index + 1],
                     0
                 );
+            }
+            if (normals.empty()) {
+                Vec3 normal = ((vertices[1] - vertices[0]) ^ (vertices[2] - vertices[0])).norm();
+                for (int v = 0; v < fv; ++v) normals.push_back(normal);
             }
             index_offset += fv;
 
@@ -101,7 +111,8 @@ bool LoadModel(const string &filename, const string &mtlDir, const Trans3 &T, co
                 make_shared<MtlGGX>(diffuse, specular, material.roughness, material.ior, material.dissolve),
                 nullptr,
                 medium, medium,
-                T * vertices[0], T * vertices[1], T * vertices[2]
+                T * vertices[0], T * vertices[1], T * vertices[2],
+                (T.t * normals[0]).norm(), (T.t * normals[1]).norm(), (T.t * normals[2]).norm()
             ));
         }
         scene->addObjects(objects);
