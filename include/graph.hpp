@@ -104,7 +104,7 @@ KaDanTree::KaDanTree(vector<const Shape *> objects) {
     tree.resize(objects.size());
     root = acquire();
     root->load(&(objects.front()), objects.size(), [this] { return this->acquire(); }, 0);
-    cerr << "faces : " << root->box.L() << " " << root->box.U() << endl;
+    cerr << "box : " << root->box.L() << " " << root->box.U() << endl;
 }
 
 KaDanTreeNode *KaDanTree::acquire() { return &tree[cnt++]; }

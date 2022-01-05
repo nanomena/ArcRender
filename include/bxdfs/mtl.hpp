@@ -26,7 +26,7 @@ private:
 #ifdef ARC_IMPLEMENTATION
 
 MtlGGX::MtlGGX(TextureMap diffuse, TextureMap specular, double roughness, double ior, double dissolve)
-    : diffuse(std::move(diffuse)), specular(std::move(specular)), rough(roughness), ior(ior), dissolve(dissolve) {}
+    : diffuse(diffuse), specular(specular), rough(roughness), ior(ior), dissolve(dissolve) {}
 
 Spectrum MtlGGX::F(const Vec3 &pos, const Vec3 &i, const Vec3 &o, const Vec3 &n) const {
     if (o.z() > 0)

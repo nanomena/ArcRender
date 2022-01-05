@@ -6,12 +6,13 @@
 
 class Texture {
 public:
-    explicit Texture(const string &filename);
+    explicit Texture(const string &filename, const Vec3 &o, const Vec3 &s);
     Spectrum operator [](const Vec3 &v) const;
 
 private:
     Spectrum get(int x, int y) const;
 
+    Vec3 o, s;
     int width{}, height{};
     vector<Spectrum> spectrum;
 };
@@ -30,7 +31,7 @@ private:
 
 #ifdef ARC_IMPLEMENTATION
 
-Texture::Texture(const string &filename) {
+Texture::Texture(const string &filename, const Vec3 &o, const Vec3 &s) : o(o), s(s) {
     int n;
     unsigned char *data = stbi_load(filename.c_str(), &width, &height, &n, 0);
     cerr << width << " " << height << endl;
@@ -48,7 +49,7 @@ Texture::Texture(const string &filename) {
 }
 
 Spectrum Texture::operator [](const Vec3 &v) const {
-    double x = max(0., min(1., v.x())) * width, y = max(0., min(1., 1 - v.y())) * height;
+    double x = max(0., min(1., (v.x() - o.x()) / s.x())) * width, y = max(0., min(1., 1 - (v.y() - o.y()) / s.y())) * height;
     int ix = lround(x), iy = lround(y);
     return (get(ix - 1, iy - 1) * (ix + .5 - x) + get(ix, iy - 1) * (x + .5 - ix)) * (iy + .5 - y)
         + (get(ix - 1, iy) * (ix + .5 - x) + get(ix, iy) * (x + .5 - ix)) * (y + .5 - iy);

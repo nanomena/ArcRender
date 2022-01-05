@@ -1,8 +1,0 @@
-newmtl Rose_Model_3
-Ni 1.8
-Kd 1.0 1.0 1.0
-Ks 0.2 0.2 0.2
-d 0.4
-Ns 0.0
-illum 0
-map_Kd Rose_Model_3_decimated.jpg

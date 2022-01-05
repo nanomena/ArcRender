@@ -4,7 +4,7 @@
 # http://graphics.cs.williams.edu/data
 
 newmtl default
-  Ns 100.0000
+  Ns 900.0000
 #   Ns 10.0000
   Ni 1.5000
   d 1.0000

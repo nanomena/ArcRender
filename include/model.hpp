@@ -19,7 +19,7 @@ struct MtlMaterial {
 
 class Model {
 public:
-    Model (const string &filename, const string &mtlDir, const Trans3 &T, const Medium *medium);
+    Model (const string &filename, const string &mtlDir, const Trans3 &T, const Medium *medium, bool noNormal = false);
     ~Model();
 
     vector<const Shape *> get() const;
@@ -40,7 +40,7 @@ Model::~Model() {
     }
 }
 
-Model::Model(const string &filename, const string &mtlDir, const Trans3 &T, const Medium *medium) {
+Model::Model(const string &filename, const string &mtlDir, const Trans3 &T, const Medium *medium, bool noNormal) {
     cerr << filename << ":" << endl;
     tinyobj::attrib_t attrib;
     vector<tinyobj::shape_t> mtlShapes;
@@ -56,18 +56,34 @@ Model::Model(const string &filename, const string &mtlDir, const Trans3 &T, cons
     for (const auto &material: mtlMaterials) {
         Spectrum diffuse = rgb(material.diffuse[0], material.diffuse[1], material.diffuse[2]);
         Spectrum specular = rgb(material.specular[0], material.specular[1], material.specular[2]);
-        double ior = material.ior, dissolve = material.dissolve, roughness = 1 - atan(material.shininess);
+        double ior = material.ior, dissolve = material.dissolve, roughness = (1. - atan(material.shininess / 100) / (pi / 2));
         const Texture *diffuseTex = nullptr, *specularTex = nullptr;
 
         if (!material.diffuse_texname.empty()) {
             string texture = mtlDir + material.diffuse_texname;
             cerr << "Diffuse Texture: " << texture << endl;
-            diffuseTex = new Texture (texture);
+            diffuseTex = new Texture (texture, {
+                material.diffuse_texopt.origin_offset[0],
+                material.diffuse_texopt.origin_offset[1],
+                material.diffuse_texopt.origin_offset[2]
+            }, {
+                material.diffuse_texopt.scale[0],
+                material.diffuse_texopt.scale[1],
+                material.diffuse_texopt.scale[2]
+            });
         }
         if (!material.specular_texname.empty()) {
             string texture = mtlDir + material.specular_texname;
             cerr << "Specular Texture: " << texture << endl;
-            specularTex = new Texture(texture);
+            specularTex = new Texture(texture, {
+                material.specular_texopt.origin_offset[0],
+                material.specular_texopt.origin_offset[1],
+                material.specular_texopt.origin_offset[2]
+            }, {
+                material.specular_texopt.scale[0],
+                material.specular_texopt.scale[1],
+                material.specular_texopt.scale[2]
+            });
         }
 
         materials.push_back({
@@ -93,7 +109,7 @@ Model::Model(const string &filename, const string &mtlDir, const Trans3 &T, cons
                     attrib.vertices[3 * idx.vertex_index + 1],
                     attrib.vertices[3 * idx.vertex_index + 2]
                 );
-                if (!attrib.normals.empty())
+                if (!attrib.normals.empty() && !noNormal)
                     normals.emplace_back(
                         attrib.normals[3 * idx.normal_index + 0],
                         attrib.normals[3 * idx.normal_index + 1],

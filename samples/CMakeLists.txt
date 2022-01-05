@@ -5,6 +5,6 @@
 add_subdirectory(scene6)
 add_subdirectory(scene7)
 add_subdirectory(scene8)
-# add_subdirectory(scene9)
+ add_subdirectory(scene9)
 # add_subdirectory(scene11)
 add_subdirectory(classroom)

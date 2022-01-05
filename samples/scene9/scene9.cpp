@@ -1,142 +1,125 @@
+#define ARC_IMPLEMENTATION
 #include "arc.hpp"
 #include <bits/stdc++.h>
 using namespace std;
 
-int main()
-{
-    ios::sync_with_stdio(0);
+//#define DEBUG_FLAG
+int main() {
+    ios::sync_with_stdio(false);
 
-    make_shared<GGX>(30, 0.5)->verify_sample();
 
-    shared_ptr<Object> skybox = make_shared<Object>(
-        make_shared<Sphere>(Vec3(0, 0, 0), INF / 10),
-        make_shared<Surface>(),
-        "skybox"
-    );
+    long long T0 = time(nullptr);
 
-    shared_ptr<Scene> scene = make_shared<Scene>(skybox);
 
-    scene->add_object(
-        make_shared<Object>(
-            make_shared<Flat>(
-                Vec3(-0.3, 0.99, -0.7),
-                Vec3(-0.3, 0.99, -1.3),
-                Vec3(0.3, 0.99, -1.3),
-                Vec3(0.3, 0.99, -0.7)
-            ),
-            make_light(make_shared<UniformLight>(), Spectrum(1)),
-            "light"
-        )
-    );
+    auto medium = new Transparent(Spectrum(1, 1, 1));
+//    auto medium = new Scatter(0.3, Spectrum(1, 1, 1));
 
-    scene->add_object(
-        make_shared<Object>(
-            make_shared<Flat>(
-                Vec3(-1, -1, -2),
-                Vec3(-1, -1, 2),
-                Vec3(1, -1, 2),
-                Vec3(1, -1, -2)
-            ),
-            make_bxdf(make_shared<Lambert>(), rgb256(255, 255, 255)),
-            "down"
-        )
-    );
-
-    scene->add_object(
-        make_shared<Object>(
-            make_shared<Flat>(
-                Vec3(1, -1, -2),
-                Vec3(1, -1, 2),
-                Vec3(1, 1, 2),
-                Vec3(1, 1, -2)
-            ),
-            make_bxdf(make_shared<Lambert>(), rgb256(255, 175, 175)),
-            "right"
-        )
-    );
-
-    scene->add_object(
-        make_shared<Object>(
-            make_shared<Flat>(
-                Vec3(-1, -1, 2),
-                Vec3(-1, -1, -2),
-                Vec3(-1, 1, -2),
-                Vec3(-1, 1, 2)
-            ),
-            make_bxdf(make_shared<Lambert>(), rgb256(175, 175, 255)),
-            "left"
-        )
-    );
-
-    scene->add_object(
-        make_shared<Object>(
-            make_shared<Flat>(
-                Vec3(-1, 1, 2),
-                Vec3(-1, 1, -2),
-                Vec3(1, 1, -2),
-                Vec3(1, 1, 2)
-            ),
-            make_bxdf(make_shared<Lambert>(), rgb256(255, 255, 255)),
-            "up"
-        )
-    );
-
-    scene->add_object(
-        make_shared<Object>(
-            make_shared<Flat>(
-                Vec3(-1, 1, -2),
-                Vec3(-1, -1, -2),
-                Vec3(1, -1, -2),
-                Vec3(1, 1, -2)
-            ),
-            make_bxdf(make_shared<Lambert>(), rgb256(255, 255, 255)),
-            "back"
-        )
-    );
-
-    scene->add_object(
-        make_shared<Object>(
-            make_shared<Flat>(
-                Vec3(-1, -1, 2),
-                Vec3(-1, 1, 2),
-                Vec3(1, 1, 2),
-                Vec3(1, -1, 2)
-            ),
-            make_bxdf(make_shared<Lambert>(), rgb256(255, 255, 255)),
-            "front"
-        )
-    );
-
-    scene->add_object(
-        make_shared<Object>(
-            make_shared<Sphere>(
-                Vec3(0, 0, -1), 0.5
-            ),
-            make_bxdf(make_shared<BiGGX>(1.5, 0.1, 0), rgb256(255, 255, 255)),
-            "ball"
-        )
-    );
-
-    shared_ptr<Camera> camera = make_shared<PerspectiveCamera>(
+    auto camera = new PerspectiveCamera(
         Vec3(0, 0, 1.5),
         Vec3(0.8, 0, 0),
         Vec3(0, 0.6, 0),
         0.6
     );
+    auto scene = new Scene(camera, Spectrum(0), medium);
 
-    shared_ptr<Image> image = make_shared<Image>(800, 600, camera);
-    shared_ptr<Render> render = make_shared<LightSampledPathTracer>(image, scene);
+    Model model("models/rose.obj", "models/", Trans3(
+        Vec3(0.4, -0.6, -0.8),
+        Vec3(0.2, 0, 0),
+        Vec3(0, 0.2 * sqrt(4. / 5), -0.2 * sqrt(1. / 5)),
+        Vec3(0, 0.2 * sqrt(1. / 5), 0.2 * sqrt(4. / 5))
+    ), medium, true);
+    scene->addObjects(model.get());
+
+    scene->addObject(
+        new Flat(
+            new Lambert(Spectrum(0)),
+            new UniformLight(Spectrum(10)),
+            medium, medium,
+            Vec3(-0.3, 0.99, -0.7),
+            Vec3(-0.3, 0.99, -1.3),
+            Vec3(0.3, 0.99, -1.3),
+            Vec3(0.3, 0.99, -0.7)
+        ), "light"
+    );
+
+    scene->addObject(
+        new Flat(
+            new GGX(rgb256(250, 250, 250), 0.8), nullptr,
+            medium, medium,
+            Vec3(-1, -1, -2),
+            Vec3(-1, -1, 2),
+            Vec3(1, -1, 2),
+            Vec3(1, -1, -2)
+        ), "down"
+    );
+
+    scene->addObject(
+        new Flat(
+            new GGX(rgb256(250, 250, 250), 0.8), nullptr,
+            medium, medium,
+            Vec3(-1, 1, 2),
+            Vec3(-1, 1, -2),
+            Vec3(1, 1, -2),
+            Vec3(1, 1, 2)
+        ), "up"
+    );
+
+    scene->addObject(
+        new Flat(
+            new GGX(rgb256(170, 170, 250), 0.8), nullptr,
+            medium, medium,
+            Vec3(1, -1, -2),
+            Vec3(1, -1, 2),
+            Vec3(1, 1, 2),
+            Vec3(1, 1, -2)
+        ), "right"
+    );
+
+    scene->addObject(
+        new Flat(
+            new GGX(rgb256(250, 170, 170), 0.8), nullptr,
+            medium, medium,
+            Vec3(-1, -1, 2),
+            Vec3(-1, -1, -2),
+            Vec3(-1, 1, -2),
+            Vec3(-1, 1, 2)
+        ), "left"
+    );
+
+    scene->addObject(
+        new Flat(
+            new Lambert(rgb256(250, 250, 250)), nullptr,
+            medium, medium,
+            Vec3(-1, 1, -2),
+            Vec3(-1, -1, -2),
+            Vec3(1, -1, -2),
+            Vec3(1, 1, -2)
+        ), "back"
+    );
+
+    scene->addObject(
+        new Flat(
+            new Lambert(rgb256(250, 250, 250)), nullptr,
+            medium, medium,
+            Vec3(-1, -1, 2),
+            Vec3(-1, 1, 2),
+            Vec3(1, 1, 2),
+            Vec3(1, -1, 2)
+        ),
+        "front"
+    );
+
+    auto tracer = new BidirectionalPathTracer(1600, 1200, scene);
 
     char output[100];
-    sprintf(output, "result.png");
+    sprintf(output, "samples/scene9/result.png");
 
-    int epoch = 3000, cluster = 1;
-    cerr << "[T + " << (clock() / (double)CLOCKS_PER_SEC) << "] | target : " << epoch << endl;
-    for (int i = 1; i <= epoch; ++i)
-    {
-        render->epoch(cluster);
-        cerr << "[T + " << (clock() / (double)CLOCKS_PER_SEC) << "] | epoch " << i << endl;
-        if (i % 5 == 0)
-            image->save(output, 0.35);
+    int epoch = 1000;
+
+    cerr << "[T + " << time(nullptr) - T0 << "] | target : " << epoch << endl;
+    for (int i = 1; i <= epoch; ++i) {
+        tracer->epoch();
+        cerr << "[T + " << time(nullptr) - T0 << "] | epoch " << i << endl;
+        tracer->savePNG(output, 1);
     }
 }

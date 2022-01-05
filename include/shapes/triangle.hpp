@@ -65,6 +65,14 @@ Vec3 Triangle::normal(const Vec3 &inter) const
     double S = ((v1 - v0) ^ (v2 - v0)).length();
     double k1 = ((inter - v0) ^ (inter - v2)).length() / S;
     double k2 = ((inter - v0) ^ (inter - v1)).length() / S;
+    assert(S > 0);
+    if ((vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2)[0] != (vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2)[0]) {
+        cerr << vn0 << " " << vn1 << " " << vn2 << endl;
+        cerr << k1 << " " << k2 << " " << inter << endl;
+    }
+    assert((vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2)[0] == (vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2)[0]);
+    assert((vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2)[1] == (vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2)[1]);
+    assert((vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2)[2] == (vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2)[2]);
     return (vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2).norm();
 }
 

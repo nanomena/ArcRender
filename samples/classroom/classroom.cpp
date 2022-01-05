@@ -11,36 +11,36 @@ int main() {
     long long T0 = time(nullptr);
 
 
-    shared_ptr<Medium> medium = make_shared<Transparent>(Spectrum(1, 1, 1));
-//    shared_ptr<Medium> medium = make_shared<Scatter>(0.025, Spectrum(1, 1, 1));
+    auto medium = new Transparent(Spectrum(1, 1, 1));
+//    auto medium = new Scatter(0.02, Spectrum(1, 1, 1));
 
-    shared_ptr<Camera> camera = make_shared<PerspectiveCamera>(
-        Vec3(2.95, 1.4, 3.45),
+    auto camera = new PerspectiveCamera(
+        Vec3(3.4, 1.5, 3.95),
         Vec3(1, 0, -0.5).norm() * 0.8,
         Vec3(-0.10, 1, -0.20).norm() * 0.6,
         0.6
-//        Vec3(-0.3, 1.2, 3.95),
-//        Vec3(1, 0, 0.6).norm() * 0.8,
-//        Vec3(0.24, 1, -0.40).norm() * 0.6,
+//        Vec3(8, 0, 0),
+//        Vec3(-1, 0, 0).norm() * 0.8,
+//        Vec3(0, 1, 0).norm() * 0.6,
 //        0.6
     );
-    shared_ptr<Scene> scene = make_shared<Scene>(camera, rgb256(245, 251, 253), medium);
+    auto scene = new Scene(camera, rgb256(245, 251, 253), medium);
+//    auto scene = new Scene(camera, rgb256(0, 0, 0), medium);
 
-
-    vector<shared_ptr<Shape>> objects;
-    if (!LoadModel("models/class3_obj.obj", "models/", Trans3(
+    Model model("models/classroom.obj", "models/", Trans3(
         Vec3(0, 0, 0),
         Vec3(1, 0, 0),
         Vec3(0, 1, 0),
         Vec3(0, 0, 1)
-    ), medium, scene)) return -1;
+    ), medium);
+    scene->addObjects(model.get());
 
     scene->addObject(
-        make_shared<Disc>(
-            make_shared<Lambert>(Spectrum(0)),
-            make_shared<SpotLight>(rgb256(242, 230, 209) * 25, 0.2),
+        new Disc(
+            new Lambert(Spectrum(0)),
+            new SpotLight(rgb256(242, 230, 209) * 80, 0.1),
             medium, medium,
-            Ray({10, 5, 2}, Vec3(-1, -.5, -.2).norm()),
+            Ray({8, 5, 2}, Vec3(-1, -.5, -.2).norm()),
             5
         ), "right"
     );
@@ -55,13 +55,12 @@ int main() {
 //        "ball1"
 //    );
 
-//    shared_ptr<Tracer> tracer = make_shared<BidirectionalPathTracer>(400, 300, scene);
-    shared_ptr<Tracer> tracer = make_shared<BidirectionalPathTracer>(2400, 1800, scene);
+    auto tracer = new BidirectionalPathTracer(4000, 3000, scene);
 
     char output[100];
     sprintf(output, "samples/classroom/result.png");
 
-    int epoch = 1000;
+    int epoch = 2000;
 
     cerr << "[T + " << time(nullptr) - T0 << "] | target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++i) {
