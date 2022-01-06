@@ -24,7 +24,7 @@ public:
     }
 
     bool intersect(const Ray &ray, double &t) const override;
-    Vec3 normal(const Vec3 &inter) const override;
+    Vec3 normal(const Vec3 &pos) const override;
     void sampleSurface(Vec3 &pos, double &pdf, Sampler &RNG) const override;
     double evaluateSurfaceImportance(const Vec3 &pos) const override;
 
@@ -95,7 +95,7 @@ bool Flat::intersect(const Ray &ray, double &t) const {
 //    cerr << "here!" << " " << ray.o << " " << ray.d << " " << TCandi <<  " " << inside << endl;
     return inside;
 }
-Vec3 Flat::normal(const Vec3 &inter) const {
+Vec3 Flat::normal(const Vec3 &pos) const {
     return norm;
 }
 void Flat::sampleSurface(Vec3 &pos, double &pdf, Sampler &RNG) const { // @TODO better locate method

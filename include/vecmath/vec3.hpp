@@ -10,6 +10,9 @@ public:
     double x() const;
     double y() const;
     double z() const;
+    Vec2 xy() const;
+    Vec2 xz() const;
+    Vec2 yz() const;
     const double &operator [](int i) const;
     double &operator [](int i);
 
@@ -48,6 +51,9 @@ Vec3::Vec3(double x, double y, double z) : d{x, y, z} {}
 double Vec3::x() const { return d[0]; }
 double Vec3::y() const { return d[1]; }
 double Vec3::z() const { return d[2]; }
+Vec2 Vec3::xy() const { return {d[0], d[1]}; }
+Vec2 Vec3::xz() const { return {d[0], d[2]}; }
+Vec2 Vec3::yz() const { return {d[1], d[2]}; }
 const double &Vec3::operator [](int i) const { return d[i]; }
 double &Vec3::operator [](int i) { return d[i]; }
 

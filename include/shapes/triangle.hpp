@@ -20,7 +20,7 @@ public:
     );
 
     bool intersect(const Ray &ray, double &t) const override;
-    Vec3 normal(const Vec3 &inter) const override;
+    Vec3 normal(const Vec3 &pos) const override;
 };
 
 #ifdef ARC_IMPLEMENTATION
@@ -60,15 +60,15 @@ bool Triangle::intersect(const Ray &ray, double &t) const {
     return true;
 }
 
-Vec3 Triangle::normal(const Vec3 &inter) const
+Vec3 Triangle::normal(const Vec3 &pos) const
 {
     double S = ((v1 - v0) ^ (v2 - v0)).length();
-    double k1 = ((inter - v0) ^ (inter - v2)).length() / S;
-    double k2 = ((inter - v0) ^ (inter - v1)).length() / S;
+    double k1 = ((pos - v0) ^ (pos - v2)).length() / S;
+    double k2 = ((pos - v0) ^ (pos - v1)).length() / S;
     assert(S > 0);
     if ((vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2)[0] != (vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2)[0]) {
         cerr << vn0 << " " << vn1 << " " << vn2 << endl;
-        cerr << k1 << " " << k2 << " " << inter << endl;
+        cerr << k1 << " " << k2 << " " << pos << endl;
     }
     assert((vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2)[0] == (vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2)[0]);
     assert((vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2)[1] == (vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2)[1]);

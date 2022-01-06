@@ -104,6 +104,7 @@ void BidirectionalPathTracer::epoch() {
                 Spectrum result = curMedium->evaluate(t) * object->evaluateBxDF(lB, vB) * color
                     / pow(t, 2) / (1 + pdfSum2b);
                 if (result.r != result.r) {
+                    assert(0);
                     exit(-1);
                 }
                 spectrumBuffer[rev] = make_pair(cameraIdx, result);
@@ -114,9 +115,10 @@ void BidirectionalPathTracer::epoch() {
             Ray v = sampleCamera(idx, pdf, RNG);
             Spectrum result = trace(photonBuffer, v, scene->medium, 1, Spectrum(1), {pdf, 0}, RNG);
             if (result.r != result.r) {
-                exit(-1);
+//                assert(0);
+//                exit(-1);
             }
-//#pragma omp critical
+#pragma omp critical
             {
                 number[idx] += 1;
                 spectrum[idx] += result;

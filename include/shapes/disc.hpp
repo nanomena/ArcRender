@@ -12,7 +12,7 @@ public:
     );
 
     bool intersect(const Ray &ray, double &t) const override;
-    Vec3 normal(const Vec3 &inter) const override;
+    Vec3 normal(const Vec3 &pos) const override;
     void sampleSurface(Vec3 &pos, double &pdf, Sampler &RNG) const override;
     double evaluateSurfaceImportance(const Vec3 &pos) const override;
 
@@ -29,19 +29,21 @@ Disc::Disc(
     const Medium *inside, const Medium *outside,
     Ray v, double r
 ) : Shape(bxdf, light, inside, outside), v(v), r(r) {
-    box = Box3(v.o - Vec3(r, r, r), v.o + Vec3(r, r, r));
+    box = discBox(v, {r, 0});
     rotateAxis(v.d, v.d, T, TInv);
 }
 
 bool Disc::intersect(const Ray &ray, double &t) const {
     if (abs((T * ray.d).z()) < EPS) return false;
 
-    t = (T * (v.o - ray.o)).z() / (T * ray.d).z();
-
+    Vec3 To = T * (v.o - ray.o), Td = T * ray.d;
+    t = To.z() / Td.z();
+    if ((To - Td * t).xy().length() > r) return false;
     if (t < EPS) return false;
     return true;
 }
-Vec3 Disc::normal(const Vec3 &inter) const {
+
+Vec3 Disc::normal(const Vec3 &pos) const {
     return v.d;
 }
 

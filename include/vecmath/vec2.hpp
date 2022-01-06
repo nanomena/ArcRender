@@ -17,6 +17,10 @@ public:
     Vec2 &operator *=(double f);
     Vec2 &operator /=(double f);
 
+    double squaredLength() const;
+    double length() const;
+    Vec2 norm(double f = 1) const;
+
 protected:
     double d[2];
 } __attribute__((aligned(16)));
@@ -24,9 +28,12 @@ protected:
 Vec2 operator -(const Vec2 &v);
 Vec2 operator +(const Vec2 &v0, const Vec2 &v1);
 Vec2 operator -(const Vec2 &v0, const Vec2 &v1);
+double operator *(const Vec2 &v0, const Vec2 &v1);
 Vec2 operator *(double f, const Vec2 &v);
 Vec2 operator *(const Vec2 &v, double f);
 Vec2 operator /(const Vec2 &v, double f);
+
+ostream& operator <<(ostream &o, const Vec2 &v);
 
 #ifdef ARC_IMPLEMENTATION
 
@@ -47,9 +54,19 @@ Vec2 &Vec2::operator /=(double f) { return *this = *this / f; }
 Vec2 operator -(const Vec2 &v) { return {-v.x(), -v.y()}; }
 Vec2 operator +(const Vec2 &v0, const Vec2 &v1) { return {v0.x() + v1.x(), v0.y() + v1.y()}; }
 Vec2 operator -(const Vec2 &v0, const Vec2 &v1) { return {v0.x() - v1.x(), v0.y() - v1.y()}; }
+double operator *(const Vec2 &v0, const Vec2 &v1) { return v0.x() * v1.x() + v0.y() * v1.y(); }
 Vec2 operator *(double f, const Vec2 &v) { return {v.x() * f, v.y() * f}; }
 Vec2 operator *(const Vec2 &v, double f) { return {v.x() * f, v.y() * f}; }
 Vec2 operator /(const Vec2 &v, double f) { return {v.x() / f, v.y() / f}; }
+
+double Vec2::squaredLength() const { return (*this) * (*this); }
+double Vec2::length() const { return sqrt(squaredLength()); }
+Vec2 Vec2::norm(double f) const { return (*this) / length() * f; }
+
+ostream& operator <<(ostream &o, const Vec2 &v) {
+    o << "[" << v.x() << "," << v.y() << "]";
+    return o;
+}
 
 #endif
 #endif //ARC_INCLUDE_VECMATH_VEC2_HPP

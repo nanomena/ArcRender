@@ -122,7 +122,7 @@ Mat3 makeAxis(const Vec3 &x, const Vec3 &y, const Vec3 &z) {
 }
 
 void rotateAxis(const Vec3 &n, const Vec3 &v, Mat3 &T, Mat3 &TInv) {
-    assert(abs(1 - n.length()) < EPS);
+//    assert(abs(1 - n.length()) < EPS);
     Vec3 x, y, z = n;
 //    cerr << "rotateAxis " << n << " " << v << endl;
 

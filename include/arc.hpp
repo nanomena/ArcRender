@@ -14,7 +14,9 @@
 #include "sampler.hpp"
 #include "vecmath.hpp"
 #include "spectrum.hpp"
+
 #include "model.hpp"
+#include "revSurface.hpp"
 
 #include "bxdfs/lambert.hpp"
 #include "bxdfs/biggx.hpp"
@@ -25,12 +27,12 @@
 #include "shapes/flat.hpp"
 #include "shapes/disc.hpp"
 #include "shapes/triangle.hpp"
+#include "shapes/conical.hpp"
+#include "shapes/cylinder.hpp"
 
 #include "tracers/bdpt.hpp"
-//#include "tracers/sppm.hpp"
 
 #include "cameras/perspective.hpp"
-//#include "cameras/actinometer.hpp"
 
 #include "lights/uniform.hpp"
 #include "lights/spot.hpp"

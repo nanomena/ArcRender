@@ -20,7 +20,7 @@ public:
     virtual bool intersect(const Ray &ray, double &t) const {
         throw invalid_argument("NotImplementedError");
     }
-    virtual Vec3 normal(const Vec3 &inter) const {
+    virtual Vec3 normal(const Vec3 &pos) const {
         throw invalid_argument("NotImplementedError");
     } // norm should be unitary
     void sampleSurface(Vec3 &pos, double &pdf, Sampler &RNG) const override {

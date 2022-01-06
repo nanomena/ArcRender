@@ -19,6 +19,7 @@ protected:
 } __attribute__((aligned(64)));
 
 Box3 operator +(const Box3 &b0, const Box3 &b1);
+Box3 discBox(Ray v, Vec2 r);
 
 #ifdef ARC_IMPLEMENTATION
 
@@ -61,6 +62,12 @@ Box3 operator +(const Box3 &b0, const Box3 &b1) {
         Vec3(min(b0.L()[0], b1.L()[0]), min(b0.L()[1], b1.L()[1]), min(b0.L()[2], b1.L()[2])),
         Vec3(max(b0.U()[0], b1.U()[0]), max(b0.U()[1], b1.U()[1]), max(b0.U()[2], b1.U()[2])),
     };
+}
+
+Box3 discBox(Ray v, Vec2 r) {
+    Vec3 h(v.d.yz().squaredLength(), v.d.xz().squaredLength(), v.d.xy().squaredLength());
+//    cerr << "H: " << h << endl;
+    return {v.o - h * r.x() + v.d * r.y(), v.o + h * r.x() + v.d * r.y()};
 }
 
 #endif

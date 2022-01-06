@@ -12,7 +12,7 @@ public:
     );
 
     bool intersect(const Ray &ray, double &t) const override;
-    Vec3 normal(const Vec3 &inter) const override;
+    Vec3 normal(const Vec3 &pos) const override;
 
 private:
 
@@ -34,8 +34,7 @@ Sphere::Sphere(
 bool Sphere::intersect(const Ray &ray, double &t) const {
 //    cerr << ray.o << " " << ray.d << " " << o << " " << r << endl;
     double x = (o - ray.o) * ray.d, y = (ray.o + ray.d * x - o).length();
-    if (r + EPS < y) {
-//        cerr << "Not" << endl;
+    if (r < y) {
         return false;
     }
     if ((o - ray.o).length() < r + EPS) {
@@ -48,8 +47,8 @@ bool Sphere::intersect(const Ray &ray, double &t) const {
     return true;
 }
 
-Vec3 Sphere::normal(const Vec3 &inter) const {
-    return (inter - o).norm() * (reverse ? -1 : 1);
+Vec3 Sphere::normal(const Vec3 &pos) const {
+    return (pos - o).norm() * (reverse ? -1 : 1);
 }
 
 #endif

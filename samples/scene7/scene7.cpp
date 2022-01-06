@@ -120,12 +120,12 @@ int main() {
         "front"
     );
 
-    auto tracer = new BidirectionalPathTracer(3600, 2700, scene);
+    auto tracer = new BidirectionalPathTracer(4000, 3000, scene);
 
     char output[100];
     sprintf(output, "samples/scene7/result.png");
 
-    int epoch = 1000;
+    int epoch = 2000;
 
     cerr << "[T + " << time(nullptr) - T0 << "] | target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++i) {

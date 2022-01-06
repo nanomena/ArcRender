@@ -1,4 +1,4 @@
-//#define ARC_IMPLEMENTATION
+#define ARC_IMPLEMENTATION
 #include "arc.hpp"
 #include <bits/stdc++.h>
 using namespace std;
@@ -12,6 +12,7 @@ int main() {
 
 
     auto medium = new Transparent(Spectrum(1, 1, 1));
+//    auto medium = new Scatter(0.3, Spectrum(1, 1, 1));
 
     auto camera = new PerspectiveCamera(
         Vec3(0, 0, 1.5),
@@ -21,13 +22,30 @@ int main() {
     );
     auto scene = new Scene(camera, Spectrum(0), medium);
 
-    Model model("models/teapot.obj", "models/", Trans3(
-        Vec3(0, -.9, -1),
-        Vec3(0.24, 0, 0),
-        Vec3(0, 0.24, 0),
-        Vec3(0, 0, 0.24)
-    ), medium);
-    scene->addObjects(model.get());
+    auto curve = new Curve(3,
+        Vec2(0, 0), Vec2(0, 0),
+        Vec2(.3, 0), Vec2(.5, .2),
+        Vec2(.5, .4), Vec2(.3, .6),
+        Vec2(.3, .8), Vec2(.3, 1)
+    );
+
+
+//    auto curve = new Curve(1, Vec2(.3, 0), Vec2(.3, 1));
+
+    RevSurface surface(
+        new Lambert(rgb256(170, 250, 170)), nullptr,
+        medium, medium,
+        Ray(Vec3(0, -1, -1), Vec3(0, 1, 0)), curve, 100
+    );
+    scene->addObjects(surface.get());
+
+//    scene->addObject(
+//        new Cylinder(
+//            new Lambert(rgb256(170, 250, 170)), nullptr,
+//            medium, medium,
+//            Ray(Vec3(0, -1, -1), Vec3(0, 1, 0)), 0.2, 0., .2
+//        ), ""
+//    );
 
     scene->addObject(
         new Flat(
@@ -108,12 +126,12 @@ int main() {
         "front"
     );
 
-    auto tracer = new BidirectionalPathTracer(4000, 3000, scene);
+    auto tracer = new BidirectionalPathTracer(1600, 1200, scene);
 
     char output[100];
-    sprintf(output, "samples/scene8/result.png");
+    sprintf(output, "samples/scene10/result.png");
 
-    int epoch = 2000;
+    int epoch = 1000;
 
     cerr << "[T + " << time(nullptr) - T0 << "] | target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++i) {
