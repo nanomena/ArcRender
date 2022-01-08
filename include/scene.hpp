@@ -13,7 +13,7 @@ public:
     Spectrum skyboxColor;
     vector<const Shape*> lights;
 
-    Scene(const Camera *camera, const Spectrum &skyboxColor, const Medium *medium);
+    Scene(const Camera *camera, const Spectrum &skyboxColor, const Medium *medium, double skyboxDist = INF / 10);
     ~Scene();
 
 
@@ -31,12 +31,12 @@ private:
 
 #ifdef ARC_IMPLEMENTATION
 
-Scene::Scene(const Camera *camera, const Spectrum &skyboxColor, const Medium *medium)
+Scene::Scene(const Camera *camera, const Spectrum &skyboxColor, const Medium *medium, double skyboxDist)
     : camera(camera), skyboxColor(skyboxColor), medium(medium) {
     skybox = new Sphere(
         nullptr, nullptr,
         nullptr, medium,
-        Vec3(0, 0, 0), INF / 10, true
+        Vec3(0, 0, 0), skyboxDist, true
     );
 }
 Scene::~Scene() {
@@ -85,8 +85,8 @@ const Medium *Scene::visible(const Ray &ray, const Object *object, double t) con
     const Shape *objectTrue;
     Vec3 pos; Vec2 texPos;
     intersect(ray, objectTrue, tTrue, pos, texPos);
-    if (tTrue > t + EPS) return objectTrue->getMedium(texPos, -ray.d);
-    if ((objectTrue != object) || tTrue < t - EPS) return nullptr;
+    if (tTrue > t + GEO_EPS) return objectTrue->getMedium(texPos, -ray.d);
+    if ((objectTrue != object) || tTrue < t - GEO_EPS) return nullptr;
     return objectTrue->getMedium(texPos, -ray.d);
 }
 

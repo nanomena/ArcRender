@@ -49,7 +49,8 @@ Texture::Texture(const string &filename, const Vec2 &o, const Vec2 &s) : o(o), s
 }
 
 Spectrum Texture::operator [](const Vec2 &v) const {
-    double x = max(0., min(1., (v.x() - o.x()) / s.x())) * width, y = max(0., min(1., 1 - (v.y() - o.y()) / s.y())) * height;
+    double x = fmod(fmod(v.x() - o.x(), 1) + 1, 1) * width,
+            y = fmod(fmod(1 - (v.y() - o.y()) / s.y(), 1) + 1, 1) * height;
     int ix = lround(x), iy = lround(y);
     return (get(ix - 1, iy - 1) * (ix + .5 - x) + get(ix, iy - 1) * (x + .5 - ix)) * (iy + .5 - y)
         + (get(ix - 1, iy) * (ix + .5 - x) + get(ix, iy) * (x + .5 - ix)) * (y + .5 - iy);

@@ -9,7 +9,7 @@
 #include "vecmath/box3.hpp"
 #include "vecmath/trans3.hpp"
 #include "vecmath/poly.hpp"
-#include "vecmath/curve.hpp"
+#include "vecmath/spline.hpp"
 #include "vecmath/matrix.hpp"
 
 #endif //ARC_INCLUDE_VECMATH_HPP

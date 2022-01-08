@@ -71,6 +71,7 @@ void BidirectionalPathTracer::epoch() {
             const Shape *light = scene->lights[idx % scene->lights.size()];
             Vec3 pos; Vec2 texPos;
             Spectrum traceMul = light->sampleLight(lB.d, pos, texPos, medium, RNG) * scene->lights.size();
+            lB.o = pos;
             revTrace(
                 photonBuffer, lB, medium, 1, traceMul, {
                     light->evaluateLightImportance(lB.d, pos, texPos) * light->evaluateSurfaceImportance(pos, texPos),

@@ -11,21 +11,23 @@ int main() {
     long long T0 = time(nullptr);
 
 
-    auto medium = new Transparent(Spectrum(1, 1, 1));
-//    auto medium = new Scatter(0.02, Spectrum(1, 1, 1));
+//    auto medium = new Transparent(Spectrum(1, 1, 1));
+    auto medium = new Scatter(0.03, Spectrum(1, 1, 1));
 
     auto camera = new PerspectiveCamera(
         Vec3(3.4, 1.5, 3.95),
         Vec3(1, 0, -0.5).norm() * 0.8,
         Vec3(-0.10, 1, -0.20).norm() * 0.6,
         0.6
-//        Vec3(8, 0, 0),
-//        Vec3(-1, 0, 0).norm() * 0.8,
-//        Vec3(0, 1, 0).norm() * 0.6,
-//        0.6
     );
-    auto scene = new Scene(camera, rgb256(245, 251, 253), medium);
-//    auto scene = new Scene(camera, rgb256(0, 0, 0), medium);
+
+//    auto camera = new PerspectiveCamera(
+//        Vec3(-1.4, 1.5, 3.95),
+//        Vec3(1, 0, 0.5).norm() * 0.8,
+//        Vec3(0.10, 1, -0.20).norm() * 0.6,
+//        0.6
+//    );
+    auto scene = new Scene(camera, rgb256(245, 251, 253), medium, 16);
 
     Model model("models/classroom.obj", "models/", Trans3(
         Vec3(0, 0, 0),
@@ -38,10 +40,10 @@ int main() {
     scene->addObject(
         new Disc(
             new Lambert(Spectrum(0)),
-            new SpotLight(rgb256(242, 230, 209) * 80, 0.1),
+            new SpotLight(rgb256(249, 236, 214) * 120, 0.05),
             medium, medium,
             Ray({8, 5, 2}, Vec3(-1, -.5, -.2).norm()),
-            5
+            8
         ), "right"
     );
 
@@ -55,7 +57,7 @@ int main() {
 //        "ball1"
 //    );
 
-    auto tracer = new BidirectionalPathTracer(4000, 3000, scene);
+    auto tracer = new BidirectionalPathTracer(800, 600, scene);
 
     char output[100];
     sprintf(output, "samples/classroom/result.png");

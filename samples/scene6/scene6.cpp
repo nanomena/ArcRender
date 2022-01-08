@@ -21,25 +21,25 @@ int main() {
     );
     auto scene = new Scene(camera, Spectrum(0), medium);
 
-//    scene->addObject(
-//        new Sphere(
-//            new BiGGX(2.5, 0.2), nullptr,
-//            new Transparent(Spectrum(0.2, 1, 0.2)),
-//            medium,
-//            Vec3(-.5, -.69, -1), .3
-//        ),
-//        "ball1"
-//    );
-//
-//    scene->addObject(
-//        new Sphere(
-//            new BiGGX(1.05, 0.2), nullptr,
-//            new Transparent(Spectrum(0.2, 1, 0.2)),
-//            medium,
-//            Vec3(.5, -.69, -1), .3
-//        ),
-//        "ball2"
-//    );
+    scene->addObject(
+        new Sphere(
+            new BiGGX(2.5, 0.2), nullptr,
+            new Transparent(Spectrum(0.2, 1, 0.2)),
+            medium,
+            Vec3(-.5, -.69, -1), .3
+        ),
+        "ball1"
+    );
+
+    scene->addObject(
+        new Sphere(
+            new BiGGX(1.05, 0.2), nullptr,
+            new Transparent(Spectrum(0.2, 1, 0.2)),
+            medium,
+            Vec3(.5, -.69, -1), .3
+        ),
+        "ball2"
+    );
 
     scene->addObject(
         new Flat(
@@ -120,7 +120,7 @@ int main() {
         "front"
     );
 
-    auto tracer = new BidirectionalPathTracer(800, 600, scene);
+    auto tracer = new BidirectionalPathTracer(2400, 1800, scene);
 
     char output[100];
     sprintf(output, "samples/scene6/result.png");

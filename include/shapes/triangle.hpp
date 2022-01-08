@@ -60,11 +60,6 @@ bool Triangle::intersect(const Ray &ray, double &t, Vec3 &pos, Vec2 &texPos) con
     pos = ray.o + ray.d * t;
     texPos = {u / det, v / det};
 
-    double S = ((v1 - v0) ^ (v2 - v0)).length();
-    double k1 = ((pos - v0) ^ (pos - v2)).length() / S;
-    double k2 = ((pos - v0) ^ (pos - v1)).length() / S;
-    assert(abs(k1 - texPos.x()) < EPS);
-    assert(abs(k2 - texPos.y()) < EPS);
 
     return true;
 }

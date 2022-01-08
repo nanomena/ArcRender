@@ -57,7 +57,7 @@ bool Cylinder::intersect(const Ray &ray, double &t, Vec3 &pos, Vec2 &texPos) con
 }
 
 Vec3 Cylinder::normal(const Vec2 &texPos) const {
-    Vec3 TNormal(sin(texPos.x()), cos(texPos.x()), 0);
+    Vec3 TNormal(cos(texPos.x()), sin(texPos.x()), 0);
     return TInv * TNormal.norm();
 }
 
