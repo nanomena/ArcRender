@@ -8,7 +8,7 @@ class Scene;
 
 class Medium {
 public:
-    virtual Spectrum evaluate(double t) const {
+    virtual Spectrum evaluate(const Ray &v, double t) const {
         throw invalid_argument("NotImplementedError");
     }
     virtual Spectrum sample(

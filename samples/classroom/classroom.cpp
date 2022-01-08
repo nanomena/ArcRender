@@ -12,7 +12,9 @@ int main() {
 
 
 //    auto medium = new Transparent(Spectrum(1, 1, 1));
-    auto medium = new Scatter(0.03, Spectrum(1, 1, 1));
+    auto medium = new Scatter(0.05, Spectrum(1, 1, 1),
+        new Sphere(nullptr, nullptr, nullptr, nullptr, {0, 0, -1000}, 1001)
+        );
 
     auto camera = new PerspectiveCamera(
         Vec3(3.4, 1.5, 3.95),
@@ -40,7 +42,7 @@ int main() {
     scene->addObject(
         new Disc(
             new Lambert(Spectrum(0)),
-            new SpotLight(rgb256(249, 236, 214) * 120, 0.05),
+            new SpotLight(rgb256(249, 236, 214) * 180, 0.05),
             medium, medium,
             Ray({8, 5, 2}, Vec3(-1, -.5, -.2).norm()),
             8
@@ -57,12 +59,12 @@ int main() {
 //        "ball1"
 //    );
 
-    auto tracer = new BidirectionalPathTracer(800, 600, scene);
+    auto tracer = new BidirectionalPathTracer(4000, 3000, scene);
 
     char output[100];
     sprintf(output, "samples/classroom/result.png");
 
-    int epoch = 2000;
+    int epoch = 4000;
 
     cerr << "[T + " << time(nullptr) - T0 << "] | target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++i) {

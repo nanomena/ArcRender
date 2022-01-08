@@ -7,7 +7,7 @@ class Transparent : public Medium {
 public:
     explicit Transparent(Spectrum spectrum);
 
-    Spectrum evaluate(double t) const override;
+    Spectrum evaluate(const Ray &v, double t) const override;
     Spectrum sample(
         const Scene *scene, const Ray &v, const Object *&object, Vec3 &pos, Vec2 &texPos, Sampler &RNG
     ) const override;
@@ -20,7 +20,7 @@ private:
 
 Transparent::Transparent(Spectrum spectrum) : spectrum(spectrum) {}
 
-Spectrum Transparent::evaluate(double t) const {
+Spectrum Transparent::evaluate(const Ray &v, double t) const {
     return (spectrum ^ t);
 }
 

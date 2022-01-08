@@ -100,7 +100,7 @@ void BidirectionalPathTracer::epoch() {
                         + (vB.o - lB.o).squaredLength())
                     * pow(scene->camera->evaluateImportance(pos) / t / pdf.last, 2);
 
-                Spectrum result = curMedium->evaluate(t) * object->evaluateBxDF(lB.d, pos, texPos, vB.d) * color
+                Spectrum result = curMedium->evaluate(v, t) * object->evaluateBxDF(lB.d, pos, texPos, vB.d) * color
                     / pow(t, 2) / (1 + pdfSum2b);
                 if (result.r != result.r) {
                     assert(0);
@@ -206,7 +206,7 @@ Spectrum BidirectionalPathTracer::trace(
             double pdfSub2b = pow(object->evaluateBxDFImportance(v.d, pos, texPos, l.d) / t / light->evaluateSurfaceImportance(pos, texPos), 2);
 
             // cerr << pdfSum2 << endl;
-            color += curMedium->evaluate(t) * object->evaluateBxDF(v.d, pos, texPos, l.d)
+            color += curMedium->evaluate(l, t) * object->evaluateBxDF(v.d, pos, texPos, l.d)
                 * light->evaluateLightBack(vB.d, LPos, LPosTex) / LPosPdf / pow(t, 2)
                 / (pdfSum2f + 1 + pdfSub2b);
             // / traceDepth;
@@ -229,7 +229,7 @@ Spectrum BidirectionalPathTracer::trace(
                 + (vB.o - p.lB.d).squaredLength()) * pow(object->evaluateBxDFImportance(v.d, pos, texPos, l.d) / t / p.pdf.last, 2);
 
         // cerr << pdfSum2f << " " << pdfSum2b << endl;
-            color += curMedium->evaluate(t) * object->evaluateBxDF(v.d, pos, texPos, l.d) * p.color
+            color += curMedium->evaluate(l, t) * object->evaluateBxDF(v.d, pos, texPos, l.d) * p.color
                 * p.object->evaluateBxDF(p.lB.d, p.pos, p.texPos, vB.d) / pow(t, 2)
                 / (pdfSum2f + 1 + pdfSum2b)
                 * (rev + traceDepth);
