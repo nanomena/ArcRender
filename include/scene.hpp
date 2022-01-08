@@ -21,7 +21,7 @@ public:
     void addObjects(const vector<const Shape *> &object, const string &name = "");
     void clear();
 
-    void intersect(const Ray &ray, const Shape *&object, double &t) const;
+    void intersect(const Ray &ray, const Shape *&object, double &t, Vec3 &pos, Vec2 &texPos) const;
     const Medium *visible(const Ray &ray, const Object *object, double t) const;
 
     Box3 box() const;
@@ -61,17 +61,16 @@ void Scene::clear() {
     graphs.clear();
 }
 
-void Scene::intersect(const Ray &ray, const Shape *&object, double &t) const {
+void Scene::intersect(const Ray &ray, const Shape *&object, double &t, Vec3 &pos, Vec2 &texPos) const {
 //    cerr << "intersect checking: " << ray.o << " " << ray.d << endl;
 
-    Ray rayX = ray;
-    rayX.d = rayX.d.norm();
+    assert(abs(ray.d.length() - 1) < EPS);
 
     object = skybox;
-    bool f = skybox->intersect(rayX, t);
+    bool f = skybox->intersect(ray, t, pos, texPos);
     assert(f);
     for (const auto &graph: graphs)
-        graph->intersect(rayX, object, t);
+        graph->intersect(ray, object, t, pos, texPos);
 }
 
 Box3 Scene::box() const {
@@ -84,10 +83,11 @@ Box3 Scene::box() const {
 const Medium *Scene::visible(const Ray &ray, const Object *object, double t) const {
     double tTrue;
     const Shape *objectTrue;
-    intersect(ray, objectTrue, tTrue);
-    if (tTrue > t + EPS) return objectTrue->getMedium({ray.o + ray.d * tTrue, -ray.d});
+    Vec3 pos; Vec2 texPos;
+    intersect(ray, objectTrue, tTrue, pos, texPos);
+    if (tTrue > t + EPS) return objectTrue->getMedium(texPos, -ray.d);
     if ((objectTrue != object) || tTrue < t - EPS) return nullptr;
-    return objectTrue->getMedium({ray.o + ray.d * tTrue, -ray.d});
+    return objectTrue->getMedium(texPos, -ray.d);
 }
 
 

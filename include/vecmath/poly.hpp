@@ -20,6 +20,10 @@ public:
     Poly &operator *=(double f);
     Poly &operator /=(double f);
 
+    Poly stripe() const;
+
+    double* coefficient();
+
 private:
     vector<double> d;
 };
@@ -74,7 +78,7 @@ Poly &Poly::operator /=(double f) { return *this = *this / f; }
 
 Poly operator -(const Poly &v) {
     Poly w = Poly(v.size());
-    for (int i = 0; i < w.size(); ++ i) w[i] = v[i];
+    for (int i = 0; i < w.size(); ++ i) w[i] = -v[i];
     return w;
 }
 
@@ -120,6 +124,18 @@ ostream& operator <<(ostream &o, const Poly &v) {
     o << "[";
     for (int i = 0; i < v.size(); ++ i) cerr << v[i] << (i != v.size() - 1 ? "," : "]");
     return o;
+}
+
+double* Poly::coefficient() {
+    return &(d.front());
+}
+
+Poly Poly::stripe() const {
+    int idx = d.size();
+    while (idx && abs(d[idx - 1]) < EPS) idx --;
+    Poly w = Poly(idx);
+    for (int i = 0; i < w.size(); ++ i) w[i] = d[i];
+    return w;
 }
 
 #endif

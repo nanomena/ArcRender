@@ -8,9 +8,9 @@ public:
     GGX(Spectrum F0, double roughness);
 
 private:
-    Spectrum evaluate(const Vec3 &pos, const Vec3 &i, const Vec3 &o) const override;
-    Spectrum sample(const Vec3 &pos, const Vec3 &i, Vec3 &o, double &pdf, Sampler &RNG) const override;
-    double evaluateImportance(const Vec3 &pos, const Vec3 &i, const Vec3 &o) const override;
+    Spectrum evaluate(const Vec2 &texPos, const Vec3 &i, const Vec3 &o) const override;
+    Spectrum sample(const Vec2 &texPos, const Vec3 &i, Vec3 &o, double &pdf, Sampler &RNG) const override;
+    double evaluateImportance(const Vec2 &texPos, const Vec3 &i, const Vec3 &o) const override;
 
     Spectrum F(const Vec3 &i, const Vec3 &o, const Vec3 &n) const;
     double D(const Vec3 &n) const;
@@ -54,14 +54,14 @@ void GGX::sampleN(Vec3 &n, double &pdf, Sampler &RNG) const {
     pdf = alpha2 * cos_n / (pi * pow((alpha2 - 1) * cos_n * cos_n + 1, 2));
 }
 
-Spectrum GGX::evaluate(const Vec3 &pos, const Vec3 &i, const Vec3 &o) const {
+Spectrum GGX::evaluate(const Vec2 &texPos, const Vec3 &i, const Vec3 &o) const {
     if (i.z() * o.z() < 0) return Spectrum(0);
     Vec3 n = (i + o).norm();
     return F(i, o, n) * D(n) * G(i, o, n) / (4 * i.z() * o.z())
         + F0 * (1 - G(i, o, n)) / pi;
 }
 
-Spectrum GGX::sample(const Vec3 &pos, const Vec3 &i, Vec3 &o, double &pdf, Sampler &RNG) const {
+Spectrum GGX::sample(const Vec2 &texPos, const Vec3 &i, Vec3 &o, double &pdf, Sampler &RNG) const {
     double prob = (3 - rough) / 3;
     if (RNG.rand() < prob) {
         Vec3 n;
@@ -78,7 +78,7 @@ Spectrum GGX::sample(const Vec3 &pos, const Vec3 &i, Vec3 &o, double &pdf, Sampl
     }
 }
 
-double GGX::evaluateImportance(const Vec3 &pos, const Vec3 &i, const Vec3 &o) const {
+double GGX::evaluateImportance(const Vec2 &texPos, const Vec3 &i, const Vec3 &o) const {
     double prob = (3 - rough) / 3;
     if (i.z() * o.z() > 0) {
         Vec3 n = (i + o).norm();

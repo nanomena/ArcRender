@@ -8,9 +8,9 @@ public:
     BiGGX(double ior, double roughness);
 
 private:
-    Spectrum evaluate(const Vec3 &pos, const Vec3 &i, const Vec3 &o) const override;
-    Spectrum sample(const Vec3 &pos, const Vec3 &i, Vec3 &o, double &pdf, Sampler &RNG) const override;
-    double evaluateImportance(const Vec3 &pos, const Vec3 &i, const Vec3 &o) const override;
+    Spectrum evaluate(const Vec2 &texPos, const Vec3 &i, const Vec3 &o) const override;
+    Spectrum sample(const Vec2 &texPos, const Vec3 &i, Vec3 &o, double &pdf, Sampler &RNG) const override;
+    double evaluateImportance(const Vec2 &texPos, const Vec3 &i, const Vec3 &o) const override;
 
     Spectrum F(const Vec3 &i, const Vec3 &o, const Vec3 &n) const;
     double D(const Vec3 &n) const;
@@ -60,7 +60,7 @@ void BiGGX::sampleN(Vec3 &n, double &pdf, Sampler &RNG) const {
     pdf = alpha2 * cos_n / (pi * pow((alpha2 - 1) * cos_n * cos_n + 1, 2));
 }
 
-Spectrum BiGGX::evaluate(const Vec3 &pos, const Vec3 &i, const Vec3 &o) const {
+Spectrum BiGGX::evaluate(const Vec2 &texPos, const Vec3 &i, const Vec3 &o) const {
     if (i.z() * o.z() > 0) {
         Vec3 n = (i + o).norm();
 
@@ -85,7 +85,7 @@ Spectrum BiGGX::evaluate(const Vec3 &pos, const Vec3 &i, const Vec3 &o) const {
     }
 }
 
-Spectrum BiGGX::sample(const Vec3 &pos, const Vec3 &i, Vec3 &o, double &pdf, Sampler &RNG) const {
+Spectrum BiGGX::sample(const Vec2 &texPos, const Vec3 &i, Vec3 &o, double &pdf, Sampler &RNG) const {
     Vec3 n;
     sampleN(n, pdf, RNG);
     o = -i + n * (i * n) * 2;
@@ -93,7 +93,7 @@ Spectrum BiGGX::sample(const Vec3 &pos, const Vec3 &i, Vec3 &o, double &pdf, Sam
     if (RNG.rand() < prob) {
         o = -i + n * (i * n) * 2;
         pdf = pdf / abs(4 * i * n) * prob;
-        if (o.z() * i.z() > 0) return evaluate(pos, i, o);
+        if (o.z() * i.z() > 0) return evaluate(texPos, i, o);
         else return Spectrum(0);
     } else {
         double cosV = abs(i * n), sinV = sqrt(1 - cosV * cosV);
@@ -111,11 +111,11 @@ Spectrum BiGGX::sample(const Vec3 &pos, const Vec3 &i, Vec3 &o, double &pdf, Sam
 
         pdf = pdf * abs(o * n) / (o + i * (i.z() < 0 ? ior : 1 / ior)).squaredLength() * (1 - prob);
         if (o.z() * i.z() > 0) return Spectrum(0);
-        else return evaluate(pos, i, o);
+        else return evaluate(texPos, i, o);
     }
 }
 
-double BiGGX::evaluateImportance(const Vec3 &pos, const Vec3 &i, const Vec3 &o) const {
+double BiGGX::evaluateImportance(const Vec2 &texPos, const Vec3 &i, const Vec3 &o) const {
     if (i.z() * o.z() > 0) {
         Vec3 n = (i + o).norm();
         double prob = (rough + F(i, o, n).norm() / sqrt(3)) / (1 + 2 * rough);

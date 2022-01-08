@@ -10,7 +10,7 @@ public:
 
     Spectrum evaluate(double t) const override;
     Spectrum sample(
-        const Scene *scene, const Ray &v, const Object *&object, Vec3 &intersect, Sampler &RNG
+        const Scene *scene, const Ray &v, const Object *&object, Vec3 &pos, Vec2 &texPos, Sampler &RNG
     ) const override;
 
 private:
@@ -28,18 +28,18 @@ Spectrum Scatter::evaluate(double t) const {
 }
 
 Spectrum Scatter::sample(
-    const Scene *scene, const Ray &v, const Object *&object, Vec3 &intersect, Sampler &RNG
+    const Scene *scene, const Ray &v, const Object *&object, Vec3 &pos, Vec2 &texPos, Sampler &RNG
 ) const {
     double t;
     const Shape *shape;
-    scene->intersect(v, shape, t);
+    scene->intersect(v, shape, t, pos, texPos);
     double tCur = log(1 - RNG.rand()) / (-lambda);
     if (tCur > t) {
         object = shape;
-        intersect = v.o + v.d * t;
     } else {
         object = particle;
-        intersect = v.o + v.d * tCur;
+        pos = v.o + v.d * tCur;
+        texPos = Vec2(0, 0);
     }
     return Spectrum(1);
 }

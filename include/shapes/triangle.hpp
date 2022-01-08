@@ -19,8 +19,8 @@ public:
         Vec3 vn0, Vec3 vn1, Vec3 vn2
     );
 
-    bool intersect(const Ray &ray, double &t) const override;
-    Vec3 normal(const Vec3 &pos) const override;
+    bool intersect(const Ray &ray, double &t, Vec3 &pos, Vec2 &texPos) const override;
+    Vec3 normal(const Vec2 &texPos) const override;
 };
 
 #ifdef ARC_IMPLEMENTATION
@@ -44,7 +44,7 @@ Triangle::Triangle(
 }
 
 
-bool Triangle::intersect(const Ray &ray, double &t) const {
+bool Triangle::intersect(const Ray &ray, double &t, Vec3 &pos, Vec2 &texPos) const {
     Vec3 e1 = v1 - v0, e2 = v2 - v0, T = ray.o - v0;
     Vec3 p = (ray.d ^ e2);
     double det = p * e1;
@@ -57,23 +57,20 @@ bool Triangle::intersect(const Ray &ray, double &t) const {
     if (t < EPS) return false;
     double v = q * ray.d;
     if (v < 0 || u + v > det) return false;
-    return true;
-}
+    pos = ray.o + ray.d * t;
+    texPos = {u / det, v / det};
 
-Vec3 Triangle::normal(const Vec3 &pos) const
-{
     double S = ((v1 - v0) ^ (v2 - v0)).length();
     double k1 = ((pos - v0) ^ (pos - v2)).length() / S;
     double k2 = ((pos - v0) ^ (pos - v1)).length() / S;
-    assert(S > 0);
-    if ((vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2)[0] != (vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2)[0]) {
-        cerr << vn0 << " " << vn1 << " " << vn2 << endl;
-        cerr << k1 << " " << k2 << " " << pos << endl;
-    }
-    assert((vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2)[0] == (vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2)[0]);
-    assert((vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2)[1] == (vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2)[1]);
-    assert((vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2)[2] == (vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2)[2]);
-    return (vn0 * (1 - k1 - k2) + vn1 * k1 + vn2 * k2).norm();
+    assert(abs(k1 - texPos.x()) < EPS);
+    assert(abs(k2 - texPos.y()) < EPS);
+
+    return true;
+}
+
+Vec3 Triangle::normal(const Vec2 &texPos) const {
+    return (vn0 * (1 - texPos.x() - texPos.y()) + vn1 * texPos.x() + vn2 * texPos.y()).norm();
 }
 
 #endif

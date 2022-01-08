@@ -6,13 +6,13 @@
 
 class Texture {
 public:
-    explicit Texture(const string &filename, const Vec3 &o, const Vec3 &s);
-    Spectrum operator [](const Vec3 &v) const;
+    explicit Texture(const string &filename, const Vec2 &o, const Vec2 &s);
+    Spectrum operator [](const Vec2 &v) const;
 
 private:
     Spectrum get(int x, int y) const;
 
-    Vec3 o, s;
+    Vec2 o, s;
     int width{}, height{};
     vector<Spectrum> spectrum;
 };
@@ -21,7 +21,7 @@ class TextureMap {
 public:
     explicit TextureMap(const Spectrum &color);
     TextureMap(const Texture *texture, const Spectrum &color, Trans3 T);
-    Spectrum operator [](const Vec3 &v) const;
+    Spectrum operator [](const Vec2 &v) const;
 
 private:
     const Texture *texture;
@@ -31,7 +31,7 @@ private:
 
 #ifdef ARC_IMPLEMENTATION
 
-Texture::Texture(const string &filename, const Vec3 &o, const Vec3 &s) : o(o), s(s) {
+Texture::Texture(const string &filename, const Vec2 &o, const Vec2 &s) : o(o), s(s) {
     int n;
     unsigned char *data = stbi_load(filename.c_str(), &width, &height, &n, 0);
     cerr << width << " " << height << endl;
@@ -48,7 +48,7 @@ Texture::Texture(const string &filename, const Vec3 &o, const Vec3 &s) : o(o), s
     }
 }
 
-Spectrum Texture::operator [](const Vec3 &v) const {
+Spectrum Texture::operator [](const Vec2 &v) const {
     double x = max(0., min(1., (v.x() - o.x()) / s.x())) * width, y = max(0., min(1., 1 - (v.y() - o.y()) / s.y())) * height;
     int ix = lround(x), iy = lround(y);
     return (get(ix - 1, iy - 1) * (ix + .5 - x) + get(ix, iy - 1) * (x + .5 - ix)) * (iy + .5 - y)
@@ -63,10 +63,10 @@ TextureMap::TextureMap(const Spectrum &color) : texture(nullptr), color(color) {
 TextureMap::TextureMap(const Texture *texture, const Spectrum &color, Trans3 T)
     : texture(texture), color(color), T(T) {}
 
-Spectrum TextureMap::operator [](const Vec3 &v) const {
+Spectrum TextureMap::operator [](const Vec2 &v) const {
     if (texture == nullptr)
         return color;
-    else return color * (*texture)[T * v];
+    else return color * (*texture)[(T * Vec3(v.x(), v.y(), 0)).xy()];
 }
 
 #endif

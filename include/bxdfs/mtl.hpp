@@ -10,11 +10,11 @@ public:
     MtlGGX(TextureMap diffuse, TextureMap specular, double roughness, double ior, double dissolve);
 
 private:
-    Spectrum evaluate(const Vec3 &pos, const Vec3 &i, const Vec3 &o) const override;
-    Spectrum sample(const Vec3 &pos, const Vec3 &i, Vec3 &o, double &pdf, Sampler &RNG) const override;
-    double evaluateImportance(const Vec3 &pos, const Vec3 &i, const Vec3 &o) const override;
+    Spectrum evaluate(const Vec2 &texPos, const Vec3 &i, const Vec3 &o) const override;
+    Spectrum sample(const Vec2 &texPos, const Vec3 &i, Vec3 &o, double &pdf, Sampler &RNG) const override;
+    double evaluateImportance(const Vec2 &texPos, const Vec3 &i, const Vec3 &o) const override;
 
-    Spectrum F(const Vec3 &pos, const Vec3 &i, const Vec3 &o, const Vec3 &n) const;
+    Spectrum F(const Vec2 &texPos, const Vec3 &i, const Vec3 &o, const Vec3 &n) const;
     double D(const Vec3 &n) const;
     double G(const Vec3 &i, const Vec3 &o, const Vec3 &n) const;
     void sampleN(Vec3 &n, double &pdf, Sampler &RNG) const;
@@ -28,11 +28,11 @@ private:
 MtlGGX::MtlGGX(TextureMap diffuse, TextureMap specular, double roughness, double ior, double dissolve)
     : diffuse(diffuse), specular(specular), rough(roughness), ior(ior), dissolve(dissolve) {}
 
-Spectrum MtlGGX::F(const Vec3 &pos, const Vec3 &i, const Vec3 &o, const Vec3 &n) const {
+Spectrum MtlGGX::F(const Vec2 &texPos, const Vec3 &i, const Vec3 &o, const Vec3 &n) const {
     if (o.z() > 0)
-        return specular[pos] + (Spectrum(1) - specular[pos]) * pow(1 - abs(o * n), 5);
+        return specular[texPos] + (Spectrum(1) - specular[texPos]) * pow(1 - abs(o * n), 5);
     else {
-        return specular[pos] + (Spectrum(1) - specular[pos]) * pow(1 - sqrt(max(0., (pow(o * n, 2) - 1) * pow(ior, 2) + 1)), 5);
+        return specular[texPos] + (Spectrum(1) - specular[texPos]) * pow(1 - sqrt(max(0., (pow(o * n, 2) - 1) * pow(ior, 2) + 1)), 5);
     }
 }
 
@@ -62,37 +62,37 @@ void MtlGGX::sampleN(Vec3 &n, double &pdf, Sampler &RNG) const {
     pdf = alpha2 * cos_n / (pi * pow((alpha2 - 1) * cos_n * cos_n + 1, 2));
 }
 
-Spectrum MtlGGX::evaluate(const Vec3 &pos, const Vec3 &i, const Vec3 &o) const {
+Spectrum MtlGGX::evaluate(const Vec2 &texPos, const Vec3 &i, const Vec3 &o) const {
     if (i.z() * o.z() > 0) {
         Vec3 n = (i + o).norm();
 
-        return F(pos, i, o, n) * D(n) * G(i, o, n) / (4 * i.z() * o.z())
-            + diffuse[pos] / pi * dissolve;
+        return F(texPos, i, o, n) * D(n) * G(i, o, n) / (4 * i.z() * o.z())
+            + diffuse[texPos] / pi * dissolve;
     } else {
         Vec3 n = (o + i * (o.z() > 0 ? ior : 1 / ior)).norm();
 
-        return (Spectrum(1) - F(pos, i, o, n)) * D(n) * G(i, o, n)
+        return (Spectrum(1) - F(texPos, i, o, n)) * D(n) * G(i, o, n)
             * (abs(i * n) * abs(o * n)) / abs(i.z() * o.z())
             / (o + i * (o.z() > 0 ? ior : 1 / ior)).squaredLength() * (1 - dissolve);
     }
 }
 
-Spectrum MtlGGX::sample(const Vec3 &pos, const Vec3 &i, Vec3 &o, double &pdf, Sampler &RNG) const {
+Spectrum MtlGGX::sample(const Vec2 &texPos, const Vec3 &i, Vec3 &o, double &pdf, Sampler &RNG) const {
     Vec3 n;
     sampleN(n, pdf, RNG);
     o = -i + n * (i * n) * 2;
-    double prob = (rough + F(pos, i, o, n).norm() / sqrt(3)) / (1 + 2 * rough);
+    double prob = (rough + F(texPos, i, o, n).norm() / sqrt(3)) / (1 + 2 * rough);
     if (RNG.rand() < prob) {
         o = -i + n * (i * n) * 2;
         pdf = pdf / abs(4 * i * n) * prob;
         if (o.z() * i.z() > 0)
-            return F(pos, i, o, n) * D(n) * G(i, o, n) / (4 * i.z() * o.z());
+            return F(texPos, i, o, n) * D(n) * G(i, o, n) / (4 * i.z() * o.z());
         else return Spectrum(0);
     } else if (RNG.rand() < dissolve) {
         o = RNG.hemisphere();
         if (i.z() * o.z() < 0) o[2] *= -1;
         pdf = 1 / (2 * pi) * (1 - prob) * dissolve;
-        return diffuse[pos] / pi;
+        return diffuse[texPos] / pi;
     } else {
         double cosV = abs(i * n), sinV = sqrt(1 - cosV * cosV);
         double sinL = sinV * (i.z() < 0 ? ior : 1 / ior);
@@ -106,20 +106,20 @@ Spectrum MtlGGX::sample(const Vec3 &pos, const Vec3 &i, Vec3 &o, double &pdf, Sa
         pdf = pdf * abs(o * n) / (o + i * (i.z() < 0 ? ior : 1 / ior)).squaredLength()
             * (1 - prob) * (1 - dissolve);
         if (o.z() * i.z() > 0) return Spectrum(0);
-        else return (Spectrum(1) - F(pos, i, o, n)) * D(n) * G(i, o, n)
+        else return (Spectrum(1) - F(texPos, i, o, n)) * D(n) * G(i, o, n)
                 * (abs(i * n) * abs(o * n)) / abs(i.z() * o.z())
                 / (o + i * (o.z() > 0 ? ior : 1 / ior)).squaredLength();
     }
 }
 
-double MtlGGX::evaluateImportance(const Vec3 &pos, const Vec3 &i, const Vec3 &o) const {
+double MtlGGX::evaluateImportance(const Vec2 &texPos, const Vec3 &i, const Vec3 &o) const {
     if (i.z() * o.z() > 0) {
         Vec3 n = (i + o).norm();
-        double prob = (rough + F(pos, i, o, n).norm() / sqrt(3)) / (1 + 2 * rough);
+        double prob = (rough + F(texPos, i, o, n).norm() / sqrt(3)) / (1 + 2 * rough);
         return D(n) * prob + 1 / (2 * pi) * (1 - prob) * dissolve;
     } else {
         Vec3 n = (o + i * (o.z() > 0 ? ior : 1 / ior)).norm();
-        double prob = (rough + F(pos, i, o, n).norm() / sqrt(3)) / (1 + 2 * rough);
+        double prob = (rough + F(texPos, i, o, n).norm() / sqrt(3)) / (1 + 2 * rough);
         return D(n) * (1 - prob) * (1 - dissolve);
     }
 }

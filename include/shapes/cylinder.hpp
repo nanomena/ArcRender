@@ -11,8 +11,8 @@ public:
         Ray v, double vx, double vy0, double vy1
     );
 
-    bool intersect(const Ray &ray, double &t) const override;
-    Vec3 normal(const Vec3 &pos) const override;
+    bool intersect(const Ray &ray, double &t, Vec3 &pos, Vec2 &texPos) const override;
+    Vec3 normal(const Vec2 &texPos) const override;
 
 private:
 
@@ -31,7 +31,7 @@ Cylinder::Cylinder(
     rotateAxis(v.d, v.d, T, TInv);
 }
 
-bool Cylinder::intersect(const Ray &ray, double &t) const {
+bool Cylinder::intersect(const Ray &ray, double &t, Vec3 &pos, Vec2 &texPos) const {
     Ray TRay = Ray(T * (ray.o - v.o), T * ray.d);
     if (abs(TRay.d.z()) < EPS) return false;
 
@@ -47,12 +47,17 @@ bool Cylinder::intersect(const Ray &ray, double &t) const {
         t = (x + sqrt(vx * vx - y * y)) / TRay.d.xy().length();
         ok = t > EPS && vy0 <= (TRay.o + TRay.d * t).z() && (TRay.o + TRay.d * t).z() <= vy1;
     }
+    if (ok) {
+        pos = ray.o + ray.d * t;
+        Vec3 TPos = TRay.o + TRay.d * t;
+        texPos = {atan2(TPos.y(), TPos.x()), (TPos.z() - vy0) / (vy1 - vy0)};
+    }
+
     return ok;
 }
 
-Vec3 Cylinder::normal(const Vec3 &pos) const {
-    Vec3 TPos = T * (pos - v.o);
-    Vec3 TNormal(TPos.x(), TPos.y(), 0);
+Vec3 Cylinder::normal(const Vec2 &texPos) const {
+    Vec3 TNormal(sin(texPos.x()), cos(texPos.x()), 0);
     return TInv * TNormal.norm();
 }
 

@@ -108,7 +108,7 @@ int main() {
         "front"
     );
 
-    auto tracer = new BidirectionalPathTracer(4000, 3000, scene);
+    auto tracer = new BidirectionalPathTracer(2400, 1800, scene);
 
     char output[100];
     sprintf(output, "samples/scene8/result.png");

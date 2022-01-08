@@ -14,7 +14,7 @@ struct KaDanTreeNode {
     void load(
         const Shape *objects[], unsigned int size, const function<KaDanTreeNode *()> &acquire, int d
     );
-    void intersect(const Ray &ray, const Shape *&object, double &t) const;
+    void intersect(const Ray &ray, const Shape *&object, double &t, Vec3 &pos, Vec2 &texPos) const;
 };
 
 class KaDanTree {
@@ -23,7 +23,7 @@ public:
 
     KaDanTreeNode *acquire();
 
-    void intersect(const Ray &ray, const Shape *&object, double &t) const;
+    void intersect(const Ray &ray, const Shape *&object, double &t, Vec3 &pos, Vec2 &texPos) const;
     Box3 box() const;
 
 private:
@@ -59,18 +59,21 @@ void KaDanTreeNode::load(
     if (right != nullptr) box = box + right->box;
 }
 
-void KaDanTreeNode::intersect(const Ray &ray, const Shape *&object, double &t) const {
+void KaDanTreeNode::intersect(const Ray &ray, const Shape *&object, double &t, Vec3 &pos, Vec2 &texPos) const {
     int is_inter;
-    double t_cur;
-    if (!box.intersect(ray, t_cur)) return;
-    if (t_cur >= t) return;
+    double tCur;
+    if (!box.intersect(ray, tCur)) return;
+    if (tCur >= t) return;
 
 //    KaDanVisit++;
 
     // $ << "ray " << ray << " " << cen->outline() << " " << is_inter << endl;
-    if (cen->intersect(ray, t_cur))
-        if (t_cur < t) {
-            t = t_cur;
+    Vec3 posCur; Vec2 texPosCur;
+    if (cen->intersect(ray, tCur, posCur, texPosCur))
+        if (tCur < t) {
+            t = tCur;
+            pos = posCur;
+            texPos = texPosCur;
             object = cen;
         }
 
@@ -81,20 +84,20 @@ void KaDanTreeNode::intersect(const Ray &ray, const Shape *&object, double &t) c
 
     if (!hit_l && !hit_r) return;
     if (!hit_l) {
-        right->intersect(ray, object, t);
+        right->intersect(ray, object, t, pos, texPos);
         return;
     }
     if (!hit_r) {
-        left->intersect(ray, object, t);
+        left->intersect(ray, object, t, pos, texPos);
         return;
     }
 
     if (t_l < t_r) {
-        left->intersect(ray, object, t);
-        right->intersect(ray, object, t);
+        left->intersect(ray, object, t, pos, texPos);
+        right->intersect(ray, object, t, pos, texPos);
     } else {
-        right->intersect(ray, object, t);
-        left->intersect(ray, object, t);
+        right->intersect(ray, object, t, pos, texPos);
+        left->intersect(ray, object, t, pos, texPos);
     }
 }
 
@@ -109,9 +112,9 @@ KaDanTree::KaDanTree(vector<const Shape *> objects) {
 
 KaDanTreeNode *KaDanTree::acquire() { return &tree[cnt++]; }
 
-void KaDanTree::intersect(const Ray &ray, const Shape *&object, double &t) const {
+void KaDanTree::intersect(const Ray &ray, const Shape *&object, double &t, Vec3 &pos, Vec2 &texPos) const {
 //    KaDanVisit = 0;
-    root->intersect(ray, object, t);
+    root->intersect(ray, object, t, pos, texPos);
 //#pragma omp critical
 //    cerr << KaDanVisit << endl;
 //    for (const auto& node : tree) {

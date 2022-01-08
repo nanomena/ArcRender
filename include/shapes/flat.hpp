@@ -23,10 +23,10 @@ public:
         new(this)Flat(bxdf, light, inside, outside, tmp);
     }
 
-    bool intersect(const Ray &ray, double &t) const override;
-    Vec3 normal(const Vec3 &pos) const override;
-    void sampleSurface(Vec3 &pos, double &pdf, Sampler &RNG) const override;
-    double evaluateSurfaceImportance(const Vec3 &pos) const override;
+    bool intersect(const Ray &ray, double &t, Vec3 &pos, Vec2 &texPos) const override;
+    Vec3 normal(const Vec2 &texPos) const override;
+    void sampleSurface(Vec3 &pos, Vec2 &texPos, double &pdf, Sampler &RNG) const override;
+    double evaluateSurfaceImportance(const Vec3 &pos, const Vec2 &texPos) const override;
 
 private:
     unsigned int n;
@@ -73,7 +73,7 @@ unsigned int Flat::onRight(const Vec3 &p1, const Vec3 &p2, const Vec3 &q) const 
         > (q.x() - p1.x()) * (p2.y() - p1.y());
 }
 
-bool Flat::intersect(const Ray &ray, double &t) const {
+bool Flat::intersect(const Ray &ray, double &t, Vec3 &pos, Vec2 &texPos) const {
 //    cerr << "here!" << endl;
 
     Ray TRay = Ray(T * ray.o, T * ray.d);
@@ -93,12 +93,17 @@ bool Flat::intersect(const Ray &ray, double &t) const {
         inside ^= onRight(tVertices[i], tVertices[i + 1], TCandi);
 
 //    cerr << "here!" << " " << ray.o << " " << ray.d << " " << TCandi <<  " " << inside << endl;
+    if (inside) {
+        pos = ray.o + ray.d * t;
+        texPos = {0, 0};
+    }
+
     return inside;
 }
-Vec3 Flat::normal(const Vec3 &pos) const {
+Vec3 Flat::normal(const Vec2 &texPos) const {
     return norm;
 }
-void Flat::sampleSurface(Vec3 &pos, double &pdf, Sampler &RNG) const { // @TODO better locate method
+void Flat::sampleSurface(Vec3 &pos, Vec2 &texPos, double &pdf, Sampler &RNG) const { // @TODO better locate method
     double area = 0;
     for (int i = 2; i < n; ++i)
         area += ((vertices[i - 1] - vertices[0]) ^ (vertices[i] - vertices[0])).length() / 2;
@@ -114,9 +119,10 @@ void Flat::sampleSurface(Vec3 &pos, double &pdf, Sampler &RNG) const { // @TODO 
     double a = RNG.rand(), b = RNG.rand();
     if (a + b > 1) a = 1 - a, b = 1 - b;
     pos = (vertices[k - 1] - vertices[0]) * a + (vertices[k] - vertices[0]) * b + vertices[0];
+    texPos = {0, 0};
     pdf = 1 / area;
 }
-double Flat::evaluateSurfaceImportance(const Vec3 &pos) const {
+double Flat::evaluateSurfaceImportance(const Vec3 &pos, const Vec2 &texPos) const {
     double area = 0;
     for (int i = 2; i < n; ++i)
         area += ((vertices[i - 1] - vertices[0]) ^ (vertices[i] - vertices[0])).length() / 2;

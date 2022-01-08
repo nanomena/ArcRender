@@ -16,7 +16,6 @@
 #include "spectrum.hpp"
 
 #include "model.hpp"
-#include "revSurface.hpp"
 
 #include "bxdfs/lambert.hpp"
 #include "bxdfs/biggx.hpp"
@@ -27,8 +26,8 @@
 #include "shapes/flat.hpp"
 #include "shapes/disc.hpp"
 #include "shapes/triangle.hpp"
-#include "shapes/conical.hpp"
 #include "shapes/cylinder.hpp"
+//#include "shapes/revSurface.hpp"
 
 #include "tracers/bdpt.hpp"
 

@@ -6,7 +6,6 @@
 #include "spectrum.hpp"
 #include "vecmath.hpp"
 #include "sampler.hpp"
-#include "counter.hpp"
 #include "scene.hpp"
 
 #define MaxThreads 512

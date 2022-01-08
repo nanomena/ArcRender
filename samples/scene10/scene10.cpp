@@ -22,7 +22,7 @@ int main() {
     );
     auto scene = new Scene(camera, Spectrum(0), medium);
 
-    auto curve = new Curve(3,
+    auto curve = new Curve(1,
         Vec2(0, 0), Vec2(0, 0),
         Vec2(.3, 0), Vec2(.5, .2),
         Vec2(.5, .4), Vec2(.3, .6),
@@ -32,13 +32,20 @@ int main() {
 
 //    auto curve = new Curve(1, Vec2(.3, 0), Vec2(.3, 1));
 
-    RevSurface surface(
+//    RevSurface surface(
+//        new Lambert(rgb256(170, 250, 170)), nullptr,
+//        medium, medium,
+//        Ray(Vec3(0, -1, -1), Vec3(0, 1, 0)), curve, 100
+//    );
+//    scene->addObjects(surface.get());
+
+    scene->addObject(
+        new RevSurfaceShape(
         new Lambert(rgb256(170, 250, 170)), nullptr,
         medium, medium,
-        Ray(Vec3(0, -1, -1), Vec3(0, 1, 0)), curve, 100
+        Ray(Vec3(0, -1, -1), Vec3(0, 1, 0)), curve, 10
+        )
     );
-    scene->addObjects(surface.get());
-
 //    scene->addObject(
 //        new Cylinder(
 //            new Lambert(rgb256(170, 250, 170)), nullptr,

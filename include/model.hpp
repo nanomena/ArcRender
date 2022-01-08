@@ -65,11 +65,9 @@ Model::Model(const string &filename, const string &mtlDir, const Trans3 &T, cons
             diffuseTex = new Texture (texture, {
                 material.diffuse_texopt.origin_offset[0],
                 material.diffuse_texopt.origin_offset[1],
-                material.diffuse_texopt.origin_offset[2]
             }, {
                 material.diffuse_texopt.scale[0],
                 material.diffuse_texopt.scale[1],
-                material.diffuse_texopt.scale[2]
             });
         }
         if (!material.specular_texname.empty()) {
@@ -78,14 +76,13 @@ Model::Model(const string &filename, const string &mtlDir, const Trans3 &T, cons
             specularTex = new Texture(texture, {
                 material.specular_texopt.origin_offset[0],
                 material.specular_texopt.origin_offset[1],
-                material.specular_texopt.origin_offset[2]
             }, {
                 material.specular_texopt.scale[0],
                 material.specular_texopt.scale[1],
-                material.specular_texopt.scale[2]
             });
         }
 
+        cerr << diffuse << " " << specular << " " << roughness << " " << ior << " " << dissolve << endl;
         materials.push_back({
             diffuse, specular, diffuseTex, specularTex, roughness, ior, dissolve
         });
@@ -129,7 +126,7 @@ Model::Model(const string &filename, const string &mtlDir, const Trans3 &T, cons
 
             auto &material = materials[s.mesh.material_ids[f]];
             Trans3 texT = Trans3(
-                T * vertices[0], T * vertices[1], T * vertices[2],
+                Vec3(0, 0, 0), Vec3(1, 0, 0), Vec3(0, 1, 0),
                 textures[0], textures[1], textures[2]
                 );
             TextureMap diffuse = (material.diffuseTex != nullptr)

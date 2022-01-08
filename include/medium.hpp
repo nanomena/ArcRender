@@ -12,7 +12,7 @@ public:
         throw invalid_argument("NotImplementedError");
     }
     virtual Spectrum sample(
-        const Scene *scene, const Ray &v, const Object *&object, Vec3 &intersect, Sampler &RNG
+        const Scene *scene, const Ray &v, const Object *&object, Vec3 &pos, Vec2 &texPos, Sampler &RNG
     ) const {
         throw invalid_argument("NotImplementedError");
     }

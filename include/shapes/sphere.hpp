@@ -11,8 +11,8 @@ public:
         Vec3 o, double r, bool reverse = false
     );
 
-    bool intersect(const Ray &ray, double &t) const override;
-    Vec3 normal(const Vec3 &pos) const override;
+    bool intersect(const Ray &ray, double &t, Vec3 &pos, Vec2 &texPos) const override;
+    Vec3 normal(const Vec2 &texPos) const override;
 
 private:
 
@@ -31,7 +31,7 @@ Sphere::Sphere(
     box = Box3(o - Vec3(r, r, r), o + Vec3(r, r, r));
 }
 
-bool Sphere::intersect(const Ray &ray, double &t) const {
+bool Sphere::intersect(const Ray &ray, double &t, Vec3 &pos, Vec2 &texPos) const {
 //    cerr << ray.o << " " << ray.d << " " << o << " " << r << endl;
     double x = (o - ray.o) * ray.d, y = (ray.o + ray.d * x - o).length();
     if (r < y) {
@@ -44,11 +44,18 @@ bool Sphere::intersect(const Ray &ray, double &t) const {
     }
 //    cerr << t << endl;
     if (t < EPS) return false;
+    pos = ray.o + ray.d * t;
+    texPos = {atan2((pos - o).y(), (pos - o).x()), asin((pos - o).z() / r)};
+    {
+        Vec3 normalOld = (pos - o).norm();
+        Vec3 normalNew = Vec3(cos(texPos.x()) * cos(texPos.y()), sin(texPos.x()) * cos(texPos.y()), sin(texPos.y()));
+        assert((normalNew - normalOld).length() < EPS);
+    }
     return true;
 }
 
-Vec3 Sphere::normal(const Vec3 &pos) const {
-    return (pos - o).norm() * (reverse ? -1 : 1);
+Vec3 Sphere::normal(const Vec2 &texPos) const {
+    return Vec3(cos(texPos.x()) * cos(texPos.y()), sin(texPos.x()) * cos(texPos.y()), sin(texPos.y())) * (reverse ? -1 : 1);
 }
 
 #endif
