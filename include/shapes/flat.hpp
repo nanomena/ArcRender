@@ -33,7 +33,7 @@ private:
     vector<Vec3> vertices, tVert;
     Vec3 *tVertices;
     Vec3 norm;
-    Mat3 T;
+    Mat3 T, TInv;
 
     unsigned int onRight(const Vec3 &p1, const Vec3 &p2, const Vec3 &q) const;
 };
@@ -50,7 +50,6 @@ Flat::Flat(
 
     for (auto v: vertices) cerr << v << endl;
     norm = ((vertices[1] - vertices[0]) ^ (vertices[2] - vertices[0])).norm();
-    Mat3 TInv;
 //    cerr << (vertices[1] - vertices[0]).norm() << endl;
 //    cerr << (vertices[2] - vertices[0]).norm() << endl;
     rotateAxis(norm, (vertices[1] - vertices[0]).norm(), T, TInv);
@@ -95,7 +94,7 @@ bool Flat::intersect(const Ray &ray, double &t, Vec3 &pos, Vec2 &texPos) const {
 //    cerr << "here!" << " " << ray.o << " " << ray.d << " " << TCandi <<  " " << inside << endl;
     if (inside) {
         pos = ray.o + ray.d * t;
-        texPos = {0, 0};
+        texPos = (T * (pos - vertices[0])).xy();
     }
 
     return inside;
@@ -119,7 +118,7 @@ void Flat::sampleSurface(Vec3 &pos, Vec2 &texPos, double &pdf, Sampler &RNG) con
     double a = RNG.rand(), b = RNG.rand();
     if (a + b > 1) a = 1 - a, b = 1 - b;
     pos = (vertices[k - 1] - vertices[0]) * a + (vertices[k] - vertices[0]) * b + vertices[0];
-    texPos = {0, 0};
+    texPos = (T * (pos - vertices[0])).xy();
     pdf = 1 / area;
 }
 double Flat::evaluateSurfaceImportance(const Vec3 &pos, const Vec2 &texPos) const {

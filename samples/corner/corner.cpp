@@ -19,7 +19,7 @@ int main() {
         Vec3(0.8, 0, 0),
         Vec3(0, 0.6, 0),
         0.6,
-        0.58, 0.003, 0.05
+        0.74, 0.01, 0.05
     );
     auto scene = new Scene(camera, Spectrum(0), medium);
 
@@ -34,11 +34,10 @@ int main() {
     scene->addObject(
         new Revolved(
             new MtlExtGGX(
-                TextureMap(new Texture("textures/Tiles_049/Tiles_049_basecolor.jpg"), Spectrum(2.5)),
-                TextureMap(new Texture("textures/Tiles_049/Tiles_049_metallic.jpg"), Spectrum(1)),
-                TextureMap(new Texture("textures/Tiles_049/Tiles_049_roughness.jpg"), Spectrum(1)),
-                20, 1,
-                TextureMap(new Texture("textures/Tiles_049/Tiles_049_normal.jpg"), Spectrum(1))
+                TextureMap(new Texture("textures/Marble/Marble_Carrara_002_COLOR.jpg"), Spectrum(2.5)),
+                TextureMap(Spectrum(0.2)),
+                TextureMap(Spectrum(0.05)),
+                1.5, 1
             ), nullptr,
             medium, medium,
             Ray(Vec3(.68, -1, -1.32), Vec3(0, 1, 0)), curve
@@ -47,8 +46,8 @@ int main() {
 
     scene->addObject(
         new Sphere(
-            new BiGGX(2.5, 0.2), nullptr,
-            new Transparent(Spectrum(0.2, 1, 0.2)),
+            new GGX(Spectrum(0.8, 1, 0.8), 0.8), nullptr,
+            new Transparent(Spectrum(0.1, 1, 0.1)),
             medium,
             Vec3(.43, -.95, -.58), .05
         )
@@ -60,19 +59,17 @@ int main() {
                 TextureMap(new Texture("textures/Metal_Gold/Metal_Gold_001_basecolor.jpg"), Spectrum(2.5)),
                 TextureMap(new Texture("textures/Metal_Gold/Metal_Gold_001_metallic.jpg"), Spectrum(1)),
                 TextureMap(new Texture("textures/Metal_Gold/Metal_Gold_001_roughness.jpg"), Spectrum(3)),
-                30, 0.2,
+                30, 1,
                 TextureMap(new Texture("textures/Metal_Gold/Metal_Gold_001_normal.jpg"), Spectrum(1))
             ), nullptr,
-            new Scatter(8, Spectrum(1, 1, 1),
-            new Sphere(nullptr, nullptr, nullptr, nullptr, Vec3(), INF / 10)),
-            medium,
+            medium, medium,
             Vec3(.40, -.93, -.82), .07
         )
     );
 
     scene->addObject(
         new Sphere(
-            new BiGGX(2.5, 0.1), nullptr,
+            new BiGGX(1.5, 0.2), nullptr,
             medium, medium,
             Vec3(.55, -.95, -0.68), .05
         )
@@ -108,7 +105,13 @@ int main() {
 
     scene->addObject(
         new Flat(
-            new GGX(rgb256(250, 250, 250), 0.8), nullptr,
+            new MtlExtGGX(
+                TextureMap(new Texture("textures/Tiles_049/Tiles_049_basecolor.jpg"), Spectrum(2.5)),
+                TextureMap(new Texture("textures/Tiles_049/Tiles_049_metallic.jpg"), Spectrum(1)),
+                TextureMap(new Texture("textures/Tiles_049/Tiles_049_roughness.jpg"), Spectrum(1)),
+                20, 1,
+                TextureMap(new Texture("textures/Tiles_049/Tiles_049_normal.jpg"), Spectrum(1))
+            ), nullptr,
             medium, medium,
             Vec3(-1, -1, -2),
             Vec3(-1, -1, 2),
@@ -152,7 +155,7 @@ int main() {
 
     scene->addObject(
         new Flat(
-            new Lambert(rgb256(250, 250, 250)), nullptr,
+            new GGX(rgb256(250, 250, 250), 0.3), nullptr,
             medium, medium,
             Vec3(-1, 1, -2),
             Vec3(-1, -1, -2),
@@ -173,12 +176,12 @@ int main() {
         "front"
     );
 
-    auto tracer = new BidirectionalPathTracer(1600, 1200, scene);
+    auto tracer = new BidirectionalPathTracer(2560, 1920, scene);
 
     char output[100];
     sprintf(output, "samples/corner/result.png");
 
-    int epoch = 1000;
+    int epoch = 16000;
 
     cerr << "[T + " << time(nullptr) - T0 << "] | target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++i) {

@@ -38,11 +38,11 @@ Spectrum MtlExtGGX::F(const Vec2 &texPos, const Vec3 &i, const Vec3 &o, const Ve
 }
 
 double MtlExtGGX::D(const Vec2 &texPos, const Vec3 &n) const {
-    Vec3 nl = (n / abs(n.z()) - Vec3(normalMap[texPos].r, normalMap[texPos].g, 0)).norm();
+    Vec3 m = Vec3(normalMap[texPos].r, normalMap[texPos].g, normalMap[texPos].b).norm();
 
     double alpha = pow(roughness[texPos].norm(), 2);
     double alpha2 = alpha * alpha;
-    return alpha2 / (pi * pow(nl.z() * nl.z() * (alpha2 - 1) + 1, 2));
+    return alpha2 / (pi * pow(pow(n * m, 2) * (alpha2 - 1) + 1, 2));
 }
 
 double MtlExtGGX::G(const Vec2 &texPos, const Vec3 &i, const Vec3 &o, const Vec3 &n) const {
@@ -61,10 +61,15 @@ void MtlExtGGX::sampleN(const Vec2 &texPos, Vec3 &n, double &pdf, Sampler &RNG) 
     double p = RNG.rand(), q = RNG.rand(-pi, pi);
     double cos_n = sqrt((1 - p) / (p * (alpha2 - 1) + 1));
     double sin_n = sqrt(1 - cos_n * cos_n);
-    n = Vec3(cos(q) * sin_n, sin(q) * sin_n, cos_n);
+    Vec3 lN = Vec3(cos(q) * sin_n, sin(q) * sin_n, cos_n);
     pdf = alpha2 * cos_n / (pi * pow((alpha2 - 1) * cos_n * cos_n + 1, 2));
 
-    n = (n / abs(n.z()) + Vec3(normalMap[texPos].r, normalMap[texPos].g, 0)).norm();
+    Vec3 m = Vec3(normalMap[texPos].r, normalMap[texPos].g, normalMap[texPos].b).norm();
+    Mat3 T, TInv;
+    rotateAxis(m, m, T, TInv);
+    n = TInv * lN;
+//#pragma omp critical
+//    cerr << lN.z() << " " << (m * n) << endl;
 }
 
 Spectrum MtlExtGGX::evaluate(const Vec2 &texPos, const Vec3 &i, const Vec3 &o) const {
