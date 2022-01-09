@@ -8,15 +8,14 @@ public:
     Revolved(
         const BxDF *bxdf, const Light *light,
         const Medium *inside, const Medium *outside,
-        Ray v, const Spline* Curve, const TextureMap &normalMap = TextureMap(Spectrum(0, 0, 1))
+        Ray v, const Spline* Curve
     );
 
     bool intersect(const Ray &ray, double &t, Vec3 &pos, Vec2 &texPos) const override;
     Vec3 normal(const Vec2 &texPos) const override;
+    Vec3 tangent(const Vec2 &texPos) const override;
 
 private:
-
-    TextureMap normalMap;
     Mat3 T, TInv;
     Ray v; const Spline *Curve;
 };
@@ -26,8 +25,8 @@ private:
 Revolved::Revolved(
     const BxDF *bxdf, const Light *light,
     const Medium *inside, const Medium *outside,
-    Ray v, const Spline* Curve, const TextureMap &normalMap
-) : Shape(bxdf, light, inside, outside), v(v), Curve(Curve), normalMap(normalMap) {
+    Ray v, const Spline* Curve
+) : Shape(bxdf, light, inside, outside), v(v), Curve(Curve) {
     for (int i = Curve->k; i <= Curve->n + 1; ++ i)
         box = box + discBox(v, {Curve->B(Curve->tdx(i)).x(), Curve->B(Curve->tdx(i)).y()});
     rotateAxis(v.d, v.d, T, TInv);
@@ -120,11 +119,12 @@ bool Revolved::intersect(const Ray &ray, double &t, Vec3 &pos, Vec2 &texPos) con
 Vec3 Revolved::normal(const Vec2 &texPos) const {
     Vec2 dB = Curve->dB(texPos.y()).norm();
     Vec3 Tz = {cos(texPos.x() * (2 * pi)) * dB.y(), sin(texPos.x() * (2 * pi)) * dB.y(), -dB.x()};
-    Vec3 Tx = {sin(texPos.x() * (2 * pi)), -cos(texPos.x() * (2 * pi)), 0};
-    Vec3 Ty = (Tz ^ Tx).norm();
-    Spectrum LNormal = normalMap[texPos];
-    Vec3 TNormal = (LNormal.r * Tx + LNormal.g * Ty + LNormal.b * Tz).norm();
     return TInv * Tz;
+}
+
+Vec3 Revolved::tangent(const Vec2 &texPos) const {
+    Vec3 Tx = {sin(texPos.x() * (2 * pi)), -cos(texPos.x() * (2 * pi)), 0};
+    return TInv * Tx;
 }
 
 #endif

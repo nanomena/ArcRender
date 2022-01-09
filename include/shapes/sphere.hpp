@@ -8,15 +8,14 @@ public:
     Sphere(
         const BxDF *bxdf, const Light *light,
         const Medium *inside, const Medium *outside,
-        Vec3 o, double r, const TextureMap &normalMap = TextureMap(Spectrum(0, 0, 1))
+        Vec3 o, double r
     );
 
     bool intersect(const Ray &ray, double &t, Vec3 &pos, Vec2 &texPos) const override;
     Vec3 normal(const Vec2 &texPos) const override;
+    Vec3 tangent(const Vec2 &texPos) const override;
 
 private:
-
-    TextureMap normalMap;
     Vec3 o;
     double r;
 };
@@ -26,8 +25,8 @@ private:
 Sphere::Sphere(
     const BxDF *bxdf, const Light *light,
     const Medium *inside, const Medium *outside,
-    Vec3 o, double r, const TextureMap &normalMap
-) : Shape(bxdf, light, inside, outside), o(o), r(r), normalMap(normalMap) {
+    Vec3 o, double r
+) : Shape(bxdf, light, inside, outside), o(o), r(r) {
     box = Box3(o - Vec3(r, r, r), o + Vec3(r, r, r));
 }
 
@@ -53,16 +52,15 @@ bool Sphere::intersect(const Ray &ray, double &t, Vec3 &pos, Vec2 &texPos) const
 }
 
 Vec3 Sphere::normal(const Vec2 &texPos) const {
-    Vec3 Nz = {
+    return {
         cos(texPos.x() * (2 * pi)) * cos((texPos.y() - .5) * pi),
         sin(texPos.x() * (2 * pi)) * cos((texPos.y() - .5) * pi),
         sin((texPos.y() - .5) * pi)
     };
-    Vec3 Nx = {sin(texPos.x() * (2 * pi)), -cos(texPos.x() * (2 * pi)), 0};
-    Vec3 Ny = (Nz ^ Nx).norm();
-    Spectrum LNormal = normalMap[texPos];
+}
 
-    return (LNormal.r * Nx + LNormal.g * Ny + LNormal.b * Nz).norm();
+Vec3 Sphere::tangent(const Vec2 &texPos) const {
+    return {sin(texPos.x() * (2 * pi)), -cos(texPos.x() * (2 * pi)), 0};
 }
 
 #endif

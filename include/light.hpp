@@ -7,9 +7,9 @@
 
 class Light {
 public:
-    Spectrum evaluate(const Vec2 &texPos, const Vec3 &n, const Vec3 &gI) const;
-    Spectrum sample(const Vec2 &texPos, const Vec3 &n, Vec3 &gI, Sampler &RNG) const;
-    double evaluateImportance(const Vec2 &texPos, const Vec3 &n, const Vec3 &gI) const;
+    Spectrum evaluate(const Vec2 &texPos, const Vec3 &n, const Vec3 &t, const Vec3 &gI) const;
+    Spectrum sample(const Vec2 &texPos, const Vec3 &n, const Vec3 &t, Vec3 &gI, Sampler &RNG) const;
+    double evaluateImportance(const Vec2 &texPos, const Vec3 &n, const Vec3 &t, const Vec3 &gI) const;
 
 private:
     virtual Spectrum evaluate(const Vec2 &texPos, const Vec3 &i) const {
@@ -25,16 +25,16 @@ private:
 
 #ifdef ARC_IMPLEMENTATION
 
-Spectrum Light::evaluate(const Vec2 &texPos, const Vec3 &n, const Vec3 &gI) const {
+Spectrum Light::evaluate(const Vec2 &texPos, const Vec3 &n, const Vec3 &t, const Vec3 &gI) const {
     Mat3 T, TInv;
-    rotateAxis(n, gI, T, TInv);
+    rotateAxis(n, t, T, TInv);
     Vec3 vT = T * gI;
     return evaluate(texPos, vT);
 }
 
-Spectrum Light::sample(const Vec2 &texPos, const Vec3 &n, Vec3 &gI, Sampler &RNG) const {
+Spectrum Light::sample(const Vec2 &texPos, const Vec3 &n, const Vec3 &t, Vec3 &gI, Sampler &RNG) const {
     Mat3 T, TInv;
-    rotateAxis(n, n, T, TInv);
+    rotateAxis(n, t, T, TInv);
     Vec3 vT;
     double pdf;
     Spectrum s = sample(texPos, vT, pdf, RNG);
@@ -42,9 +42,9 @@ Spectrum Light::sample(const Vec2 &texPos, const Vec3 &n, Vec3 &gI, Sampler &RNG
     return s / pdf;
 }
 
-double Light::evaluateImportance(const Vec2 &texPos, const Vec3 &n, const Vec3 &gI) const {
+double Light::evaluateImportance(const Vec2 &texPos, const Vec3 &n, const Vec3 &t, const Vec3 &gI) const {
     Mat3 T, TInv;
-    rotateAxis(n, gI, T, TInv);
+    rotateAxis(n, t, T, TInv);
     Vec3 vT = T * gI;
     return evaluateImportance(texPos, vT);
 }

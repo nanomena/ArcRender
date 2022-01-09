@@ -14,11 +14,12 @@ int main() {
     auto medium = new Transparent(Spectrum(1, 1, 1));
 //    auto medium = new Scatter(0.3, Spectrum(1, 1, 1));
 
-    auto camera = new PerspectiveCamera(
-        Vec3(.6, -.8, .15),
+    auto camera = new SimulatedCamera(
+        Vec3(.6, -.8, .05),
         Vec3(0.8, 0, 0),
         Vec3(0, 0.6, 0),
-        0.6
+        0.6,
+        0.58, 0.003, 0.05
     );
     auto scene = new Scene(camera, Spectrum(0), medium);
 
@@ -36,11 +37,11 @@ int main() {
                 TextureMap(new Texture("textures/Tiles_049/Tiles_049_basecolor.jpg"), Spectrum(2.5)),
                 TextureMap(new Texture("textures/Tiles_049/Tiles_049_metallic.jpg"), Spectrum(1)),
                 TextureMap(new Texture("textures/Tiles_049/Tiles_049_roughness.jpg"), Spectrum(1)),
-                20, 1
+                20, 1,
+                TextureMap(new Texture("textures/Tiles_049/Tiles_049_normal.jpg"), Spectrum(1))
             ), nullptr,
             medium, medium,
-            Ray(Vec3(.68, -1, -1.32), Vec3(0, 1, 0)), curve,
-            TextureMap(new Texture("textures/Tiles_049/Tiles_049_normal.jpg"), Spectrum(1))
+            Ray(Vec3(.68, -1, -1.32), Vec3(0, 1, 0)), curve
         )
     );
 
@@ -49,17 +50,7 @@ int main() {
             new BiGGX(2.5, 0.2), nullptr,
             new Transparent(Spectrum(0.2, 1, 0.2)),
             medium,
-            Vec3(.38, -.95, -.57), .05
-        )
-    );
-
-    scene->addObject(
-        new Sphere(
-            new BiGGX(2.5, 0.1), nullptr,
-            new Scatter(8, Spectrum(0.2, 1, 0.2),
-            new Sphere(nullptr, nullptr, nullptr, nullptr, Vec3(), INF / 10)),
-            medium,
-            Vec3(.45, -.93, -.77), .07
+            Vec3(.43, -.95, -.58), .05
         )
     );
 
@@ -69,27 +60,37 @@ int main() {
                 TextureMap(new Texture("textures/Metal_Gold/Metal_Gold_001_basecolor.jpg"), Spectrum(2.5)),
                 TextureMap(new Texture("textures/Metal_Gold/Metal_Gold_001_metallic.jpg"), Spectrum(1)),
                 TextureMap(new Texture("textures/Metal_Gold/Metal_Gold_001_roughness.jpg"), Spectrum(3)),
-                1.5, 0.2
+                30, 0.2,
+                TextureMap(new Texture("textures/Metal_Gold/Metal_Gold_001_normal.jpg"), Spectrum(1))
             ), nullptr,
-            medium, medium,
-            Vec3(.60, -.93, -0.63), .07,
-            TextureMap(new Texture("textures/Metal_Gold/Metal_Gold_001_normal.jpg"), Spectrum(1))
+            new Scatter(8, Spectrum(1, 1, 1),
+            new Sphere(nullptr, nullptr, nullptr, nullptr, Vec3(), INF / 10)),
+            medium,
+            Vec3(.40, -.93, -.82), .07
         )
     );
 
-//    Model model("models/teapot.obj", "models/", Trans3(
-//        Vec3(0.13, -1, -15),
-//        Vec3(0.096, 0, 0),
-//        Vec3(0, 0.096, 0),
-//        Vec3(0, 0, 0.096)
-//    ), medium);
-//    scene->addObjects(model.get());
+    scene->addObject(
+        new Sphere(
+            new BiGGX(2.5, 0.1), nullptr,
+            medium, medium,
+            Vec3(.55, -.95, -0.68), .05
+        )
+    );
+
+    Model model("models/teapot.obj", "models/", Trans3(
+        Vec3(0.78, -1, -0.63),
+        Vec3(0.036, 0, 0),
+        Vec3(0, 0.036, 0),
+        Vec3(0, 0, 0.036)
+    ), medium);
+    scene->addObjects(model.get());
 
     Model model2("models/rose.obj", "models/", Trans3(
-        Vec3(0.83, -0.94, -0.63),
-        Vec3(0.03, 0, 0),
-        Vec3(0, 0.03 * sqrt(4. / 5), -0.03 * sqrt(1. / 5)),
-        Vec3(0, 0.03 * sqrt(1. / 5), 0.03 * sqrt(4. / 5))
+        Vec3(0.78, -0.94, -0.63),
+        Vec3(0.022, 0, 0),
+        Vec3(0, 0.022 * sqrt(4. / 5), -0.022 * sqrt(1. / 5)),
+        Vec3(0, 0.022 * sqrt(1. / 5), 0.022 * sqrt(4. / 5))
     ), medium, true);
     scene->addObjects(model2.get());
 

@@ -7,9 +7,9 @@
 
 class BxDF {
 public:
-    Spectrum evaluate(const Vec2 &texPos, const Vec3 &n, const Vec3 &gI, const Vec3 &gO) const;
-    Spectrum sample(const Vec2 &texPos, const Vec3 &n, const Vec3 &gI, Vec3 &gO, Sampler &RNG) const;
-    double evaluateImportance(const Vec2 &texPos, const Vec3 &n, const Vec3 &gI, const Vec3 &gO) const;
+    Spectrum evaluate(const Vec2 &texPos, const Vec3 &n, const Vec3 &t, const Vec3 &gI, const Vec3 &gO) const;
+    Spectrum sample(const Vec2 &texPos, const Vec3 &n, const Vec3 &t, const Vec3 &gI, Vec3 &gO, Sampler &RNG) const;
+    double evaluateImportance(const Vec2 &texPos, const Vec3 &n, const Vec3 &t, const Vec3 &gI, const Vec3 &gO) const;
 
 private:
     virtual Spectrum evaluate(const Vec2 &texPos, const Vec3 &i, const Vec3 &o) const {
@@ -25,16 +25,16 @@ private:
 
 #ifdef ARC_IMPLEMENTATION
 
-Spectrum BxDF::evaluate(const Vec2 &texPos, const Vec3 &n, const Vec3 &gI, const Vec3 &gO) const {
+Spectrum BxDF::evaluate(const Vec2 &texPos, const Vec3 &n, const Vec3 &t, const Vec3 &gI, const Vec3 &gO) const {
     Mat3 T, TInv;
-    rotateAxis(n, gI, T, TInv);
+    rotateAxis(n, t, T, TInv);
     Vec3 vT = T * gI, lT = T * gO;
     return evaluate(texPos, vT, lT);
 }
 
-Spectrum BxDF::sample(const Vec2 &texPos, const Vec3 &n, const Vec3 &gI, Vec3 &gO, Sampler &RNG) const {
+Spectrum BxDF::sample(const Vec2 &texPos, const Vec3 &n, const Vec3 &t, const Vec3 &gI, Vec3 &gO, Sampler &RNG) const {
     Mat3 T, TInv;
-    rotateAxis(n, gI, T, TInv);
+    rotateAxis(n, t, T, TInv);
     Vec3 vT = T * gI, lT;
     double pdf;
     Spectrum s = sample(texPos, vT, lT, pdf, RNG);
@@ -42,9 +42,9 @@ Spectrum BxDF::sample(const Vec2 &texPos, const Vec3 &n, const Vec3 &gI, Vec3 &g
     return s / pdf;
 }
 
-double BxDF::evaluateImportance(const Vec2 &texPos, const Vec3 &n, const Vec3 &gI, const Vec3 &gO) const {
+double BxDF::evaluateImportance(const Vec2 &texPos, const Vec3 &n, const Vec3 &t, const Vec3 &gI, const Vec3 &gO) const {
     Mat3 T, TInv;
-    rotateAxis(n, gI, T, TInv);
+    rotateAxis(n, t, T, TInv);
     Vec3 vT = T * gI, lT = T * gO;
     return evaluateImportance(texPos, vT, lT);
 }

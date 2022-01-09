@@ -7,7 +7,8 @@
 
 class MtlExtGGX : public BxDF {
 public:
-    MtlExtGGX(TextureMap baseColor, TextureMap metallic, TextureMap roughness, double ior, double dissolve);
+    MtlExtGGX(TextureMap baseColor, TextureMap metallic, TextureMap roughness, double ior, double dissolve,
+        TextureMap normalMap = TextureMap(Spectrum(0, 0, 1)));
 
 private:
     Spectrum evaluate(const Vec2 &texPos, const Vec3 &i, const Vec3 &o) const override;
@@ -19,14 +20,14 @@ private:
     double G(const Vec2 &texPos, const Vec3 &i, const Vec3 &o, const Vec3 &n) const;
     void sampleN(const Vec2 &texPos, Vec3 &n, double &pdf, Sampler &RNG) const;
 
-    TextureMap baseColor, metallic, roughness;
+    TextureMap baseColor, metallic, roughness, normalMap;
     double ior, dissolve;
 };
 
 #ifdef ARC_IMPLEMENTATION
 
-MtlExtGGX::MtlExtGGX(TextureMap baseColor, TextureMap metallic, TextureMap roughness, double ior, double dissolve)
-    : baseColor(baseColor), metallic(metallic), roughness(roughness), ior(ior), dissolve(dissolve) {}
+MtlExtGGX::MtlExtGGX(TextureMap baseColor, TextureMap metallic, TextureMap roughness, double ior, double dissolve, TextureMap normalMap)
+    : baseColor(baseColor), metallic(metallic), roughness(roughness), ior(ior), dissolve(dissolve), normalMap(normalMap) {}
 
 Spectrum MtlExtGGX::F(const Vec2 &texPos, const Vec3 &i, const Vec3 &o, const Vec3 &n) const {
     if (o.z() > 0)
@@ -37,9 +38,11 @@ Spectrum MtlExtGGX::F(const Vec2 &texPos, const Vec3 &i, const Vec3 &o, const Ve
 }
 
 double MtlExtGGX::D(const Vec2 &texPos, const Vec3 &n) const {
+    Vec3 nl = (n / abs(n.z()) - Vec3(normalMap[texPos].r, normalMap[texPos].g, 0)).norm();
+
     double alpha = pow(roughness[texPos].norm(), 2);
     double alpha2 = alpha * alpha;
-    return alpha2 / (pi * pow(n.z() * n.z() * (alpha2 - 1) + 1, 2));
+    return alpha2 / (pi * pow(nl.z() * nl.z() * (alpha2 - 1) + 1, 2));
 }
 
 double MtlExtGGX::G(const Vec2 &texPos, const Vec3 &i, const Vec3 &o, const Vec3 &n) const {
@@ -60,6 +63,8 @@ void MtlExtGGX::sampleN(const Vec2 &texPos, Vec3 &n, double &pdf, Sampler &RNG) 
     double sin_n = sqrt(1 - cos_n * cos_n);
     n = Vec3(cos(q) * sin_n, sin(q) * sin_n, cos_n);
     pdf = alpha2 * cos_n / (pi * pow((alpha2 - 1) * cos_n * cos_n + 1, 2));
+
+    n = (n / abs(n.z()) + Vec3(normalMap[texPos].r, normalMap[texPos].g, 0)).norm();
 }
 
 Spectrum MtlExtGGX::evaluate(const Vec2 &texPos, const Vec3 &i, const Vec3 &o) const {
