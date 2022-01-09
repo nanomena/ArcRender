@@ -7,6 +7,7 @@
 #include "light.hpp"
 #include "medium.hpp"
 #include "object.hpp"
+#include "texture.hpp"
 
 class Shape : public Object {
 public:

@@ -21,6 +21,7 @@
 #include "bxdfs/biggx.hpp"
 #include "bxdfs/ggx.hpp"
 #include "bxdfs/mtl.hpp"
+#include "bxdfs/mtlExt.hpp"
 
 #include "shapes/sphere.hpp"
 #include "shapes/flat.hpp"

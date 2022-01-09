@@ -8,7 +8,7 @@ public:
     Sphere(
         const BxDF *bxdf, const Light *light,
         const Medium *inside, const Medium *outside,
-        Vec3 o, double r, bool reverse = false
+        Vec3 o, double r, const TextureMap &normalMap = TextureMap(Spectrum(0, 0, 1))
     );
 
     bool intersect(const Ray &ray, double &t, Vec3 &pos, Vec2 &texPos) const override;
@@ -16,9 +16,9 @@ public:
 
 private:
 
+    TextureMap normalMap;
     Vec3 o;
     double r;
-    bool reverse;
 };
 
 #ifdef ARC_IMPLEMENTATION
@@ -26,8 +26,8 @@ private:
 Sphere::Sphere(
     const BxDF *bxdf, const Light *light,
     const Medium *inside, const Medium *outside,
-    Vec3 o, double r, bool reverse
-) : Shape(bxdf, light, inside, outside), o(o), r(r), reverse(reverse) {
+    Vec3 o, double r, const TextureMap &normalMap
+) : Shape(bxdf, light, inside, outside), o(o), r(r), normalMap(normalMap) {
     box = Box3(o - Vec3(r, r, r), o + Vec3(r, r, r));
 }
 
@@ -45,20 +45,24 @@ bool Sphere::intersect(const Ray &ray, double &t, Vec3 &pos, Vec2 &texPos) const
 //    cerr << t << endl;
     if (t < EPS) return false;
     pos = ray.o + ray.d * t;
-    texPos = {atan2((pos - o).y(), (pos - o).x()), asin((pos - o).z() / r)};
-//    {
-//        Vec3 normalOld = (pos - o).norm();
-//        Vec3 normalNew = Vec3(cos(texPos.x()) * cos(texPos.y()), sin(texPos.x()) * cos(texPos.y()), sin(texPos.y()));\
-//        if ((normalNew - normalOld).length() > EPS) {
-//            cerr << normalNew << " " << normalOld << endl;
-//        }
-//        assert((normalNew - normalOld).length() < EPS);
-//    }
+    texPos = {
+        fmod(atan2((pos - o).y(), (pos - o).x()) / (2 * pi) + 1, 1),
+        asin((pos - o).z() / r) / pi + .5
+    };
     return true;
 }
 
 Vec3 Sphere::normal(const Vec2 &texPos) const {
-    return Vec3(cos(texPos.x()) * cos(texPos.y()), sin(texPos.x()) * cos(texPos.y()), sin(texPos.y())) * (reverse ? -1 : 1);
+    Vec3 Nz = {
+        cos(texPos.x() * (2 * pi)) * cos((texPos.y() - .5) * pi),
+        sin(texPos.x() * (2 * pi)) * cos((texPos.y() - .5) * pi),
+        sin((texPos.y() - .5) * pi)
+    };
+    Vec3 Nx = {sin(texPos.x() * (2 * pi)), -cos(texPos.x() * (2 * pi)), 0};
+    Vec3 Ny = (Nz ^ Nx).norm();
+    Spectrum LNormal = normalMap[texPos];
+
+    return (LNormal.r * Nx + LNormal.g * Ny + LNormal.b * Nz).norm();
 }
 
 #endif

@@ -67,7 +67,7 @@ int Spectrum::rgb256(double white, double gamma) const {
 }
 
 double Spectrum::norm() const {
-    return sqrt(r * r + g * g + b * b);
+    return sqrt(r * r + g * g + b * b) / sqrt(3);
 }
 
 Spectrum &Spectrum::operator +=(const Spectrum &v) { return *this = *this + v; }

@@ -36,7 +36,7 @@ Scene::Scene(const Camera *camera, const Spectrum &skyboxColor, const Medium *me
     skybox = new Sphere(
         nullptr, nullptr,
         nullptr, medium,
-        Vec3(0, 0, 0), skyboxDist, true
+        Vec3(0, 0, 0), skyboxDist
     );
 }
 Scene::~Scene() {

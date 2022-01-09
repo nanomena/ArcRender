@@ -8,7 +8,7 @@ public:
     Revolved(
         const BxDF *bxdf, const Light *light,
         const Medium *inside, const Medium *outside,
-        Ray v, const Spline* Curve
+        Ray v, const Spline* Curve, const TextureMap &normalMap = TextureMap(Spectrum(0, 0, 1))
     );
 
     bool intersect(const Ray &ray, double &t, Vec3 &pos, Vec2 &texPos) const override;
@@ -16,6 +16,7 @@ public:
 
 private:
 
+    TextureMap normalMap;
     Mat3 T, TInv;
     Ray v; const Spline *Curve;
 };
@@ -25,8 +26,8 @@ private:
 Revolved::Revolved(
     const BxDF *bxdf, const Light *light,
     const Medium *inside, const Medium *outside,
-    Ray v, const Spline* Curve
-) : Shape(bxdf, light, inside, outside), v(v), Curve(Curve) {
+    Ray v, const Spline* Curve, const TextureMap &normalMap
+) : Shape(bxdf, light, inside, outside), v(v), Curve(Curve), normalMap(normalMap) {
     for (int i = Curve->k; i <= Curve->n + 1; ++ i)
         box = box + discBox(v, {Curve->B(Curve->tdx(i)).x(), Curve->B(Curve->tdx(i)).y()});
     rotateAxis(v.d, v.d, T, TInv);
@@ -102,7 +103,10 @@ bool Revolved::intersect(const Ray &ray, double &t, Vec3 &pos, Vec2 &texPos) con
                 ok = true;
                 t = tCur;
                 pos = ray.o + ray.d * t;
-                texPos = {atan2((TRay.o + TRay.d * tCur).y(), (TRay.o + TRay.d * tCur).x()), u};
+                texPos = {
+                    fmod(atan2((TRay.o + TRay.d * tCur).y(), (TRay.o + TRay.d * tCur).x()) / (2 * pi) + 1, 1),
+                    u
+                };
             }
         }
 //#pragma omp critical
@@ -115,8 +119,12 @@ bool Revolved::intersect(const Ray &ray, double &t, Vec3 &pos, Vec2 &texPos) con
 }
 Vec3 Revolved::normal(const Vec2 &texPos) const {
     Vec2 dB = Curve->dB(texPos.y()).norm();
-    Vec3 TNormal = {cos(texPos.x()) * dB.y(), sin(texPos.x()) * dB.y(), -dB.x()};
-    return TInv * TNormal;
+    Vec3 Tz = {cos(texPos.x() * (2 * pi)) * dB.y(), sin(texPos.x() * (2 * pi)) * dB.y(), -dB.x()};
+    Vec3 Tx = {sin(texPos.x() * (2 * pi)), -cos(texPos.x() * (2 * pi)), 0};
+    Vec3 Ty = (Tz ^ Tx).norm();
+    Spectrum LNormal = normalMap[texPos];
+    Vec3 TNormal = (LNormal.r * Tx + LNormal.g * Ty + LNormal.b * Tz).norm();
+    return TInv * Tz;
 }
 
 #endif

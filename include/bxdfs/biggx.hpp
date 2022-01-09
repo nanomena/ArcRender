@@ -89,7 +89,7 @@ Spectrum BiGGX::sample(const Vec2 &texPos, const Vec3 &i, Vec3 &o, double &pdf, 
     Vec3 n;
     sampleN(n, pdf, RNG);
     o = -i + n * (i * n) * 2;
-    double prob = (rough + F(i, o, n).norm() / sqrt(3)) / (1 + 2 * rough);
+    double prob = (rough + F(i, o, n).norm()) / (1 + 2 * rough);
     if (RNG.rand() < prob) {
         o = -i + n * (i * n) * 2;
         pdf = pdf / abs(4 * i * n) * prob;
@@ -118,11 +118,11 @@ Spectrum BiGGX::sample(const Vec2 &texPos, const Vec3 &i, Vec3 &o, double &pdf, 
 double BiGGX::evaluateImportance(const Vec2 &texPos, const Vec3 &i, const Vec3 &o) const {
     if (i.z() * o.z() > 0) {
         Vec3 n = (i + o).norm();
-        double prob = (rough + F(i, o, n).norm() / sqrt(3)) / (1 + 2 * rough);
+        double prob = (rough + F(i, o, n).norm()) / (1 + 2 * rough);
         return D(n) * prob;
     } else {
         Vec3 n = (o + i * (o.z() > 0 ? ior : 1 / ior)).norm();
-        double prob = (rough + F(i, o, n).norm() / sqrt(3)) / (1 + 2 * rough);
+        double prob = (rough + F(i, o, n).norm()) / (1 + 2 * rough);
         return D(n) * (1 - prob);
     }
 }

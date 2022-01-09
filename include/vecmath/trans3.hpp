@@ -12,6 +12,8 @@ struct Trans3 {
 
 Vec3 operator *(const Trans3 &t0, const Vec3 &v1);
 
+Trans3 TransEye();
+
 #ifdef ARC_IMPLEMENTATION
 
 Trans3::Trans3() = default;
@@ -28,6 +30,11 @@ Trans3::Trans3(const Vec3 &v0, const Vec3 &v1, const Vec3 &v2, const Vec3 &vt0, 
 Vec3 operator *(const Trans3 &t0, const Vec3 &v1) {
     return t0.o + t0.t * v1;
 }
+
+Trans3 TransEye() {
+    return {Vec3(), Vec3(1, 0, 0), Vec3(0, 1, 0) , Vec3(0, 0, 1)};
+}
+
 
 #endif
 #endif //ARCRENDER_INCLUDE_VECMATH_TRANS3_HPP

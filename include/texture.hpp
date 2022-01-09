@@ -6,7 +6,7 @@
 
 class Texture {
 public:
-    explicit Texture(const string &filename, const Vec2 &o, const Vec2 &s);
+    explicit Texture(const string &filename, const Vec2 &o = {0, 0}, const Vec2 &s = {1, 1});
     Spectrum operator [](const Vec2 &v) const;
 
 private:
@@ -20,7 +20,7 @@ private:
 class TextureMap {
 public:
     explicit TextureMap(const Spectrum &color);
-    TextureMap(const Texture *texture, const Spectrum &color, Trans3 T);
+    TextureMap(const Texture *texture, const Spectrum &color, const Trans3 &T = TransEye());
     Spectrum operator [](const Vec2 &v) const;
 
 private:
@@ -61,7 +61,7 @@ Spectrum Texture::get(int x, int y) const {
 }
 
 TextureMap::TextureMap(const Spectrum &color) : texture(nullptr), color(color) {}
-TextureMap::TextureMap(const Texture *texture, const Spectrum &color, Trans3 T)
+TextureMap::TextureMap(const Texture *texture, const Spectrum &color, const Trans3 &T)
     : texture(texture), color(color), T(T) {}
 
 Spectrum TextureMap::operator [](const Vec2 &v) const {
