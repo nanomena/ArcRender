@@ -91,24 +91,25 @@ void BidirectionalPathTracer::epoch() {
             Vec2 cameraV2;
             Ray v;
             double cameraWeight = scene->camera->evaluate(pos, v, cameraV2, RNG);
+            if (cameraWeight <= 0) continue;
             int cameraIdx = getCameraIdx(cameraV2);
+            if (cameraIdx == -1) continue;
             double t = (v.o - pos).length();
             Ray vB = {pos, (v.o - pos).norm()};
 
             const Medium *curMedium = scene->visible(v, object, t);
-            if (cameraWeight > 0 && cameraIdx != -1 && curMedium != nullptr) {
-                double pdfSum2b = (pdf.sum2 * pow(object->evaluateBxDFImportance(-vB.d, pos, texPos, -lB.d), 2)
-                        + (vB.o - lB.o).squaredLength())
-                    * pow(1. / t / pdf.last, 2);
+            if (curMedium == nullptr) continue;
+            double pdfSum2b = (pdf.sum2 * pow(object->evaluateBxDFImportance(-vB.d, pos, texPos, -lB.d), 2)
+                    + (vB.o - lB.o).squaredLength())
+                * pow(1. / t / pdf.last, 2);
 
-                Spectrum result = curMedium->evaluate(v, t) * object->evaluateBxDF(lB.d, pos, texPos, vB.d) * color
-                    / pow(t, 2) / (1 + pdfSum2b) * cameraWeight;
-                if (result.r != result.r) {
-                    assert(0);
-                    exit(-1);
-                }
-                spectrumBuffer[rev] = make_pair(cameraIdx, result);
+            Spectrum result = curMedium->evaluate(v, t) * object->evaluateBxDF(lB.d, pos, texPos, vB.d) * color
+                / pow(t, 2) / (1 + pdfSum2b) * cameraWeight;
+            if (result.r != result.r) {
+                assert(0);
+                exit(-1);
             }
+            spectrumBuffer[rev] = make_pair(cameraIdx, result);
         }
         {
             Ray v;

@@ -13,12 +13,14 @@ int main() {
 
     auto medium = new Transparent(Spectrum(1, 1, 1));
 
-    auto camera = new PerspectiveCamera(
+    auto camera = new SimulatedCamera(
         Vec3(0, 0, 1.5),
         Vec3(0.8, 0, 0),
         Vec3(0, 0.6, 0),
-        0.6
+        0.6,
+        2.5, 0.04, 0.1
     );
+
     auto scene = new Scene(camera, Spectrum(0), medium);
 
     Model model("models/teapot.obj", "models/", Trans3(

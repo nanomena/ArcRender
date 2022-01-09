@@ -16,11 +16,12 @@ int main() {
         new Sphere(nullptr, nullptr, nullptr, nullptr, {0, 0, -1000}, 1001)
         );
 
-    auto camera = new PerspectiveCamera(
+    auto camera = new SimulatedCamera(
         Vec3(3.4, 1.5, 3.95),
         Vec3(1, 0, -0.5).norm() * 0.8,
         Vec3(-0.10, 1, -0.20).norm() * 0.6,
-        0.6
+        0.6,
+        3.1, 0.03, 0.1
     );
 
 //    auto camera = new PerspectiveCamera(
@@ -59,12 +60,12 @@ int main() {
 //        "ball1"
 //    );
 
-    auto tracer = new BidirectionalPathTracer(4000, 3000, scene);
+    auto tracer = new BidirectionalPathTracer(2560, 1920, scene);
 
     char output[100];
     sprintf(output, "samples/classroom/result.png");
 
-    int epoch = 4000;
+    int epoch = 8000;
 
     cerr << "[T + " << time(nullptr) - T0 << "] | target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++i) {

@@ -26,12 +26,12 @@ SimulatedCamera::SimulatedCamera(Vec3 o, Vec3 x, Vec3 y, double zLength, double 
 
 double SimulatedCamera::evaluate(const Vec3 &pos, Ray &ray, Vec2 &t, Sampler &RNG) const {
     Vec3 vT = T * (pos - o);
-    if (vT.z() < f0) return 0;
+    if (-vT.z() < f0) return 0;
 
-    double C = (1 - ((1 / f0) - (1 / vT.z())) / ((1 / f0) - (1 / f))) * (R * ((1 / f0) - (1 / f)));
+    double C = (1 - ((1 / f0) - (1 / -vT.z())) / ((1 / f0) - (1 / f))) * (R * ((1 / f0) - (1 / f)));
     double theta = RNG.rand(0, 2 * pi), r2 = RNG.rand(0, 1);
 
-    t = Vec2(-(vT.x() / x.length()) / (vT.z() / z.length()), -(vT.y() / y.length()) / (vT.z() / z.length()))
+    t = Vec2(vT.x() / (-vT.z()) * z.length() / x.length(), vT.y() / (-vT.z()) * z.length() / y.length())
         + Vec2(cos(theta) * z.length() / x.length(), sin(theta) * z.length() / y.length()) * C * sqrt(r2);
 
     Vec3 oo = o + (x.norm() * cos(theta) + y.norm() * sin(theta)) * sqrt(r2) * R;

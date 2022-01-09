@@ -12,21 +12,21 @@ public:
 
 private:
     Vec3 o, x, y, z;
+    Mat3 T, TInv;
 };
 
 #ifdef ARC_IMPLEMENTATION
 
 PerspectiveCamera::PerspectiveCamera(Vec3 o, Vec3 x, Vec3 y, double zLength) : o(o), x(x), y(y) {
     z = (x ^ y).norm(zLength);
+    rotateAxis(z.norm(), x.norm(), T, TInv);
 }
 
 double PerspectiveCamera::evaluate(const Vec3 &pos, Ray &ray, Vec2 &t, Sampler &RNG) const {
-    Mat3 T, TInv;
-    rotateAxis(z.norm(), x.norm(), T, TInv);
     Vec3 vT = T * (pos - o);
-    if (vT.z() < EPS) return 0;
+    if (-vT.z() < EPS) return 0;
 
-    t = {-(vT.x() / x.length()) / (vT.z() / z.length()),-(vT.y() / y.length()) / (vT.z() / z.length())};
+    t = {vT.x() / (-vT.z()) * z.length() / x.length(), vT.y() / (-vT.z()) * z.length() / y.length()};
     ray = {o, (pos - o).norm()};
     return 1;
 }
