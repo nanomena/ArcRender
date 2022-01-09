@@ -19,7 +19,7 @@ int main() {
         Vec3(0.8, 0, 0),
         Vec3(0, 0.6, 0),
         0.6,
-        0.74, 0.01, 0.05
+        0.75, 0.01, 0.05
     );
     auto scene = new Scene(camera, Spectrum(0), medium);
 
@@ -34,7 +34,7 @@ int main() {
     scene->addObject(
         new Revolved(
             new MtlExtGGX(
-                TextureMap(new Texture("textures/Marble/Marble_Carrara_002_COLOR.jpg"), Spectrum(2.5)),
+                TextureMap(new Texture("textures/Marble/Marble_Carrara_002_COLOR.jpg"), Spectrum(1)),
                 TextureMap(Spectrum(0.2)),
                 TextureMap(Spectrum(0.05)),
                 1.5, 1
@@ -49,52 +49,61 @@ int main() {
             new GGX(Spectrum(0.8, 1, 0.8), 0.8), nullptr,
             new Transparent(Spectrum(0.1, 1, 0.1)),
             medium,
-            Vec3(.43, -.95, -.58), .05
+            Vec3(.53, -.95, -.58), .05
         )
     );
 
-    scene->addObject(
-        new Sphere(
-            new MtlExtGGX(
-                TextureMap(new Texture("textures/Metal_Gold/Metal_Gold_001_basecolor.jpg"), Spectrum(2.5)),
-                TextureMap(new Texture("textures/Metal_Gold/Metal_Gold_001_metallic.jpg"), Spectrum(1)),
-                TextureMap(new Texture("textures/Metal_Gold/Metal_Gold_001_roughness.jpg"), Spectrum(3)),
-                30, 1,
-                TextureMap(new Texture("textures/Metal_Gold/Metal_Gold_001_normal.jpg"), Spectrum(1))
-            ), nullptr,
-            medium, medium,
-            Vec3(.40, -.93, -.82), .07
-        )
-    );
+//    scene->addObject(
+//        new Sphere(
+//            new MtlExtGGX(
+//                TextureMap(new Texture("textures/Metal_Gold/Metal_Gold_001_basecolor.jpg"), Spectrum(1)),
+//                TextureMap(new Texture("textures/Metal_Gold/Metal_Gold_001_metallic.jpg"), Spectrum(1)),
+//                TextureMap(new Texture("textures/Metal_Gold/Metal_Gold_001_roughness.jpg"), Spectrum(1)),
+//                30, 1,
+//                TextureMap(new Texture("textures/Metal_Gold/Metal_Gold_001_normal.jpg"), Spectrum(1))
+//            ), nullptr,
+//            medium, medium,
+//            Vec3(.40, -.93, -.82), .07
+//        )
+//    );
 
     scene->addObject(
         new Sphere(
             new BiGGX(1.5, 0.2), nullptr,
             medium, medium,
-            Vec3(.55, -.95, -0.68), .05
+            Vec3(.65, -.95, -0.68), .05
         )
     );
 
     Model model("models/teapot.obj", "models/", Trans3(
-        Vec3(0.78, -1, -0.63),
-        Vec3(0.036, 0, 0),
-        Vec3(0, 0.036, 0),
-        Vec3(0, 0, 0.036)
+        Vec3(0.36, -1, -0.92),
+        Vec3(0.07, 0, 0),
+        Vec3(0, 0.07, 0),
+        Vec3(0, 0, 0.07)
     ), medium);
     scene->addObjects(model.get());
 
-    Model model2("models/rose.obj", "models/", Trans3(
-        Vec3(0.78, -0.94, -0.63),
-        Vec3(0.022, 0, 0),
-        Vec3(0, 0.022 * sqrt(4. / 5), -0.022 * sqrt(1. / 5)),
-        Vec3(0, 0.022 * sqrt(1. / 5), 0.022 * sqrt(4. / 5))
+
+    Model model2("models/glass_0.obj", "models/", Trans3(
+        Vec3(0.78, -1, -0.63),
+        Vec3(.4, 0, 0),
+        Vec3(0, .4, 0),
+        Vec3(0, 0, .4)
     ), medium, true);
     scene->addObjects(model2.get());
+
+//    Model model2("models/rose.obj", "models/", Trans3(
+//        Vec3(0.78, -0.94, -0.63),
+//        Vec3(0.022, 0, 0),
+//        Vec3(0, 0.022 * sqrt(4. / 5), -0.022 * sqrt(1. / 5)),
+//        Vec3(0, 0.022 * sqrt(1. / 5), 0.022 * sqrt(4. / 5))
+//    ), medium, true);
+//    scene->addObjects(model2.get());
 
     scene->addObject(
         new Flat(
             new Lambert(Spectrum(0)),
-            new UniformLight(Spectrum(10)),
+            new UniformLight(Spectrum(20)),
             medium, medium,
             Vec3(-0.3, 0.99, -0.7),
             Vec3(-0.3, 0.99, -1.3),
@@ -106,7 +115,7 @@ int main() {
     scene->addObject(
         new Flat(
             new MtlExtGGX(
-                TextureMap(new Texture("textures/Tiles_049/Tiles_049_basecolor.jpg"), Spectrum(2.5)),
+                TextureMap(new Texture("textures/Tiles_049/Tiles_049_basecolor.jpg"), Spectrum(1)),
                 TextureMap(new Texture("textures/Tiles_049/Tiles_049_metallic.jpg"), Spectrum(1)),
                 TextureMap(new Texture("textures/Tiles_049/Tiles_049_roughness.jpg"), Spectrum(1)),
                 20, 1,

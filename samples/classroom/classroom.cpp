@@ -12,16 +12,17 @@ int main() {
 
 
 //    auto medium = new Transparent(Spectrum(1, 1, 1));
-    auto medium = new Scatter(0.05, Spectrum(1, 1, 1),
-        new Sphere(nullptr, nullptr, nullptr, nullptr, {0, 0, -1000}, 1001)
-        );
+    auto medium = new Scatter(0.3, Spectrum(1, 1, 1),
+        new Sphere(nullptr, nullptr, nullptr, nullptr,
+                        Vec3(12, -11, -13) / sqrt(3), 11)
+    );
 
     auto camera = new SimulatedCamera(
         Vec3(3.4, 1.5, 3.95),
         Vec3(1, 0, -0.5).norm() * 0.8,
         Vec3(-0.10, 1, -0.20).norm() * 0.6,
         0.6,
-        3.1, 0.03, 0.1
+        3.1, 0.015, 0.1
     );
 
 //    auto camera = new PerspectiveCamera(
@@ -65,7 +66,7 @@ int main() {
     char output[100];
     sprintf(output, "samples/classroom/result.png");
 
-    int epoch = 8000;
+    int epoch = 12000;
 
     cerr << "[T + " << time(nullptr) - T0 << "] | target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++i) {

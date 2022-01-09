@@ -112,11 +112,12 @@ Model::Model(const string &filename, const string &mtlDir, const Trans3 &T, cons
                         attrib.normals[3 * idx.normal_index + 1],
                         attrib.normals[3 * idx.normal_index + 2]
                     );
-                textures.emplace_back(
-                    attrib.texcoords[2 * idx.texcoord_index + 0],
-                    attrib.texcoords[2 * idx.texcoord_index + 1],
-                    0
-                );
+                if (!attrib.texcoords.empty())
+                    textures.emplace_back(
+                        attrib.texcoords[2 * idx.texcoord_index + 0],
+                        attrib.texcoords[2 * idx.texcoord_index + 1],
+                        0
+                    );
             }
             if (normals.empty()) {
                 Vec3 normal = ((vertices[1] - vertices[0]) ^ (vertices[2] - vertices[0])).norm();
@@ -125,7 +126,9 @@ Model::Model(const string &filename, const string &mtlDir, const Trans3 &T, cons
             index_offset += fv;
 
             auto &material = materials[s.mesh.material_ids[f]];
-            Trans3 texT = Trans3(
+            Trans3 texT;
+            if (!textures.empty())
+                texT = Trans3(
                 Vec3(0, 0, 0), Vec3(1, 0, 0), Vec3(0, 1, 0),
                 textures[0], textures[1], textures[2]
                 );
