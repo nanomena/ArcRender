@@ -20,7 +20,7 @@ public:
     void savePNG(const char *path, double white = 1, double gamma = 2.2) const;
 
 protected:
-    Ray sampleCamera(int idx, double &pdf, Sampler &RNG) const;
+    void sampleCamera(Ray &ray, int idx, Sampler &RNG) const;
     int getCameraIdx(const Vec2 &t) const;
 
     int width, height, length;
@@ -46,11 +46,13 @@ Tracer::~Tracer() {
     delete[] number;
 }
 
-Ray Tracer::sampleCamera(int idx, double &pdf, Sampler &RNG) const {
+void Tracer::sampleCamera(Ray &ray, int idx, Sampler &RNG) const {
     int x = idx % width, y = idx / width;
     Vec2 t = RNG.pixel(Vec2(x, y), width, height);
-    return scene->camera->sample(t, pdf, RNG);
+    scene->camera->sample(ray, t, RNG);
+    assert(abs(ray.d.length() - 1) < EPS);
 }
+
 int Tracer::getCameraIdx(const Vec2 &t) const {;
     int x = int(round((t.x() + .5) * width)), y = int(round((t.y() + .5) * height));
     if ((x < 0) || (x >= width) || (y < 0) || (y >= height)) return -1;

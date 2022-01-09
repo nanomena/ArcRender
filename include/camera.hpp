@@ -3,18 +3,12 @@
 
 #include "utils.hpp"
 #include "vecmath.hpp"
+#include "sampler.hpp"
 
 class Camera {
 public:
-    virtual Ray evaluate(const Vec3 &pos, Vec2 &t) const {
-        throw invalid_argument("NotImplementedError");
-    }
-    virtual Ray sample(const Vec2 &t, double &pdf, Sampler &RNG) const {
-        throw invalid_argument("NotImplementedError");
-    }
-    virtual double evaluateImportance(const Vec3 &pos) const {
-        throw invalid_argument("NotImplementedError");
-    }
+    virtual double evaluate(const Vec3 &pos, Ray &ray, Vec2 &t, Sampler &RNG) const = 0;
+    virtual void sample(Ray &ray, const Vec2 &t, Sampler &RNG) const = 0;
 };
 
 #endif /* camera_hpp */

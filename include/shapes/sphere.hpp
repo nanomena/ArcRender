@@ -46,11 +46,14 @@ bool Sphere::intersect(const Ray &ray, double &t, Vec3 &pos, Vec2 &texPos) const
     if (t < EPS) return false;
     pos = ray.o + ray.d * t;
     texPos = {atan2((pos - o).y(), (pos - o).x()), asin((pos - o).z() / r)};
-    {
-        Vec3 normalOld = (pos - o).norm();
-        Vec3 normalNew = Vec3(cos(texPos.x()) * cos(texPos.y()), sin(texPos.x()) * cos(texPos.y()), sin(texPos.y()));
-        assert((normalNew - normalOld).length() < EPS);
-    }
+//    {
+//        Vec3 normalOld = (pos - o).norm();
+//        Vec3 normalNew = Vec3(cos(texPos.x()) * cos(texPos.y()), sin(texPos.x()) * cos(texPos.y()), sin(texPos.y()));\
+//        if ((normalNew - normalOld).length() > EPS) {
+//            cerr << normalNew << " " << normalOld << endl;
+//        }
+//        assert((normalNew - normalOld).length() < EPS);
+//    }
     return true;
 }
 

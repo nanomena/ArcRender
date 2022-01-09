@@ -7,9 +7,8 @@ class PerspectiveCamera : public Camera {
 public:
     PerspectiveCamera(Vec3 o, Vec3 x, Vec3 y, double zLength);
 
-    Ray evaluate(const Vec3 &pos, Vec2 &t) const override;
-    Ray sample(const Vec2 &t, double &pdf, Sampler &RNG) const override;
-    double evaluateImportance(const Vec3 &pos) const override;
+    double evaluate(const Vec3 &pos, Ray &ray, Vec2 &t, Sampler &RNG) const override;
+    void sample(Ray &ray, const Vec2 &t, Sampler &RNG) const override;
 
 private:
     Vec3 o, x, y, z;
@@ -21,20 +20,18 @@ PerspectiveCamera::PerspectiveCamera(Vec3 o, Vec3 x, Vec3 y, double zLength) : o
     z = (x ^ y).norm(zLength);
 }
 
-Ray PerspectiveCamera::evaluate(const Vec3 &pos, Vec2 &t) const {
+double PerspectiveCamera::evaluate(const Vec3 &pos, Ray &ray, Vec2 &t, Sampler &RNG) const {
     Mat3 T, TInv;
     rotateAxis(z.norm(), x.norm(), T, TInv);
     Vec3 vT = T * (pos - o);
+    if (vT.z() < EPS) return 0;
+
     t = {-(vT.x() / x.length()) / (vT.z() / z.length()),-(vT.y() / y.length()) / (vT.z() / z.length())};
-    return {o, (pos - o).norm()};
+    ray = {o, (pos - o).norm()};
+    return 1;
 }
-Ray PerspectiveCamera::sample(const Vec2 &t, double &pdf, Sampler &RNG) const {
-    pdf = 1.;
-    return {o, (x * t.x() - y * t.y() - z).norm()};
-}
-double PerspectiveCamera::evaluateImportance(const Vec3 &pos) const {
-    Vec2 t;
-    if (evaluate(pos, t).d * -z < 0) return INF; else return 1.;
+void PerspectiveCamera::sample(Ray &ray, const Vec2 &t, Sampler &RNG) const {
+    ray = {o, (x * t.x() - y * t.y() - z).norm()};
 }
 
 #endif

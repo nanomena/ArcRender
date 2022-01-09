@@ -89,19 +89,20 @@ void BidirectionalPathTracer::epoch() {
 
             if (object == nullptr) continue;
             Vec2 cameraV2;
-            Ray v = scene->camera->evaluate(pos, cameraV2);
+            Ray v;
+            double cameraWeight = scene->camera->evaluate(pos, v, cameraV2, RNG);
             int cameraIdx = getCameraIdx(cameraV2);
             double t = (v.o - pos).length();
             Ray vB = {pos, (v.o - pos).norm()};
 
             const Medium *curMedium = scene->visible(v, object, t);
-            if (cameraIdx != -1 && curMedium != nullptr) {
+            if (cameraWeight > 0 && cameraIdx != -1 && curMedium != nullptr) {
                 double pdfSum2b = (pdf.sum2 * pow(object->evaluateBxDFImportance(-vB.d, pos, texPos, -lB.d), 2)
                         + (vB.o - lB.o).squaredLength())
-                    * pow(scene->camera->evaluateImportance(pos) / t / pdf.last, 2);
+                    * pow(1. / t / pdf.last, 2);
 
                 Spectrum result = curMedium->evaluate(v, t) * object->evaluateBxDF(lB.d, pos, texPos, vB.d) * color
-                    / pow(t, 2) / (1 + pdfSum2b);
+                    / pow(t, 2) / (1 + pdfSum2b) * cameraWeight;
                 if (result.r != result.r) {
                     assert(0);
                     exit(-1);
@@ -110,13 +111,13 @@ void BidirectionalPathTracer::epoch() {
             }
         }
         {
-            double pdf;
-            Ray v = sampleCamera(idx, pdf, RNG);
-            Spectrum result = trace(photonBuffer, v, scene->medium, 1, Spectrum(1), {pdf, 0}, RNG);
-            if (result.r != result.r) {
+            Ray v;
+            sampleCamera(v, idx, RNG);
+            Spectrum result = trace(photonBuffer, v, scene->medium, 1, Spectrum(1), {1, 0}, RNG);
+//            if (result.r != result.r) {
 //                assert(0);
 //                exit(-1);
-            }
+//            }
 #pragma omp critical
             {
                 number[idx] += 1;

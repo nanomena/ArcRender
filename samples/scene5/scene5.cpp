@@ -1,3 +1,7 @@
+//
+// Created by nanomena on 2022/1/9.
+//
+
 #define ARC_IMPLEMENTATION
 #include "arc.hpp"
 #include <bits/stdc++.h>
@@ -12,7 +16,6 @@ int main() {
 
 
     auto medium = new Transparent(Spectrum(1, 1, 1));
-//    auto medium = new Scatter(0.3, Spectrum(1, 1, 1));
 
     auto camera = new PerspectiveCamera(
         Vec3(0, 0, 1.5),
@@ -21,30 +24,6 @@ int main() {
         0.6
     );
     auto scene = new Scene(camera, Spectrum(0), medium);
-
-    auto curve = new Spline(3,
-        Vec2(0, 0), Vec2(0, 0),
-        Vec2(.3, 0), Vec2(.5, .2),
-        Vec2(.5, .4), Vec2(.3, .6),
-        Vec2(.3, .8), Vec2(.3, 1)
-    );
-
-//    auto curve = new Spline(1, Vec2(.5, 0), Vec2(.5, 1));
-    scene->addObject(
-        new Revolved(
-            new Lambert(rgb256(170, 250, 170)), nullptr,
-            medium, medium,
-            Ray(Vec3(0, -1, -1), Vec3(0, 1, 0)), curve
-        )
-    );
-
-//    scene->addObject(
-//        new Cylinder(
-//            new Lambert(rgb256(170, 250, 170)), nullptr,
-//            medium, medium,
-//            Ray(Vec3(0, -1, -1), Vec3(0, 1, 0)), .5, 0, 1
-//        )
-//    );
 
     scene->addObject(
         new Flat(
@@ -125,10 +104,10 @@ int main() {
         "front"
     );
 
-    auto tracer = new BidirectionalPathTracer(1600, 1200, scene);
+    auto tracer = new BidirectionalPathTracer(2400, 1800, scene);
 
     char output[100];
-    sprintf(output, "samples/scene11/result.png");
+    sprintf(output, "samples/scene5/result.png");
 
     int epoch = 1000;
 
