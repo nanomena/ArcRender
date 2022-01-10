@@ -14,7 +14,7 @@ int main() {
     auto medium = new Transparent(Spectrum(1, 1, 1));
 //    auto medium = new Scatter(0.3, Spectrum(1, 1, 1));
 
-    auto camera = new SimulatedCamera(
+    auto camera = new PerspectiveCamera(
         Vec3(.6, -.8, .05),
         Vec3(0.8, 0, 0),
         Vec3(0, 0.6, 0),

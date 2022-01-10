@@ -1,0 +1,649 @@
+# Blender MTL File: 'classroom.blend'
+# Material Count: 76
+
+newmtl LeatherBook_cover
+Ns 225.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd -s 0.400000 0.400000 1.000000 textures/_baseTextures/base_leather.jpg
+
+newmtl None
+Ns 500
+Kd 0.8 0.8 0.8
+Ks 0.8 0.8 0.8
+d 1
+illum 2
+
+newmtl (null)
+Ns 500
+Kd 0.8 0.8 0.8
+Ks 0.8 0.8 0.8
+d 1
+illum 2
+
+newmtl base_PlastiqueNoir
+Ns 225.000000
+Kd 0.025394 0.025394 0.025394
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl base_brass
+Ns 225.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl base_carbon
+Ns 225.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl base_metal
+Ns 546.922006
+Kd 0.100000 0.100000 0.100000
+Ks 0.593182 0.593182 0.593182
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/_baseTextures/base_bluredMetal.png
+
+newmtl beigeBook_cover
+Ns 225.000000
+Kd 0.223670 0.181868 0.103615
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl beigeBook_pages
+Ns 225.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl beigePaint
+Ns 225.000000
+Kd 0.523833 0.459638 0.322535
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl beigePaintedPlastic
+Ns 225.000000
+Kd 0.396755 0.376262 0.283149
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl beigePaintedwood
+Ns 225.000000
+Kd 0.208637 0.198069 0.174647
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl beigeWall
+Ns 26.149264
+Kd 0.800000 0.800000 0.800000
+Ks 0.084091 0.084091 0.084091
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/_baseTextures/base_wallPaint.jpg
+
+newmtl beige_paintedPipe
+Ns 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.281818 0.281818 0.281818
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd -o 19.099998 2.200000 4.700000 -s 0.200000 0.200000 0.200000 textures/_baseTextures/base_paintedPlasterWall.jpg
+
+newmtl blackBoard
+Ns 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.127273 0.127273 0.127273
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/blackBoard.png
+
+newmtl blackBoardLight
+Ns 225.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl blackPaintedWood
+Ns 225.000000
+Kd 0.045186 0.043735 0.042311
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl boardFrame
+Ns 225.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl ceilingAirVent
+Ns 225.000000
+Kd 0.291771 0.274677 0.208637
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl ceilingLamp_BlackPlastic
+Ns 225.000000
+Kd 0.035218 0.035218 0.035218
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl ceilingLamp_metal
+Ns 546.922006
+Kd 0.100000 0.100000 0.100000
+Ks 0.593182 0.593182 0.593182
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/_baseTextures/base_bluredMetal.png
+
+newmtl ceillingLamp_glass
+Ns 225.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl coloredPlastic
+Ns 225.000000
+Kd 0.009199 0.010659 0.486737
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl cork
+Ns 9.836781
+Kd 0.800000 0.800000 0.800000
+Ks 0.040909 0.040909 0.040909
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/cork.jpg
+
+newmtl crinkledPaper_paper
+Ns 225.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl dayLight_portal
+Ns 225.000000
+Kd 0.827557 0.827557 0.827557
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl drawing
+Ns 9.836781
+Kd 0.800000 0.800000 0.800000
+Ks 0.040909 0.040909 0.040909
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd textures/childDrawing/childDrawing_01.jpg
+
+newmtl drawing.002
+Ns 9.836781
+Kd 0.800000 0.800000 0.800000
+Ks 0.040909 0.040909 0.040909
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/childDrawing/childDrawing_03.jpg
+
+newmtl drawing.003
+Ns 9.836781
+Kd 0.800000 0.800000 0.800000
+Ks 0.040909 0.040909 0.040909
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/childDrawing/childDrawing_07.png
+
+newmtl drawing.004
+Ns 9.836781
+Kd 0.800000 0.800000 0.800000
+Ks 0.040909 0.040909 0.040909
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd textures/childDrawing/childDrawing_02.jpg
+
+newmtl drawing.005
+Ns 9.836781
+Kd 0.800000 0.800000 0.800000
+Ks 0.040909 0.040909 0.040909
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/childDrawing/childDrawing_05.jpg
+
+newmtl dustBin_wireframe
+Ns 225.000000
+Kd 0.800000 0.800000 0.800000
+Ks 1.000000 1.000000 1.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/dustbin_wireframe.png
+
+newmtl dustbin_bottom_metal
+Ns 546.922006
+Kd 0.100000 0.100000 0.100000
+Ks 0.593182 0.593182 0.593182
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/_baseTextures/base_bluredMetal.png
+
+newmtl dustbin_metal
+Ns 546.922006
+Kd 0.100000 0.100000 0.100000
+Ks 0.593182 0.593182 0.593182
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/_baseTextures/base_bluredMetal.png
+
+newmtl frostedGlass
+Ns 595.803761
+Kd 0.800000 0.800000 0.800000
+Ks 0.040909 0.040909 0.040909
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/_baseTextures/base_frostedGlass.png
+
+newmtl greyDiffusePaint
+Ns 225.000000
+Kd 0.088902 0.077378 0.052554
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl largeBox_glossyWhitePaper
+Ns 225.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl largeBox_greyPaper
+Ns 225.000000
+Kd 0.388878 0.388878 0.388878
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl leatherBook_pages
+Ns 225.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl leatherChair_blackPlastic
+Ns 225.000000
+Kd 0.023144 0.023144 0.023144
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl leatherChair_leather
+Ns 736.734691
+Kd 0.800000 0.800000 0.800000
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/_baseTextures/base_leather.jpg
+
+newmtl leatherChair_metal
+Ns 546.922006
+Kd 0.100000 0.100000 0.100000
+Ks 0.693182 0.693182 0.693182
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/_baseTextures/base_bluredMetal.png
+
+newmtl leatherCoat
+Ns 225.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/_baseTextures/base_leather.jpg
+
+newmtl paintedBlind
+Ns 225.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl paintedCeiling
+Ns 9.836781
+Kd 0.800000 0.800000 0.800000
+Ks 0.040909 0.040909 0.040909
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd -s 0.100000 0.100000 1.000000 textures/_baseTextures/base_paintedPlasterWall.jpg
+
+newmtl paper
+Ns 225.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl pencil
+Ns 225.000000
+Kd 0.384374 0.384374 0.384374
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl plaster
+Ns 225.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl plasticGoldPen_greenPlastic
+Ns 225.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl porcelainHandle
+Ns 225.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl radiator_glossyPaint
+Ns 225.000000
+Kd 0.389089 0.335360 0.220081
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl sc.blade
+Ns 225.000000
+Kd 0.259792 0.259792 0.259792
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl schoolDesk_blackPlastic
+Ns 225.000000
+Kd 0.023144 0.023144 0.023144
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl schoolDesk_metal
+Ns 546.922006
+Kd 0.100000 0.100000 0.100000
+Ks 0.693182 0.693182 0.693182
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/_baseTextures/base_bluredMetal.png
+
+newmtl schoolDesk_plastic
+Ns 225.000000
+Kd 0.500000 0.500000 0.500000
+Ks 0.100000 0.100000 0.100000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd textures/_baseTextures/base_brightWood.png
+
+newmtl schoolDesk_wood
+Ns 225.000000
+Kd 0.500000 0.500000 0.500000
+Ks 0.100000 0.100000 0.100000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd textures/_baseTextures/base_brightWood.png
+
+newmtl suitCase_leather
+Ns 225.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/_baseTextures/base_leather.jpg
+
+newmtl suitCase_metal
+Ns 546.922006
+Kd 0.100000 0.100000 0.100000
+Ks 0.593182 0.593182 0.593182
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/_baseTextures/base_bluredMetal.png
+
+newmtl suitCoat_darkWood
+Ns 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Kd textures/_baseTextures/base_darkWood.png
+
+newmtl suitCoat_metal
+Ns 546.922006
+Kd 0.100000 0.100000 0.100000
+Ks 0.593182 0.593182 0.593182
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/_baseTextures/base_bluredMetal.png
+
+newmtl teacherDesk_blackPlastic
+Ns 225.000000
+Kd 0.023144 0.023144 0.023144
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl teacherDesk_metal
+Ns 546.922006
+Kd 0.100000 0.100000 0.100000
+Ks 0.593182 0.593182 0.593182
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/_baseTextures/base_bluredMetal.png
+
+newmtl teacherDesk_plastic
+Ns 225.000000
+Kd 0.485150 0.300544 0.165132
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl teacherDesk_wood
+Ns 736.382186
+Kd 0.600000 0.600000 0.600000
+Ks 0.084091 0.084091 0.084091
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd textures/_baseTextures/base_brownWood.jpg
+
+newmtl varnishedWoodDoor
+Ns 9.836781
+Kd 0.800000 0.800000 0.800000
+Ks 0.040909 0.040909 0.040909
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/_baseTextures/base_paintedPlasterWall.jpg
+
+newmtl wallClock_Glass
+Ns 225.000000
+Kd 0.670296 0.790035 0.800000
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 0.000000
+illum 2
+
+newmtl wallClock_blackPlastic
+Ns 225.000000
+Kd 0.023144 0.023144 0.023144
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl wallClock_darkWood
+Ns 225.000000
+Kd 0.023144 0.023144 0.023144
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl wallClock_whiteBackground
+Ns 225.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl whiteChalk
+Ns 225.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl whitePaintedWindow
+Ns 225.000000
+Kd 0.318547 0.318547 0.318547
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl white_glossPaint
+Ns 225.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl woodFloor
+Ns 9.836781
+Kd 0.800000 0.800000 0.800000
+Ks 0.040909 0.040909 0.040909
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/_baseTextures/base_woodFloor.jpg
+
+newmtl woodPlanks
+Ns 9.836781
+Kd 0.800000 0.800000 0.800000
+Ks 0.095455 0.095455 0.095455
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/woodPlanks.jpg
+
+newmtl worldMap
+Ns 9.836781
+Kd 0.800000 0.800000 0.800000
+Ks 0.040909 0.040909 0.040909
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/europeMap.png
+
+newmtl yellowLetter
+Ns 225.000000
+Kd 1.000000 0.467453 0.104765
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl zapBook_color
+Ns 225.000000
+Kd 0.693872 0.693872 0.679543
+Ks 0.050000 0.050000 0.050000
+Ni 1.450000
+d 1.000000
+illum 2

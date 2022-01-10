@@ -33,7 +33,6 @@
 #include "tracers/bdpt.hpp"
 
 #include "cameras/perspective.hpp"
-#include "cameras/simulated.hpp"
 
 #include "lights/uniform.hpp"
 #include "lights/spot.hpp"

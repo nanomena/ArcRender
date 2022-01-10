@@ -27,8 +27,11 @@ Revolved::Revolved(
     const Medium *inside, const Medium *outside,
     Ray v, const Spline* Curve
 ) : Shape(bxdf, light, inside, outside), v(v), Curve(Curve) {
+    double mx = 0;
     for (int i = Curve->k; i <= Curve->n + 1; ++ i)
-        box = box + discBox(v, {Curve->B(Curve->tdx(i)).x(), Curve->B(Curve->tdx(i)).y()});
+        mx = max(Curve->B(Curve->tdx(i)).x(), mx);
+    for (int i = Curve->k; i <= Curve->n + 1; ++ i)
+        box = box + discBox(v, {mx, Curve->B(Curve->tdx(i)).y()});
     rotateAxis(v.d, v.d, T, TInv);
 }
 

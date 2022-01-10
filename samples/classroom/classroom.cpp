@@ -12,17 +12,17 @@ int main() {
 
 
 //    auto medium = new Transparent(Spectrum(1, 1, 1));
-    auto medium = new Scatter(0.3, Spectrum(1, 1, 1),
+    auto medium = new Scatter(0.3, Spectrum(0.5, 0.5, 0.5),
         new Sphere(nullptr, nullptr, nullptr, nullptr,
-                        Vec3(12, -11, -13) / sqrt(3), 11)
+                        Vec3(0, 0, -1000), 999)
     );
 
-    auto camera = new SimulatedCamera(
+    auto camera = new PerspectiveCamera(
         Vec3(3.4, 1.5, 3.95),
         Vec3(1, 0, -0.5).norm() * 0.8,
         Vec3(-0.10, 1, -0.20).norm() * 0.6,
         0.6,
-        3.1, 0.015, 0.1
+        3.1, 0.02, 0.1
     );
 
 //    auto camera = new PerspectiveCamera(
@@ -31,7 +31,7 @@ int main() {
 //        Vec3(0.10, 1, -0.20).norm() * 0.6,
 //        0.6
 //    );
-    auto scene = new Scene(camera, rgb256(245, 251, 253), medium, 16);
+    auto scene = new Scene(camera, rgb256(245, 251, 253), medium, 25);
 
     Model model("models/classroom.obj", "models/", Trans3(
         Vec3(0, 0, 0),
@@ -46,7 +46,7 @@ int main() {
             new Lambert(Spectrum(0)),
             new SpotLight(rgb256(249, 236, 214) * 180, 0.05),
             medium, medium,
-            Ray({8, 5, 2}, Vec3(-1, -.5, -.2).norm()),
+            Ray({10, 7, 4}, Vec3(-1, -.5, -.2).norm()),
             8
         ), "right"
     );
@@ -61,12 +61,12 @@ int main() {
 //        "ball1"
 //    );
 
-    auto tracer = new BidirectionalPathTracer(2560, 1920, scene);
+    auto tracer = new BidirectionalPathTracer(4096, 3072, scene);
 
     char output[100];
     sprintf(output, "samples/classroom/result.png");
 
-    int epoch = 12000;
+    int epoch = 25000;
 
     cerr << "[T + " << time(nullptr) - T0 << "] | target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++i) {
