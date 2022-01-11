@@ -54,7 +54,25 @@ void BidirectionalPathTracer::epoch() {
     Photon photonBuffers[MaxThreads][traceLimit];
     pair<int, Spectrum> spectrumBuffers[MaxThreads][traceLimit];
 
-#pragma omp parallel for schedule(dynamic, width) default(none) shared(spectrum, number) firstprivate(RNGs, photonBuffers, spectrumBuffers)
+    vector<double> lightImportance;
+    for (auto light : scene->lights) {
+        Spectrum sum;
+        for (int i = 0; i < width + height; ++ i) {
+            Ray lB;
+            Vec3 pos; Vec2 texPos;
+            const Medium *medium;
+            sum += light->sampleLight(lB.d, pos, texPos, medium, RNGs[0]);
+        }
+        lightImportance.push_back(sum.norm());
+    }
+    {
+        double tot = 0;
+        for (double i : lightImportance) tot += i;
+        for (double &l : lightImportance) l /= tot;
+    }
+
+#pragma omp parallel for schedule(dynamic, width) default(none) \
+    shared(spectrum, number) firstprivate(RNGs, photonBuffers, spectrumBuffers, lightImportance)
     for (int idx = 0; idx < length; idx++) {
         int thd = omp_get_thread_num();
         auto &RNG = RNGs[thd];
@@ -68,9 +86,13 @@ void BidirectionalPathTracer::epoch() {
         {
             Ray lB;
             const Medium *medium;
-            const Shape *light = scene->lights[idx % scene->lights.size()];
+            double pt = RNGs[thd].rand();
+            int lightIdx = 0;
+            while (lightIdx + 1 < scene->lights.size() && pt > lightImportance[lightIdx])
+                pt -= lightImportance[lightIdx ++];
+            const Shape *light = scene->lights[lightIdx];
             Vec3 pos; Vec2 texPos;
-            Spectrum traceMul = light->sampleLight(lB.d, pos, texPos, medium, RNG) * scene->lights.size();
+            Spectrum traceMul = light->sampleLight(lB.d, pos, texPos, medium, RNG) / lightImportance[lightIdx];
             lB.o = pos;
             revTrace(
                 photonBuffer, lB, medium, 1, traceMul, {

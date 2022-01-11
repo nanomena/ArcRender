@@ -11,7 +11,10 @@ int main() {
     long long T0 = time(nullptr);
 
 
-    auto medium = new Scatter(0.3, Spectrum(1, 1, 1));
+    auto medium = new Scatter(0.3, Spectrum(1, 1, 1),
+        new Sphere(nullptr, nullptr, nullptr, nullptr,
+            Vec3(0, 0, 0), 20)
+    );
 
     auto camera = new PerspectiveCamera(
         Vec3(0, 0, 1.5),

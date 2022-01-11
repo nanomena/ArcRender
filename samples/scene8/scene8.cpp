@@ -13,7 +13,7 @@ int main() {
 
     auto medium = new Transparent(Spectrum(1, 1, 1));
 
-    auto camera = new SimulatedCamera(
+    auto camera = new PerspectiveCamera(
         Vec3(0, 0, 1.5),
         Vec3(0.8, 0, 0),
         Vec3(0, 0.6, 0),
