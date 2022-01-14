@@ -32,9 +32,9 @@ int main() {
 //    auto curve = new Spline(1, Vec2(.5, 0), Vec2(.5, 1));
     scene->addObject(
         new Revolved(
-            new Lambert(rgb256(170, 250, 170)), nullptr,
-            medium, medium,
-            Ray(Vec3(0, -1, -1), Vec3(0, 1, 0)), curve
+        new Lambert(rgb256(170, 250, 170)), nullptr,
+        medium, medium,
+        Ray(Vec3(0, -1, -1), Vec3(0, 1, 0)), curve
         )
     );
 
@@ -128,7 +128,7 @@ int main() {
     auto tracer = new BidirectionalPathTracer(1600, 1200, scene);
 
     char output[100];
-    sprintf(output, "samples/scene11/result.png");
+    sprintf(output, "results/scene10.png");
 
     int epoch = 1000;
 

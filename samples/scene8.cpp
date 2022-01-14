@@ -1,4 +1,4 @@
-#define ARC_IMPLEMENTATION
+//#define ARC_IMPLEMENTATION
 #include "arc.hpp"
 #include <bits/stdc++.h>
 using namespace std;
@@ -17,29 +17,19 @@ int main() {
         Vec3(0, 0, 1.5),
         Vec3(0.8, 0, 0),
         Vec3(0, 0.6, 0),
-        0.6
+        0.6,
+        2.5, 0.04, 0.1
     );
+
     auto scene = new Scene(camera, Spectrum(0), medium);
 
-    scene->addObject(
-        new Sphere(
-            new BiGGX(2.5, 0.2), nullptr,
-            new Transparent(Spectrum(0.2, 1, 0.2)),
-            medium,
-            Vec3(-.5, -.69, -1), .3
-        ),
-        "ball1"
-    );
-
-    scene->addObject(
-        new Sphere(
-            new BiGGX(1.05, 0.2), nullptr,
-            new Transparent(Spectrum(0.2, 1, 0.2)),
-            medium,
-            Vec3(.5, -.69, -1), .3
-        ),
-        "ball2"
-    );
+    Model model("models/teapot.obj", "models/", Trans3(
+        Vec3(0, -.9, -1),
+        Vec3(0.24, 0, 0),
+        Vec3(0, 0.24, 0),
+        Vec3(0, 0, 0.24)
+    ), medium);
+    scene->addObjects(model.get());
 
     scene->addObject(
         new Flat(
@@ -123,9 +113,9 @@ int main() {
     auto tracer = new BidirectionalPathTracer(2400, 1800, scene);
 
     char output[100];
-    sprintf(output, "samples/scene6/result.png");
+    sprintf(output, "results/scene8.png");
 
-    int epoch = 1000;
+    int epoch = 2000;
 
     cerr << "[T + " << time(nullptr) - T0 << "] | target : " << epoch << endl;
     for (int i = 1; i <= epoch; ++i) {

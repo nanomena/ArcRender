@@ -1,4 +1,4 @@
-#define ARC_IMPLEMENTATION
+//#define ARC_IMPLEMENTATION
 #include "arc.hpp"
 #include <bits/stdc++.h>
 using namespace std;
@@ -12,7 +12,6 @@ int main() {
 
 
     auto medium = new Transparent(Spectrum(1, 1, 1));
-//    auto medium = new Scatter(0.3, Spectrum(1, 1, 1));
 
     auto camera = new PerspectiveCamera(
         Vec3(0, 0, 1.5),
@@ -22,13 +21,25 @@ int main() {
     );
     auto scene = new Scene(camera, Spectrum(0), medium);
 
-    Model model("models/rose.obj", "models/", Trans3(
-        Vec3(0.4, -0.6, -0.8),
-        Vec3(0.2, 0, 0),
-        Vec3(0, 0.2 * sqrt(4. / 5), -0.2 * sqrt(1. / 5)),
-        Vec3(0, 0.2 * sqrt(1. / 5), 0.2 * sqrt(4. / 5))
-    ), medium, true);
-    scene->addObjects(model.get());
+    scene->addObject(
+        new Sphere(
+            new BiGGX(2.5, 0.2), nullptr,
+            new Transparent(Spectrum(0.2, 1, 0.2)),
+            medium,
+            Vec3(-.5, -.69, -1), .3
+        ),
+        "ball1"
+    );
+
+    scene->addObject(
+        new Sphere(
+            new BiGGX(1.05, 0.2), nullptr,
+            new Transparent(Spectrum(0.2, 1, 0.2)),
+            medium,
+            Vec3(.5, -.69, -1), .3
+        ),
+        "ball2"
+    );
 
     scene->addObject(
         new Flat(
@@ -109,10 +120,10 @@ int main() {
         "front"
     );
 
-    auto tracer = new BidirectionalPathTracer(1600, 1200, scene);
+    auto tracer = new BidirectionalPathTracer(2400, 1800, scene);
 
     char output[100];
-    sprintf(output, "samples/scene9/result.png");
+    sprintf(output, "results/scene6.png");
 
     int epoch = 1000;
 

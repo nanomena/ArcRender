@@ -1,7 +1,3 @@
-//
-// Created by nanomena on 2022/1/9.
-//
-
 #define ARC_IMPLEMENTATION
 #include "arc.hpp"
 #include <bits/stdc++.h>
@@ -16,15 +12,23 @@ int main() {
 
 
     auto medium = new Transparent(Spectrum(1, 1, 1));
+//    auto medium = new Scatter(0.3, Spectrum(1, 1, 1));
 
     auto camera = new PerspectiveCamera(
         Vec3(0, 0, 1.5),
         Vec3(0.8, 0, 0),
         Vec3(0, 0.6, 0),
-        0.6,
-        2.5, 0.1, 0.1
+        0.6
     );
     auto scene = new Scene(camera, Spectrum(0), medium);
+
+    Model model("models/rose.obj", "models/", Trans3(
+        Vec3(0.4, -0.6, -0.8),
+        Vec3(0.2, 0, 0),
+        Vec3(0, 0.2 * sqrt(4. / 5), -0.2 * sqrt(1. / 5)),
+        Vec3(0, 0.2 * sqrt(1. / 5), 0.2 * sqrt(4. / 5))
+    ), medium, true);
+    scene->addObjects(model.get());
 
     scene->addObject(
         new Flat(
@@ -105,10 +109,10 @@ int main() {
         "front"
     );
 
-    auto tracer = new BidirectionalPathTracer(2400, 1800, scene);
+    auto tracer = new BidirectionalPathTracer(1600, 1200, scene);
 
     char output[100];
-    sprintf(output, "samples/scene5/result.png");
+    sprintf(output, "results/scene9.png");
 
     int epoch = 1000;
 

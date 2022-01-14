@@ -128,7 +128,7 @@ int main() {
     auto tracer = new BidirectionalPathTracer(2560, 1920, scene);
 
     char output[100];
-    sprintf(output, "samples/caustics/result.png");
+    sprintf(output, "results/caustics.png");
 
     int epoch = 10000;
 

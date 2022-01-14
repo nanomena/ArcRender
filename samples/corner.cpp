@@ -188,7 +188,7 @@ int main() {
     auto tracer = new BidirectionalPathTracer(2560, 1920, scene);
 
     char output[100];
-    sprintf(output, "samples/corner/result.png");
+    sprintf(output, "results/corner.png");
 
     int epoch = 16000;
 
