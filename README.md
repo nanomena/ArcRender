@@ -16,7 +16,7 @@
 
 <img src = 'results/caustics-10000spp.png' width="50%"></img>
 
-<img src = 'results/scene6-1500spp.png' width="50%"></img>
+<img src = 'results/scene6-1000spp.png' width="50%"></img>
 
 <img src = 'results/scene7-1500spp.png' width="50%"></img>
 
