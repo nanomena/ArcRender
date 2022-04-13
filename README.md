@@ -1,4 +1,4 @@
-# ARCrender
+# ArcRender
 
 报告见 Report.pdf
 
@@ -8,7 +8,7 @@
 
 图形学大作业~！
 
-## 一些结果：
+## Some Results：
 
 <img src = 'results/classroom-5000spp.png' width="50%"></img>
 
