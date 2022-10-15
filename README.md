@@ -1,6 +1,6 @@
 # ArcRender
 
-Arcrender is a bi-directional path-tracing renderer with multiple features.
+Arcrender is a toy renderer using bi-directional path-tracing with multiple features.
 
 Here are some results:
 
